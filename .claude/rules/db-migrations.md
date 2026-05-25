@@ -5,7 +5,8 @@ paths:
   - packages/auth/src/schema.ts
 ---
 
-After modifying database schema files, remind the user to run:
+After modifying database schema files:
 
 1. `bun run --filter @jx3/db db:generate` — generate migration SQL from schema changes
-2. `bun run --filter @jx3/db db:migrate` — apply migrations to the database
+2. **MUST ask the user for confirmation before running `db:migrate`** — never apply migrations without explicit approval
+3. `bun run --filter @jx3/db db:migrate` — apply migrations to the database (only after user confirms)
