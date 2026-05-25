@@ -13,7 +13,8 @@ JX3 is a game information management system built as a full-stack web applicatio
 - **Monorepo**: Turborepo with Bun workspaces
 - **Frontend** (`apps/web`): React + TanStack Start + Vite + Tailwind CSS v4
 - **API** (`apps/api`): Elysia (Bun-native framework)
-- **Database**: PostgreSQL with Drizzle ORM (planned in `packages/db`)
+- **Database** (`packages/db`): PostgreSQL + Drizzle ORM + postgres.js driver
+- **Auth** (`packages/auth`): Better Auth (factory pattern, schema exported for db)
 - **Linting/Formatting**: Biome (root config inherited by sub-projects)
 
 ## Commands
@@ -43,7 +44,9 @@ bun run --filter @jx3/api dev
 apps/
   web/       — TanStack Start frontend (port 3000), file-based routing in src/routes/
   api/       — Elysia API server, entry at src/index.ts
-packages/    — Shared packages (db, api-client, shared) to be added
+packages/
+  db/        — Drizzle ORM schema, db instance, migrations
+  auth/      — Better Auth config (createAuth factory), core schema, auth client
 ```
 
 ## Conventions
@@ -53,6 +56,7 @@ packages/    — Shared packages (db, api-client, shared) to be added
 - Sub-projects extend root `biome.json` via `"extends": ["../../biome.json"]`
 - Web uses `#/*` path alias mapping to `./src/*`
 - API runs with `--watch` in dev mode
+- Never use `any` as a type. Use precise types, generics, or `unknown` with type narrowing instead.
 
 ## Commit Format
 
