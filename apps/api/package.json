@@ -6,7 +6,8 @@
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun",
     "lint": "biome lint ./src",
-    "check": "biome check ./src"
+    "check": "biome check ./src",
+    "fix": "biome check --write ./src"
   },
   "dependencies": {
     "elysia": "latest",

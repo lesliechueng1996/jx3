@@ -12,6 +12,7 @@
       "outputs": ["dist/**", ".output/**"]
     },
     "check": {},
+    "fix": {},
     "test": {
       "dependsOn": ["^build"]
     },
