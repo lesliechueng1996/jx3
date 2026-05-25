@@ -57,6 +57,7 @@ packages/
 - Web uses `#/*` path alias mapping to `./src/*`
 - API runs with `--watch` in dev mode
 - Never use `any` as a type. Use precise types, generics, or `unknown` with type narrowing instead.
+- New packages must add `bun-types` to devDependencies and ensure all `.ts` files (including root config files like `drizzle.config.ts`) are in tsconfig's `include` scope. Use `noEmit: true` instead of `outDir`/`rootDir` to avoid path conflicts with config files outside `src/`.
 
 ## Commit Format
 
