@@ -1,6 +1,6 @@
 {
-  "id": "56b0df8a-7675-4899-a0be-0ac25b3ef12e",
-  "prevId": "9e86fd2e-0509-4d36-8ba2-ac882c116736",
+  "id": "f46ab83e-f55d-4910-8d60-34d77a360a2e",
+  "prevId": "56b0df8a-7675-4899-a0be-0ac25b3ef12e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -513,6 +513,85 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.game_item": {
+      "name": "game_item",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "game_item_id": {
+          "name": "game_item_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "item_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quality": {
+          "name": "quality",
+          "type": "item_quality",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "icon": {
+          "name": "icon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alias": {
+          "name": "alias",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.game_kungfu": {
       "name": "game_kungfu",
       "schema": "",
@@ -759,6 +838,16 @@
       "name": "dungeon_difficulty",
       "schema": "public",
       "values": ["normal", "heroic", "challenge"]
+    },
+    "public.item_quality": {
+      "name": "item_quality",
+      "schema": "public",
+      "values": ["white", "green", "blue", "purple", "orange"]
+    },
+    "public.item_type": {
+      "name": "item_type",
+      "schema": "public",
+      "values": ["equipment", "special"]
     },
     "public.attack_method": {
       "name": "attack_method",

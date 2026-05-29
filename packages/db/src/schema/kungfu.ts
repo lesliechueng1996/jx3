@@ -32,6 +32,8 @@ export const gameKungfu = pgTable('game_kungfu', {
     .boolean('is_pve_internal_recommended')
     .notNull()
     .default(false),
+  // 是否无界 (万物互联端)
+  isUnlimited: t.boolean('is_unlimited').notNull().default(false),
   icon: t.text('icon'),
   alias: t.text('alias').array().notNull().default([]),
   createdAt: t
