@@ -18,6 +18,11 @@ Every table must include:
 2. **`created_at`** — timestamp with timezone, defaults to `now()`
 3. **`updated_at`** — timestamp with timezone, defaults to `now()`, updated on modification via `.$onUpdate()`
 
+## Foreign Keys
+
+- Never use physical foreign keys (no `.references()` constraints at the database level).
+- Model relationships with plain columns (e.g., a `uuid` column named `<entity>_id`) and enforce referential integrity in the application layer.
+
 ## Example
 
 ```typescript

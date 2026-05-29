@@ -1,6 +1,6 @@
 {
-  "id": "fe2405e3-1501-4ebb-a388-8040578e5850",
-  "prevId": "9a35e2ec-fbaa-4856-9fce-f2ecdf3d2a53",
+  "id": "56b0df8a-7675-4899-a0be-0ac25b3ef12e",
+  "prevId": "9e86fd2e-0509-4d36-8ba2-ac882c116736",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -93,8 +93,12 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -164,8 +168,12 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -175,7 +183,9 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": ["token"]
+          "columns": [
+            "token"
+          ]
         }
       },
       "policies": {},
@@ -236,7 +246,9 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         }
       },
       "policies": {},
@@ -292,8 +304,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.game_server": {
-      "name": "game_server",
+    "public.game_character": {
+      "name": "game_character",
       "schema": "",
       "columns": {
         "id": {
@@ -303,17 +315,99 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "server_id": {
-          "name": "server_id",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "zone": {
-          "name": "zone",
+        "game_role_id": {
+          "name": "game_role_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "server_id": {
+          "name": "server_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "school_id": {
+          "name": "school_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "body_type": {
+          "name": "body_type",
+          "type": "body_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "is_primary": {
+          "name": "is_primary",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "game_character_server_name_unique": {
+          "name": "game_character_server_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "server_id",
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.game_dungeon": {
+      "name": "game_dungeon",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "name": "name",
@@ -321,9 +415,40 @@
           "primaryKey": false,
           "notNull": true
         },
-        "alias": {
-          "name": "alias",
-          "type": "text[]",
+        "expansion_id": {
+          "name": "expansion_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_limit": {
+          "name": "player_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "difficulty": {
+          "name": "difficulty",
+          "type": "dungeon_difficulty",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "level_requirement": {
+          "name": "level_requirement",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "boss_count": {
+          "name": "boss_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reset_weekdays": {
+          "name": "reset_weekdays",
+          "type": "integer[]",
           "primaryKey": false,
           "notNull": true,
           "default": "'{}'"
@@ -346,19 +471,13 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "game_server_server_id_unique": {
-          "name": "game_server_server_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["server_id"]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.game_school": {
-      "name": "game_school",
+    "public.game_expansion": {
+      "name": "game_expansion",
       "schema": "",
       "columns": {
         "id": {
@@ -374,25 +493,17 @@
           "primaryKey": false,
           "notNull": true
         },
-        "type": {
-          "name": "type",
-          "type": "school_type",
-          "typeSchema": "public",
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
           "primaryKey": false,
           "notNull": true
         },
-        "icon": {
-          "name": "icon",
-          "type": "text",
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
-        },
-        "alias": {
-          "name": "alias",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'"
         },
         "created_at": {
           "name": "created_at",
@@ -515,8 +626,12 @@
           "name": "game_kungfu_school_id_game_school_id_fk",
           "tableFrom": "game_kungfu",
           "tableTo": "game_school",
-          "columnsFrom": ["school_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "school_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -526,28 +641,187 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.game_school": {
+      "name": "game_school",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "school_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "icon": {
+          "name": "icon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alias": {
+          "name": "alias",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.game_server": {
+      "name": "game_server",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "server_id": {
+          "name": "server_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zone": {
+          "name": "zone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "alias": {
+          "name": "alias",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "game_server_server_id_unique": {
+          "name": "game_server_server_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "server_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
-    "public.school_type": {
-      "name": "school_type",
+    "public.body_type": {
+      "name": "body_type",
       "schema": "public",
-      "values": ["school", "genre"]
+      "values": [
+        "male",
+        "female",
+        "boy",
+        "girl"
+      ]
+    },
+    "public.dungeon_difficulty": {
+      "name": "dungeon_difficulty",
+      "schema": "public",
+      "values": [
+        "normal",
+        "heroic",
+        "challenge"
+      ]
     },
     "public.attack_method": {
       "name": "attack_method",
       "schema": "public",
-      "values": ["melee", "ranged"]
+      "values": [
+        "melee",
+        "ranged"
+      ]
     },
     "public.attack_type": {
       "name": "attack_type",
       "schema": "public",
-      "values": ["internal", "external"]
+      "values": [
+        "internal",
+        "external"
+      ]
     },
     "public.kungfu_type": {
       "name": "kungfu_type",
       "schema": "public",
-      "values": ["defense", "heal", "attack"]
+      "values": [
+        "defense",
+        "heal",
+        "attack"
+      ]
+    },
+    "public.school_type": {
+      "name": "school_type",
+      "schema": "public",
+      "values": [
+        "school",
+        "genre"
+      ]
     }
   },
   "schemas": {},

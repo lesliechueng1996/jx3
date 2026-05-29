@@ -1,12 +1,11 @@
 import * as t from 'drizzle-orm/pg-core';
 import { pgTable } from 'drizzle-orm/pg-core';
 
-export const gameServer = pgTable('game_server', {
+export const gameExpansion = pgTable('game_expansion', {
   id: t.uuid('id').primaryKey().defaultRandom(),
-  serverId: t.text('server_id').notNull().unique(),
-  zone: t.text('zone').notNull(),
   name: t.text('name').notNull(),
-  alias: t.text('alias').array().notNull().default([]),
+  startDate: t.date('start_date').notNull(),
+  endDate: t.date('end_date'),
   createdAt: t
     .timestamp('created_at', { withTimezone: true })
     .notNull()
