@@ -50,6 +50,13 @@
       "when": 1780081458406,
       "tag": "0006_blushing_sue_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1780082320684,
+      "tag": "0007_colossal_salo",
+      "breakpoints": true
     }
   ]
 }

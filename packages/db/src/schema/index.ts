@@ -4,6 +4,7 @@ export * from './dungeon';
 export * from './expansion';
 export * from './item';
 export * from './kungfu';
+export * from './raid-loot';
 export * from './raid-run';
 export * from './raid-signup';
 export * from './school';
