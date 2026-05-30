@@ -101,10 +101,9 @@ describe('AuthCredentialsFormComponent', () => {
       'disabled',
       true,
     );
-    expect(screen.getByRole('button', { name: 'Create account' })).toHaveProperty(
-      'disabled',
-      true,
-    );
+    expect(
+      screen.getByRole('button', { name: 'Create account' }),
+    ).toHaveProperty('disabled', true);
     expect(
       screen.getByRole('button', { name: 'Sign in with GitHub' }),
     ).toHaveProperty('disabled', true);

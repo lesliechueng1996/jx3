@@ -9,13 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppProfileIndexRouteImport } from './routes/_app/profile/index'
+import { Route as AppCharactersIndexRouteImport } from './routes/_app/characters/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AppRaidsHistoryIndexRouteImport } from './routes/_app/raids/history/index'
+import { Route as AppRaidsCreateIndexRouteImport } from './routes/_app/raids/create/index'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginIndexRoute = LoginIndexRouteImport.update({
@@ -23,49 +27,110 @@ const LoginIndexRoute = LoginIndexRouteImport.update({
   path: '/login/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProfileIndexRoute = AppProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCharactersIndexRoute = AppCharactersIndexRouteImport.update({
+  id: '/characters/',
+  path: '/characters/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRaidsHistoryIndexRoute = AppRaidsHistoryIndexRouteImport.update({
+  id: '/raids/history/',
+  path: '/raids/history/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppRaidsCreateIndexRoute = AppRaidsCreateIndexRouteImport.update({
+  id: '/raids/create/',
+  path: '/raids/create/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
   '/login/': typeof LoginIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/characters/': typeof AppCharactersIndexRoute
+  '/profile/': typeof AppProfileIndexRoute
+  '/raids/create/': typeof AppRaidsCreateIndexRoute
+  '/raids/history/': typeof AppRaidsHistoryIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
   '/login': typeof LoginIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/characters': typeof AppCharactersIndexRoute
+  '/profile': typeof AppProfileIndexRoute
+  '/raids/create': typeof AppRaidsCreateIndexRoute
+  '/raids/history': typeof AppRaidsHistoryIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteRouteWithChildren
+  '/_app/': typeof AppIndexRoute
   '/login/': typeof LoginIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_app/characters/': typeof AppCharactersIndexRoute
+  '/_app/profile/': typeof AppProfileIndexRoute
+  '/_app/raids/create/': typeof AppRaidsCreateIndexRoute
+  '/_app/raids/history/': typeof AppRaidsHistoryIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login/' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/login/'
+    | '/api/auth/$'
+    | '/characters/'
+    | '/profile/'
+    | '/raids/create/'
+    | '/raids/history/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/api/auth/$'
-  id: '__root__' | '/' | '/login/' | '/api/auth/$'
+  to:
+    | '/'
+    | '/login'
+    | '/api/auth/$'
+    | '/characters'
+    | '/profile'
+    | '/raids/create'
+    | '/raids/history'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/_app/'
+    | '/login/'
+    | '/api/auth/$'
+    | '/_app/characters/'
+    | '/_app/profile/'
+    | '/_app/raids/create/'
+    | '/_app/raids/history/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRouteRoute: typeof AppRouteRouteWithChildren
   LoginIndexRoute: typeof LoginIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
+    '/_app': {
+      id: '/_app'
+      path: ''
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login/': {
@@ -75,6 +140,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/': {
+      id: '/_app/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/profile/': {
+      id: '/_app/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof AppProfileIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/characters/': {
+      id: '/_app/characters/'
+      path: '/characters'
+      fullPath: '/characters/'
+      preLoaderRoute: typeof AppCharactersIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -82,11 +168,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/raids/history/': {
+      id: '/_app/raids/history/'
+      path: '/raids/history'
+      fullPath: '/raids/history/'
+      preLoaderRoute: typeof AppRaidsHistoryIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/raids/create/': {
+      id: '/_app/raids/create/'
+      path: '/raids/create'
+      fullPath: '/raids/create/'
+      preLoaderRoute: typeof AppRaidsCreateIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
+interface AppRouteRouteChildren {
+  AppIndexRoute: typeof AppIndexRoute
+  AppCharactersIndexRoute: typeof AppCharactersIndexRoute
+  AppProfileIndexRoute: typeof AppProfileIndexRoute
+  AppRaidsCreateIndexRoute: typeof AppRaidsCreateIndexRoute
+  AppRaidsHistoryIndexRoute: typeof AppRaidsHistoryIndexRoute
+}
+
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppIndexRoute: AppIndexRoute,
+  AppCharactersIndexRoute: AppCharactersIndexRoute,
+  AppProfileIndexRoute: AppProfileIndexRoute,
+  AppRaidsCreateIndexRoute: AppRaidsCreateIndexRoute,
+  AppRaidsHistoryIndexRoute: AppRaidsHistoryIndexRoute,
+}
+
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRouteRoute: AppRouteRouteWithChildren,
   LoginIndexRoute: LoginIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

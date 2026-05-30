@@ -1,7 +1,4 @@
-import { logger } from '#/lib/logger';
-
 const API_URL = process.env.API_URL ?? 'http://localhost:3001';
-const proxyLog = logger.child({ module: 'proxy' });
 
 export function buildUpstreamRequest(
   request: Request,
@@ -27,20 +24,6 @@ export async function proxyAuth(
   splat: string,
 ): Promise<Response> {
   const upstream = buildUpstreamRequest(request, splat);
-  proxyLog.debug(
-    { method: request.method, path: `/api/auth/${splat}` },
-    'proxying auth request',
-  );
-
   const response = await fetch(upstream);
-  proxyLog.debug(
-    {
-      method: request.method,
-      path: `/api/auth/${splat}`,
-      status: response.status,
-    },
-    'auth proxy response',
-  );
-
   return response;
 }

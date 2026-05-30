@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { safeRedirectPath } from '#/lib/auth-guard';
-import { getSessionFn } from '#/lib/get-session';
+import { getCachedSession } from '#/lib/session-query';
 import { LoginComponent } from './-components/LoginComponent';
 
 export const Route = createFileRoute('/login/')({
@@ -8,7 +8,7 @@ export const Route = createFileRoute('/login/')({
     redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
   }),
   beforeLoad: async ({ search }) => {
-    const session = await getSessionFn();
+    const session = await getCachedSession();
 
     if (session) {
       throw redirect({ to: safeRedirectPath(search.redirect) });

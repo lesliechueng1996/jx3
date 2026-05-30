@@ -1,10 +1,10 @@
 import { redirect } from '@tanstack/react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const getSessionFn = vi.fn();
+const getCachedSession = vi.fn();
 
-vi.mock('../../../src/lib/get-session', () => ({
-  getSessionFn: () => getSessionFn(),
+vi.mock('../../../src/lib/session-query', () => ({
+  getCachedSession: () => getCachedSession(),
 }));
 
 import { Route } from '../../../src/routes/login/index';
@@ -33,7 +33,7 @@ describe('login route beforeLoad', () => {
   });
 
   it('redirects authenticated users away from login', async () => {
-    getSessionFn.mockResolvedValue({ user: { id: 'user-1' } });
+    getCachedSession.mockResolvedValue({ user: { id: 'user-1' } });
 
     await expect(
       Route.options.beforeLoad?.({
@@ -43,7 +43,7 @@ describe('login route beforeLoad', () => {
   });
 
   it('sanitizes unsafe redirect targets', async () => {
-    getSessionFn.mockResolvedValue({ user: { id: 'user-1' } });
+    getCachedSession.mockResolvedValue({ user: { id: 'user-1' } });
 
     await expect(
       Route.options.beforeLoad?.({
@@ -53,7 +53,7 @@ describe('login route beforeLoad', () => {
   });
 
   it('allows unauthenticated users to stay on login', async () => {
-    getSessionFn.mockResolvedValue(null);
+    getCachedSession.mockResolvedValue(null);
 
     await expect(
       Route.options.beforeLoad?.({

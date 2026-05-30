@@ -3,6 +3,7 @@ import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { authClient } from '#/lib/auth-client';
 import { safeRedirectPath } from '#/lib/auth-guard';
+import { invalidateCachedSession } from '#/lib/session-query';
 import { AuthCredentialsFormComponent } from './AuthCredentialsFormComponent';
 import type { AuthCredentials } from './auth-credentials-schema';
 
@@ -30,12 +31,13 @@ export function LoginComponent({ redirectTo }: LoginComponentProps) {
 
   const signInMutation = useMutation<SignInResult, Error, AuthCredentials>({
     mutationFn: (data) => authClient.signIn.email(data),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       const message = authErrorMessage(result, 'Sign in failed');
       if (message) {
         toast.error(message);
         return;
       }
+      await invalidateCachedSession();
       router.navigate({ to: destination });
     },
     onError: () => {
@@ -46,12 +48,13 @@ export function LoginComponent({ redirectTo }: LoginComponentProps) {
   const signUpMutation = useMutation<SignUpResult, Error, AuthCredentials>({
     mutationFn: (data) =>
       authClient.signUp.email({ ...data, name: data.email }),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       const message = authErrorMessage(result, 'Sign up failed');
       if (message) {
         toast.error(message);
         return;
       }
+      await invalidateCachedSession();
       router.navigate({ to: destination });
     },
     onError: () => {
