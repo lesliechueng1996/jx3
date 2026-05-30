@@ -7,12 +7,17 @@
     "build": "bun build src/index.ts --outdir dist --target bun",
     "lint": "biome lint ./src",
     "check": "biome check ./src",
-    "fix": "biome check --write ./src"
+    "fix": "biome check --write ./src",
+    "test": "bun test",
+    "test:cov": "bun test --coverage"
   },
   "dependencies": {
     "elysia": "latest",
     "@elysiajs/cors": "latest",
-    "@elysiajs/swagger": "latest"
+    "@elysiajs/swagger": "latest",
+    "zod": "^3.24.0",
+    "@jx3/auth": "workspace:*",
+    "@jx3/db": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
