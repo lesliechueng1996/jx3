@@ -2,47 +2,73 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { authClient } from '#/lib/auth-client';
+import { safeRedirectPath } from '#/lib/auth-guard';
 import { AuthCredentialsFormComponent } from './AuthCredentialsFormComponent';
 import type { AuthCredentials } from './auth-credentials-schema';
 
-export function LoginComponent() {
-  const router = useRouter();
+type LoginComponentProps = {
+  redirectTo?: string;
+};
 
-  const signInMutation = useMutation({
-    mutationFn: (data: AuthCredentials) => authClient.signIn.email(data),
-    onSuccess: ({ error }) => {
-      if (error) {
-        toast.error(error.message ?? 'Sign in failed');
+type SignInResult = Awaited<ReturnType<typeof authClient.signIn.email>>;
+type SignUpResult = Awaited<ReturnType<typeof authClient.signUp.email>>;
+type SocialSignInResult = Awaited<ReturnType<typeof authClient.signIn.social>>;
+
+function authErrorMessage(
+  result: { error?: { message?: string | null } | null },
+  fallback: string,
+): string | null {
+  if (!result.error) {
+    return null;
+  }
+  return result.error.message ?? fallback;
+}
+
+export function LoginComponent({ redirectTo }: LoginComponentProps) {
+  const router = useRouter();
+  const destination = safeRedirectPath(redirectTo);
+
+  const signInMutation = useMutation<SignInResult, Error, AuthCredentials>({
+    mutationFn: (data) => authClient.signIn.email(data),
+    onSuccess: (result) => {
+      const message = authErrorMessage(result, 'Sign in failed');
+      if (message) {
+        toast.error(message);
         return;
       }
-      router.navigate({ to: '/' });
+      router.navigate({ to: destination });
     },
     onError: () => {
       toast.error('Sign in failed');
     },
   });
 
-  const signUpMutation = useMutation({
-    mutationFn: (data: AuthCredentials) =>
+  const signUpMutation = useMutation<SignUpResult, Error, AuthCredentials>({
+    mutationFn: (data) =>
       authClient.signUp.email({ ...data, name: data.email }),
-    onSuccess: ({ error }) => {
-      if (error) {
-        toast.error(error.message ?? 'Sign up failed');
+    onSuccess: (result) => {
+      const message = authErrorMessage(result, 'Sign up failed');
+      if (message) {
+        toast.error(message);
         return;
       }
-      router.navigate({ to: '/' });
+      router.navigate({ to: destination });
     },
     onError: () => {
       toast.error('Sign up failed');
     },
   });
 
-  const githubMutation = useMutation({
+  const githubMutation = useMutation<SocialSignInResult, Error, void>({
     mutationFn: () =>
-      authClient.signIn.social({ provider: 'github', callbackURL: '/' }),
-    onSuccess: ({ error }) => {
-      if (error) {
-        toast.error(error.message ?? 'GitHub sign in failed');
+      authClient.signIn.social({
+        provider: 'github',
+        callbackURL: destination,
+      }),
+    onSuccess: (result) => {
+      const message = authErrorMessage(result, 'GitHub sign in failed');
+      if (message) {
+        toast.error(message);
       }
     },
     onError: () => {
