@@ -12,7 +12,8 @@
   "scripts": {
     "check": "biome check .",
     "fix": "biome check --fix .",
-    "test": "bun test"
+    "test": "bun test",
+    "test:cov": "bun test --coverage --coverage-reporter=text --coverage-reporter=lcov"
   },
   "dependencies": {
     "better-auth": "^1.2.0",

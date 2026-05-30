@@ -6,7 +6,8 @@
     "build": "turbo build",
     "check": "turbo check",
     "fix": "turbo fix",
-    "test": "turbo test"
+    "test": "turbo test",
+    "test:cov": "turbo test:cov"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",

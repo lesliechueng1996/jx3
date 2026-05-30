@@ -1,0 +1,7 @@
+[test]
+coverageSkipTestFiles = true
+coveragePathIgnorePatterns = [
+  "src/schema.ts",
+  "src/type.ts",
+  "**/*.test.ts",
+]

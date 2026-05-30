@@ -85,6 +85,49 @@ describe('AuthCredentialsFormComponent', () => {
     expect(onSignIn).not.toHaveBeenCalled();
   });
 
+  it('disables actions while submitting', () => {
+    render(
+      <AuthCredentialsFormComponent
+        onSignIn={vi.fn()}
+        onSignUp={vi.fn()}
+        onGitHubSignIn={vi.fn()}
+        isSubmitting={true}
+      />,
+    );
+
+    expect(screen.getByLabelText('Email')).toHaveProperty('disabled', true);
+    expect(screen.getByLabelText('Password')).toHaveProperty('disabled', true);
+    expect(screen.getByRole('button', { name: 'Sign in' })).toHaveProperty(
+      'disabled',
+      true,
+    );
+    expect(screen.getByRole('button', { name: 'Create account' })).toHaveProperty(
+      'disabled',
+      true,
+    );
+    expect(
+      screen.getByRole('button', { name: 'Sign in with GitHub' }),
+    ).toHaveProperty('disabled', true);
+  });
+
+  it('does not call onSignUp when validation fails', async () => {
+    const user = userEvent.setup();
+    const onSignUp = vi.fn();
+
+    render(
+      <AuthCredentialsFormComponent
+        onSignIn={vi.fn()}
+        onSignUp={onSignUp}
+        onGitHubSignIn={vi.fn()}
+        isSubmitting={false}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+
+    expect(onSignUp).not.toHaveBeenCalled();
+  });
+
   it('calls onGitHubSignIn when GitHub button is clicked', async () => {
     const user = userEvent.setup();
     const onGitHubSignIn = vi.fn();

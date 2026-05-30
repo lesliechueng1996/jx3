@@ -37,14 +37,20 @@ import { meRoute } from '../../src/routes/me';
 
 ## Runners
 
-| Package | Runner | Command |
-|---------|--------|---------|
-| `apps/api`, `packages/auth` | Bun | `bun test` |
-| `apps/web` | Vitest | `vitest run` |
+| Package | Runner | Command | Coverage |
+|---------|--------|---------|----------|
+| `apps/api`, `packages/auth`, `packages/logger` | Bun | `bun test` | `bun run test:cov` |
+| `apps/web` | Vitest | `vitest run` | `vitest run --coverage` |
 
-Run all suites from repo root: `bun run test`.
+Run all suites from repo root: `bun run test`. Coverage: `bun run test:cov`.
 
-## API coverage
+Coverage artifacts: `coverage/lcov.info` (Bun/Vitest) and `coverage/index.html` (Vitest HTML report in `apps/web`).
+
+## Web coverage
+
+- `apps/web` enforces >= 90% coverage via `vitest.config.ts` thresholds.
+- Exclude bootstrap/wiring files in `coverage.exclude` (auth re-exports, query client, logger, router shell, shadcn UI, generated routes, thin API proxy handlers, route entry pages).
+- `createServerFn` wrappers stay thin; extract request/session logic into testable helpers (see `resolveSession` in `get-session.ts`).
 
 - `apps/api` enforces >= 90% coverage via `bunfig.toml`.
 - Exclude bootstrap/wiring files with `coveragePathIgnorePatterns`; test files are skipped via `coverageSkipTestFiles`.

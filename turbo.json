@@ -26,6 +26,14 @@
         "^build"
       ]
     },
+    "test:cov": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "coverage/**"
+      ]
+    },
     "db:generate": {
       "cache": false
     },

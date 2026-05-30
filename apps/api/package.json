@@ -9,7 +9,7 @@
     "check": "biome check ./src",
     "fix": "biome check --write ./src",
     "test": "bun test",
-    "test:cov": "bun test --coverage"
+    "test:cov": "bun test --coverage --coverage-reporter=text --coverage-reporter=lcov"
   },
   "dependencies": {
     "elysia": "latest",
