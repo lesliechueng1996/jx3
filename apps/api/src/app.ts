@@ -1,15 +1,11 @@
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
-import type { Auth } from '@jx3/auth';
 import { Elysia } from 'elysia';
+import { auth } from './lib/auth';
 import { authMacro } from './middleware/auth-macro';
 import { meRoute } from './routes/me';
 
-export interface AppDeps {
-  auth: Pick<Auth, 'handler' | 'api'>;
-}
-
-export const createApp = ({ auth }: AppDeps) =>
+export const createApp = () =>
   new Elysia()
     .use(
       cors({
@@ -35,7 +31,7 @@ export const createApp = ({ auth }: AppDeps) =>
       }),
     )
     .all('/api/auth/*', ({ request }) => auth.handler(request))
-    .use(authMacro((headers) => auth.api.getSession({ headers })))
+    .use(authMacro)
     .use(meRoute);
 
 export type App = ReturnType<typeof createApp>;

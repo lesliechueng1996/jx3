@@ -52,7 +52,6 @@ Run all suites from repo root: `bun run test`.
 ## Style
 
 - Prefer unit tests for pure logic and Elysia `app.handle()` for HTTP behavior.
-- Inject dependencies (e.g. `getSession`) so handlers stay testable without a live DB.
+- Mock `src/lib/auth` with `mock.module` when tests need a fake session or handler.
 - Keep `src/` free of test-only helpers; shared fixtures belong in `tests/fixtures/` when needed.
-- Elysia plugins are deduplicated by name across files: pass a unique `pluginName` to
-  `authMacro()` in tests, and wire routes inline when testing a route module in isolation.
+- Route module tests can `.use(meRoute)` directly; register `mock.module` before importing the route.

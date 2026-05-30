@@ -38,8 +38,8 @@ alwaysApply: false
 ## Structure & testing
 
 - Keep route handlers thin; put mappable/pure logic in `schemas/` or helpers so it is
-  unit-testable without a live DB. Inject dependencies (e.g. `getSession`) rather than
-  importing singletons into testable units.
+  unit-testable without a live DB. Auth macro reads session via `lib/auth` (Better Auth);
+  mock `lib/auth` in tests when needed.
 - Tests live in `apps/api/tests/` mirroring `src/` (see `testing-conventions.mdc`).
 - Tests use `bun test` via `app.handle()`. Coverage gate is >= 90%
   (`bunfig.toml`); exclude only bootstrap/wiring files via `coveragePathIgnorePatterns`.
