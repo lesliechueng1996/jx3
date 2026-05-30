@@ -2,7 +2,13 @@ import { describe, expect, it } from 'bun:test';
 import { Elysia } from 'elysia';
 import { authMacro } from './auth-macro';
 
-const user = { id: 'u1', name: 'A', email: 'a@e.com', emailVerified: true, createdAt: new Date() };
+const user = {
+  id: 'u1',
+  name: 'A',
+  email: 'a@e.com',
+  emailVerified: true,
+  createdAt: new Date(),
+};
 
 const makeApp = (session: unknown) =>
   new Elysia()
@@ -11,7 +17,9 @@ const makeApp = (session: unknown) =>
 
 describe('authMacro', () => {
   it('returns 401 when no session', async () => {
-    const res = await makeApp(null).handle(new Request('http://localhost/protected'));
+    const res = await makeApp(null).handle(
+      new Request('http://localhost/protected'),
+    );
     expect(res.status).toBe(401);
   });
 

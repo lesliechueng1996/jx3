@@ -22,7 +22,10 @@ export const authMacro = (getSession: GetSession) =>
       async resolve({ status, request: { headers } }) {
         const result = await getSession(headers);
         if (!result) {
-          return status(401, errorResponse('UNAUTHORIZED', 'Authentication required'));
+          return status(
+            401,
+            errorResponse('UNAUTHORIZED', 'Authentication required'),
+          );
         }
         return { user: result.user, session: result.session };
       },

@@ -4,7 +4,9 @@ import { errorResponse, errorSchema } from './common';
 describe('errorResponse', () => {
   it('wraps code and message', () => {
     const body = errorResponse('UNAUTHORIZED', 'Not signed in');
-    expect(body).toEqual({ error: { code: 'UNAUTHORIZED', message: 'Not signed in' } });
+    expect(body).toEqual({
+      error: { code: 'UNAUTHORIZED', message: 'Not signed in' },
+    });
     expect(errorSchema.safeParse(body).success).toBe(true);
   });
 

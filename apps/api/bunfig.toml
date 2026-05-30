@@ -1,0 +1,9 @@
+[test]
+coverage = true
+coverageThreshold = 0.9
+coverageSkipTestFiles = true
+coveragePathIgnorePatterns = [
+  "src/index.ts",
+  "src/lib/auth.ts",
+  "**/*.test.ts",
+]
