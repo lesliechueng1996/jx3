@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { authClient } from './client';
+import { authClient } from '../src/client';
 
 describe('authClient', () => {
   it('exposes email + social sign-in methods', () => {

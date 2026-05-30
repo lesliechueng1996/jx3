@@ -1,0 +1,58 @@
+---
+description: Test file layout, naming, and runner conventions
+globs: "**/tests/**"
+alwaysApply: false
+---
+
+# Testing Conventions
+
+## Layout
+
+- Place tests in a package-level `tests/` directory, **not** beside source files in `src/`.
+- Mirror the `src/` directory structure inside `tests/`.
+
+```
+apps/api/
+  src/routes/me.ts          →  tests/routes/me.test.ts
+  src/schemas/common.ts     →  tests/schemas/common.test.ts
+packages/auth/
+  src/client.ts             →  tests/client.test.ts
+```
+
+## Naming
+
+- Use the `.test.ts` suffix (or `.test.tsx` for React components).
+- One test file per source module; name matches the module under test.
+
+## Imports
+
+- Import source under test via relative paths into `../src/` (adjust depth for nested dirs).
+
+```typescript
+// tests/routes/me.test.ts
+import { meRoute } from '../../src/routes/me';
+```
+
+- Do not add path aliases from `tests/` to `src/`; keep imports explicit.
+
+## Runners
+
+| Package | Runner | Command |
+|---------|--------|---------|
+| `apps/api`, `packages/auth` | Bun | `bun test` |
+| `apps/web` | Vitest | `vitest run` |
+
+Run all suites from repo root: `bun run test`.
+
+## API coverage
+
+- `apps/api` enforces >= 90% coverage via `bunfig.toml`.
+- Exclude bootstrap/wiring files with `coveragePathIgnorePatterns`; test files are skipped via `coverageSkipTestFiles`.
+
+## Style
+
+- Prefer unit tests for pure logic and Elysia `app.handle()` for HTTP behavior.
+- Inject dependencies (e.g. `getSession`) so handlers stay testable without a live DB.
+- Keep `src/` free of test-only helpers; shared fixtures belong in `tests/fixtures/` when needed.
+- Elysia plugins are deduplicated by name across files: pass a unique `pluginName` to
+  `authMacro()` in tests, and wire routes inline when testing a route module in isolation.

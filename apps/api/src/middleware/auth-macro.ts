@@ -16,8 +16,8 @@ interface SessionResult {
 
 type GetSession = (headers: Headers) => Promise<SessionResult | null>;
 
-export const authMacro = (getSession: GetSession) =>
-  new Elysia({ name: 'auth-macro' }).macro({
+export const authMacro = (getSession: GetSession, pluginName = 'auth-macro') =>
+  new Elysia({ name: pluginName }).macro({
     auth: {
       async resolve({ status, request: { headers } }) {
         const result = await getSession(headers);

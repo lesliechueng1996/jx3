@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { createAuth } from './index';
+import { createAuth } from '../src/index';
 
 const fakeDb = {} as Parameters<typeof createAuth>[0];
 

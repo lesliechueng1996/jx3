@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { meResponseSchema, toMeResponse } from './user';
+import { meResponseSchema, toMeResponse } from '../../src/schemas/user';
 
 const user = {
   id: 'u1',

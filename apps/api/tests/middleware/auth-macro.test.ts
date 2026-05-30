@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { Elysia } from 'elysia';
-import { authMacro } from './auth-macro';
+import { authMacro } from '../../src/middleware/auth-macro';
 
 const user = {
   id: 'u1',
@@ -12,7 +12,7 @@ const user = {
 
 const makeApp = (session: unknown) =>
   new Elysia()
-    .use(authMacro(async () => session as never))
+    .use(authMacro(async () => session as never, 'auth-macro-unit-test'))
     .get('/protected', ({ user }) => ({ id: user.id }), { auth: true });
 
 describe('authMacro', () => {

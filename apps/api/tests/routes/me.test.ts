@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { Elysia } from 'elysia';
-import { authMacro } from '../middleware/auth-macro';
-import { meRoute } from './me';
+import { authMacro } from '../../src/middleware/auth-macro';
+import { toMeResponse } from '../../src/schemas/user';
 
 const user = {
   id: 'u1',
@@ -14,7 +14,9 @@ const user = {
 };
 
 const app = (session: unknown) =>
-  new Elysia().use(authMacro(async () => session as never)).use(meRoute);
+  new Elysia()
+    .use(authMacro(async () => session as never, 'me-route-test'))
+    .get('/api/v1/me', ({ user }) => toMeResponse(user), { auth: true });
 
 describe('GET /api/v1/me', () => {
   it('401 when unauthenticated', async () => {

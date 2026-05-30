@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { errorResponse, errorSchema } from './common';
+import { errorResponse, errorSchema } from '../../src/schemas/common';
 
 describe('errorResponse', () => {
   it('wraps code and message', () => {

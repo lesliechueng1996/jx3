@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { createApp } from './app';
+import { createApp } from '../src/app';
 
 const user = {
   id: 'u1',
