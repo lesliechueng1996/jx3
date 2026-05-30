@@ -7,6 +7,10 @@ export const user = pgTable('user', {
   email: t.varchar('email', { length: 255 }).notNull().unique(),
   emailVerified: t.boolean('email_verified').notNull(),
   image: t.text('image'),
+  role: t.text('role'),
+  banned: t.boolean('banned'),
+  banReason: t.text('ban_reason'),
+  banExpires: t.timestamp('ban_expires', { precision: 6, withTimezone: true }),
   createdAt: t
     .timestamp('created_at', { precision: 6, withTimezone: true })
     .notNull(),
@@ -27,6 +31,7 @@ export const session = pgTable('session', {
     .notNull(),
   ipAddress: t.text('ip_address'),
   userAgent: t.text('user_agent'),
+  impersonatedBy: t.text('impersonated_by'),
   createdAt: t
     .timestamp('created_at', { precision: 6, withTimezone: true })
     .notNull(),
