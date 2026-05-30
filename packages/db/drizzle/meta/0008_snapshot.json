@@ -93,12 +93,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -174,12 +170,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -189,9 +181,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -276,9 +266,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -418,10 +406,7 @@
         "game_character_server_name_unique": {
           "name": "game_character_server_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "server_id",
-            "name"
-          ]
+          "columns": ["server_id", "name"]
         }
       },
       "policies": {},
@@ -742,12 +727,8 @@
           "name": "game_kungfu_school_id_game_school_id_fk",
           "tableFrom": "game_kungfu",
           "tableTo": "game_school",
-          "columnsFrom": [
-            "school_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["school_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1289,9 +1270,7 @@
         "game_server_server_id_unique": {
           "name": "game_server_server_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "server_id"
-          ]
+          "columns": ["server_id"]
         }
       },
       "policies": {},
@@ -1303,105 +1282,57 @@
     "public.body_type": {
       "name": "body_type",
       "schema": "public",
-      "values": [
-        "male",
-        "female",
-        "boy",
-        "girl"
-      ]
+      "values": ["male", "female", "boy", "girl"]
     },
     "public.dungeon_difficulty": {
       "name": "dungeon_difficulty",
       "schema": "public",
-      "values": [
-        "normal",
-        "heroic",
-        "challenge"
-      ]
+      "values": ["normal", "heroic", "challenge"]
     },
     "public.item_quality": {
       "name": "item_quality",
       "schema": "public",
-      "values": [
-        "white",
-        "green",
-        "blue",
-        "purple",
-        "orange"
-      ]
+      "values": ["white", "green", "blue", "purple", "orange"]
     },
     "public.item_type": {
       "name": "item_type",
       "schema": "public",
-      "values": [
-        "equipment",
-        "special"
-      ]
+      "values": ["equipment", "special"]
     },
     "public.attack_method": {
       "name": "attack_method",
       "schema": "public",
-      "values": [
-        "melee",
-        "ranged"
-      ]
+      "values": ["melee", "ranged"]
     },
     "public.attack_type": {
       "name": "attack_type",
       "schema": "public",
-      "values": [
-        "internal",
-        "external"
-      ]
+      "values": ["internal", "external"]
     },
     "public.kungfu_type": {
       "name": "kungfu_type",
       "schema": "public",
-      "values": [
-        "defense",
-        "heal",
-        "attack"
-      ]
+      "values": ["defense", "heal", "attack"]
     },
     "public.raid_run_status": {
       "name": "raid_run_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "recruiting",
-        "ongoing",
-        "completed",
-        "cancelled"
-      ]
+      "values": ["pending", "recruiting", "ongoing", "completed", "cancelled"]
     },
     "public.raid_signup_role": {
       "name": "raid_signup_role",
       "schema": "public",
-      "values": [
-        "pending",
-        "tank",
-        "healer",
-        "dps",
-        "boss"
-      ]
+      "values": ["pending", "tank", "healer", "dps", "boss"]
     },
     "public.raid_signup_status": {
       "name": "raid_signup_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "confirmed",
-        "waitlist",
-        "rejected"
-      ]
+      "values": ["pending", "confirmed", "waitlist", "rejected"]
     },
     "public.school_type": {
       "name": "school_type",
       "schema": "public",
-      "values": [
-        "school",
-        "genre"
-      ]
+      "values": ["school", "genre"]
     }
   },
   "schemas": {},
