@@ -1,10 +1,14 @@
 import { TanStackDevtools } from '@tanstack/react-devtools';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
-
+import { NotFoundComponent } from '#/components/NotFoundComponent';
+import { queryClient } from '#/lib/query-client';
+import { Toaster } from '@/components/ui/sonner';
 import appCss from '../styles.css?url';
 
 export const Route = createRootRoute({
+  notFoundComponent: NotFoundComponent,
   head: () => ({
     meta: [
       {
@@ -35,7 +39,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <QueryClientProvider client={queryClient}>
+          {children}
+          <Toaster richColors closeButton />
+        </QueryClientProvider>
         <TanStackDevtools
           config={{
             position: 'bottom-right',

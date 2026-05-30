@@ -1,0 +1,110 @@
+---
+description: Frontend conventions for apps/web — shadcn/ui, forms, React Query, TanStack Start
+globs: apps/web/**
+alwaysApply: false
+---
+
+# Frontend Conventions
+
+## UI Components (shadcn/ui)
+
+- Prefer existing shadcn/ui components in `src/components/ui/` over custom markup.
+- When adding a new component, read and follow `.agents/skills/shadcn/SKILL.md` (CLI, composition, styling, and forms rules).
+- Use `bunx --bun shadcn@latest add <component>` from `apps/web/`.
+- Compose with built-in variants (`variant`, `size`) and semantic tokens (`bg-primary`, `text-muted-foreground`).
+
+## Styling
+
+- Use Tailwind CSS only. No separate CSS modules, styled-components, or inline styles for layout/theming.
+- Use `cn()` from `#/lib/utils` for conditional class names.
+
+## Naming
+
+| Kind | Convention | Example |
+|------|------------|---------|
+| Page / route components | PascalCase file + export | `LoginComponent.tsx` |
+| shadcn/ui primitives | lowercase (shadcn default) | `src/components/ui/button.tsx` |
+| Routes | directory = URL path | `src/routes/login/index.tsx` → `/login` |
+| Hooks, utils, API helpers | kebab-case | `use-user-query.ts`, `auth-client.ts` |
+
+## Component Placement
+
+Three tiers — pick the shallowest tier that fits:
+
+| Tier | Location | When |
+|------|----------|------|
+| **Route-local** | `src/routes/<path>/-components/` | Used only by that route's page |
+| **Shared among siblings** | Common parent route's `-components/` | Reused by multiple child routes under the same parent |
+| **App-wide base** | `src/components/` (non-`ui/`) | Reusable across unrelated routes |
+| **Primitives** | `src/components/ui/` | shadcn/ui and other design-system building blocks |
+
+The `-components` prefix (leading `-`) excludes the folder from the URL. Colocate schemas and hooks with the components that use them inside the same `-components/` directory when they are not shared.
+
+Example — login page with private form pieces:
+
+```
+src/routes/login/
+  index.tsx                              # route entry, thin
+  -components/
+    LoginComponent.tsx                   # container (API / mutations)
+    AuthCredentialsFormComponent.tsx     # presentational form
+    auth-credentials-schema.ts           # zod schema
+```
+
+Example — settings area shared by child routes:
+
+```
+src/routes/settings/
+  -components/
+    SettingsLayoutComponent.tsx          # shared by /settings/* children
+  profile/
+    index.tsx
+  security/
+    index.tsx
+```
+
+Do **not** put route-specific components in `src/features/` or top-level `src/components/`.
+
+## Forms: Two-Layer Pattern
+
+Every form feature splits into **container** (API) and **presentational** (render + validation) components. Both live in the route's `-components/` directory (or a shared parent `-components/` when reused).
+
+- **Inner (`*FormComponent`)**: renders fields, runs client-side validation (zod), exposes `onSubmit` with validated data. No API calls.
+- **Outer (`*Component`, e.g. `LoginComponent`)**: wires React Query mutations/queries, handles loading/error/success, passes callbacks and initial values to the form component.
+
+Do not mix API logic and form rendering in a single component.
+
+## Data Fetching (TanStack Query)
+
+- Use `@tanstack/react-query` for all client-side API calls (`useQuery`, `useMutation`, `useQueryClient`).
+- Colocate query keys and fetch functions in kebab-case modules under `src/lib/` or next to the consuming `-components/`.
+- Invalidate or update cache after mutations instead of manual refetch scattered in components.
+- Use route `loader`s for SSR-critical initial data; use React Query for interactive refetching and mutations.
+
+## TanStack Start — Routing
+
+- **Always use directory structure as the URL path.** One folder per route segment; the folder name becomes the URL segment (e.g. `routes/login/index.tsx` → `/login`, `routes/users/$id/index.tsx` → `/users/:id`).
+- **Root `/` exception:** the home URL has no path segment, so use a single `routes/index.tsx` file (not `routes/index/index.tsx`, which would map to `/index/`).
+- Route entry file: `index.tsx` inside the route folder for non-root routes.
+- Do **not** use flat route files like `routes/login.tsx` when a directory route is intended.
+- Keep route `index.tsx` thin: define the route, optionally a loader, then render a PascalCase page component from `-components/`.
+- Pathless / non-URL folders use a leading `-` prefix (e.g. `-components/`).
+- Use `#/*` path alias for cross-cutting imports (`#/lib/...`); prefer relative imports within the same route's `-components/`.
+- Auth and API proxy routes stay under `src/routes/api/`; business API calls target the backend via the existing proxy pattern.
+- Follow [TanStack Start docs](https://tanstack.com/start) for SSR, server functions, and router integration.
+
+## Structure
+
+```
+src/
+  components/ui/           # shadcn / design-system primitives
+  components/              # app-wide reusable base components (rare)
+  lib/                     # kebab-case utilities, query client, API helpers
+  routes/
+    __root.tsx
+    index.tsx              # / (root — no directory segment in URL)
+    login/
+      index.tsx            # /login
+      -components/         # login-only components
+    api/                   # server / proxy routes
+```
