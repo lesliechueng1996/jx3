@@ -3,10 +3,12 @@ import { swagger } from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
 import { auth } from './lib/auth';
 import { authMacro } from './middleware/auth-macro';
+import { loggerPlugin } from './plugins/logger';
 import { meRoute } from './routes/me';
 
 export const createApp = () =>
   new Elysia()
+    .use(loggerPlugin)
     .use(
       cors({
         origin: process.env.WEB_ORIGIN ?? 'http://localhost:3000',

@@ -15,6 +15,7 @@ JX3 is a game information management system built as a full-stack web applicatio
 - **API** (`apps/api`): Elysia (Bun-native framework)
 - **Database** (`packages/db`): PostgreSQL + Drizzle ORM + postgres.js driver
 - **Auth** (`packages/auth`): Better Auth (factory pattern, schema exported for db)
+- **Logging** (`packages/logger`): Pino-based structured logging with Elysia plugin
 - **Linting/Formatting**: Biome (root config inherited by sub-projects)
 
 ## Commands
@@ -47,7 +48,24 @@ apps/
 packages/
   db/        — Drizzle ORM schema, db instance, migrations
   auth/      — Better Auth config (createAuth factory), core schema, auth client
+  logger/    — Pino logger (createLogger)
 ```
+
+## Logging
+
+Use `@jx3/logger` for all server-side logging. Do not use raw `console.log` in API or web server code.
+
+| Context | Import | Notes |
+|---------|--------|-------|
+| Elysia API | `@jx3/logger`, `apps/api/src/plugins/logger.ts` | Mount `loggerPlugin` early in `createApp()`; use `log` from handler context or `logger.child({ module })` |
+| TanStack Start (server) | `#/lib/logger` | Isomorphic wrapper: Pino on server via `createIsomorphicFn` |
+| TanStack Start (client) | `#/lib/logger` | Same import; resolves to `console` on the client bundle |
+| Shared packages | `@jx3/logger` | `createLogger('package-name')` or accept a child logger from the caller |
+
+- Set `LOG_LEVEL` to override the default (`debug` in dev, `info` in production).
+- Dev output uses `pino-pretty`; production emits JSON to stdout.
+- In Elysia handlers, prefer the request-scoped `log` injected by `loggerPlugin`.
+- On the web client, import from `#/lib/logger` — never import `@jx3/logger` directly in client code.
 
 ## Conventions
 
@@ -69,4 +87,4 @@ Use Conventional Commits:
 
 Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`
 
-Scope uses package name: `web`, `api`, `db`, `shared`. Use `root` or omit for root-level changes.
+Scope uses package name: `web`, `api`, `db`, `auth`, `logger`. Use `root` or omit for root-level changes.

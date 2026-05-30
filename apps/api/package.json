@@ -17,7 +17,8 @@
     "@elysiajs/swagger": "latest",
     "zod": "^3.24.0",
     "@jx3/auth": "workspace:*",
-    "@jx3/db": "workspace:*"
+    "@jx3/db": "workspace:*",
+    "@jx3/logger": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
