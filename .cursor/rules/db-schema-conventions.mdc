@@ -1,7 +1,7 @@
 ---
-description: Database schema conventions for all tables except auth schema (packages/auth/src/schema.ts)
-paths:
-  - packages/db/src/schema/**
+description: Database schema conventions for non-auth tables
+globs: packages/db/src/schema/**
+alwaysApply: false
 ---
 
 ## Table Naming

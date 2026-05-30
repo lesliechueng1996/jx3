@@ -1,8 +1,7 @@
 ---
-description: When modifying schema files in packages/db or packages/auth/src/schema.ts
-paths:
-  - packages/db/src/schema/**
-  - packages/auth/src/schema.ts
+description: Database migration workflow after schema changes
+globs: packages/db/src/schema/**,packages/auth/src/schema.ts
+alwaysApply: false
 ---
 
 After modifying database schema files:

@@ -1,7 +1,7 @@
 ---
-description: When creating or modifying backend HTTP endpoints in apps/api
-paths:
-  - apps/api/src/**
+description: Backend HTTP endpoint conventions in apps/api
+globs: apps/api/src/**
+alwaysApply: false
 ---
 
 # Backend API Conventions
