@@ -13,6 +13,12 @@ alwaysApply: false
 - Use `bunx --bun shadcn@latest add <component>` from `apps/web/`.
 - Compose with built-in variants (`variant`, `size`) and semantic tokens (`bg-primary`, `text-muted-foreground`).
 
+## Language
+
+- All user-facing copy must be in **Simplified Chinese** (简体中文): page titles, descriptions, form labels, buttons, placeholders, validation messages, toasts, empty states, confirmations, and accessibility text (`aria-label`, `sr-only`).
+- Brand names and proper nouns may stay as-is (e.g. `JX3`, `GitHub`).
+- Code identifiers, route paths, and API field names stay in English; only rendered UI text is localized.
+
 ## Styling
 
 - Use Tailwind CSS only. No separate CSS modules, styled-components, or inline styles for layout/theming.

@@ -6,6 +6,7 @@ import { authMacro } from './middleware/auth-macro';
 import { loggerPlugin } from './plugins/logger';
 import { meRoute } from './routes/me';
 import { uploadsRoute } from './routes/uploads';
+import { usersAdminRoute } from './routes/users-admin';
 
 export const createApp = () =>
   new Elysia()
@@ -25,6 +26,7 @@ export const createApp = () =>
           info: { title: 'JX3 API', version: '1.0.0' },
           tags: [
             { name: 'User', description: 'User resources' },
+            { name: 'Users', description: 'Super admin user management' },
             { name: 'Uploads', description: 'File upload resources' },
             {
               name: 'Auth',
@@ -37,6 +39,7 @@ export const createApp = () =>
     .all('/api/auth/*', ({ request }) => auth.handler(request))
     .use(authMacro)
     .use(meRoute)
-    .use(uploadsRoute);
+    .use(uploadsRoute)
+    .use(usersAdminRoute);
 
 export type App = ReturnType<typeof createApp>;

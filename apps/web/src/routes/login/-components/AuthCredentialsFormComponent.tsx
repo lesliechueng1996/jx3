@@ -76,20 +76,18 @@ export function AuthCredentialsFormComponent({
   return (
     <Card className="mx-auto w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Sign in</CardTitle>
-        <CardDescription>
-          Use your email or GitHub account to continue.
-        </CardDescription>
+        <CardTitle>登录</CardTitle>
+        <CardDescription>使用邮箱或 GitHub 账号继续。</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <form
           className="flex flex-col gap-4"
-          aria-label="Sign in form"
+          aria-label="登录表单"
           onSubmit={handleSignIn}
         >
           <FieldGroup>
             <Field data-invalid={fieldErrors.email ? true : undefined}>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <FieldLabel htmlFor="email">邮箱</FieldLabel>
               <Input
                 id="email"
                 name="email"
@@ -105,7 +103,7 @@ export function AuthCredentialsFormComponent({
               )}
             </Field>
             <Field data-invalid={fieldErrors.password ? true : undefined}>
-              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <FieldLabel htmlFor="password">密码</FieldLabel>
               <Input
                 id="password"
                 name="password"
@@ -122,7 +120,7 @@ export function AuthCredentialsFormComponent({
             </Field>
           </FieldGroup>
           <Button type="submit" disabled={isSubmitting}>
-            Sign in
+            登录
           </Button>
         </form>
         <Button
@@ -131,11 +129,11 @@ export function AuthCredentialsFormComponent({
           disabled={isSubmitting}
           onClick={handleSignUp}
         >
-          Create account
+          创建账号
         </Button>
         <div className="flex items-center gap-4">
           <Separator className="flex-1" />
-          <span className="text-sm text-muted-foreground">or</span>
+          <span className="text-sm text-muted-foreground">或</span>
           <Separator className="flex-1" />
         </div>
         <Button
@@ -144,11 +142,11 @@ export function AuthCredentialsFormComponent({
           disabled={isSubmitting}
           onClick={onGitHubSignIn}
         >
-          Sign in with GitHub
+          使用 GitHub 登录
         </Button>
       </CardContent>
       <CardFooter className="text-sm text-muted-foreground">
-        Password must be at least 8 characters.
+        密码至少需要 8 个字符。
       </CardFooter>
     </Card>
   );

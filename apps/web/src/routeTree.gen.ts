@@ -14,9 +14,11 @@ import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppProfileIndexRouteImport } from './routes/_app/profile/index'
 import { Route as AppCharactersIndexRouteImport } from './routes/_app/characters/index'
+import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppRaidsHistoryIndexRouteImport } from './routes/_app/raids/history/index'
 import { Route as AppRaidsCreateIndexRouteImport } from './routes/_app/raids/create/index'
+import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
@@ -42,6 +44,11 @@ const AppCharactersIndexRoute = AppCharactersIndexRouteImport.update({
   path: '/characters/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const ApiV1SplatRoute = ApiV1SplatRouteImport.update({
+  id: '/api/v1/$',
+  path: '/api/v1/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -57,13 +64,20 @@ const AppRaidsCreateIndexRoute = AppRaidsCreateIndexRouteImport.update({
   path: '/raids/create/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
+  id: '/admin/users/',
+  path: '/admin/users/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login/': typeof LoginIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/v1/$': typeof ApiV1SplatRoute
   '/characters/': typeof AppCharactersIndexRoute
   '/profile/': typeof AppProfileIndexRoute
+  '/admin/users/': typeof AppAdminUsersIndexRoute
   '/raids/create/': typeof AppRaidsCreateIndexRoute
   '/raids/history/': typeof AppRaidsHistoryIndexRoute
 }
@@ -71,8 +85,10 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/login': typeof LoginIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/v1/$': typeof ApiV1SplatRoute
   '/characters': typeof AppCharactersIndexRoute
   '/profile': typeof AppProfileIndexRoute
+  '/admin/users': typeof AppAdminUsersIndexRoute
   '/raids/create': typeof AppRaidsCreateIndexRoute
   '/raids/history': typeof AppRaidsHistoryIndexRoute
 }
@@ -82,8 +98,10 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/login/': typeof LoginIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/v1/$': typeof ApiV1SplatRoute
   '/_app/characters/': typeof AppCharactersIndexRoute
   '/_app/profile/': typeof AppProfileIndexRoute
+  '/_app/admin/users/': typeof AppAdminUsersIndexRoute
   '/_app/raids/create/': typeof AppRaidsCreateIndexRoute
   '/_app/raids/history/': typeof AppRaidsHistoryIndexRoute
 }
@@ -93,8 +111,10 @@ export interface FileRouteTypes {
     | '/'
     | '/login/'
     | '/api/auth/$'
+    | '/api/v1/$'
     | '/characters/'
     | '/profile/'
+    | '/admin/users/'
     | '/raids/create/'
     | '/raids/history/'
   fileRoutesByTo: FileRoutesByTo
@@ -102,8 +122,10 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/api/auth/$'
+    | '/api/v1/$'
     | '/characters'
     | '/profile'
+    | '/admin/users'
     | '/raids/create'
     | '/raids/history'
   id:
@@ -112,8 +134,10 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/login/'
     | '/api/auth/$'
+    | '/api/v1/$'
     | '/_app/characters/'
     | '/_app/profile/'
+    | '/_app/admin/users/'
     | '/_app/raids/create/'
     | '/_app/raids/history/'
   fileRoutesById: FileRoutesById
@@ -122,6 +146,7 @@ export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
   LoginIndexRoute: typeof LoginIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiV1SplatRoute: typeof ApiV1SplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -161,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCharactersIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/api/v1/$': {
+      id: '/api/v1/$'
+      path: '/api/v1/$'
+      fullPath: '/api/v1/$'
+      preLoaderRoute: typeof ApiV1SplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -182,6 +214,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRaidsCreateIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/admin/users/': {
+      id: '/_app/admin/users/'
+      path: '/admin/users'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AppAdminUsersIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
@@ -189,6 +228,7 @@ interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppCharactersIndexRoute: typeof AppCharactersIndexRoute
   AppProfileIndexRoute: typeof AppProfileIndexRoute
+  AppAdminUsersIndexRoute: typeof AppAdminUsersIndexRoute
   AppRaidsCreateIndexRoute: typeof AppRaidsCreateIndexRoute
   AppRaidsHistoryIndexRoute: typeof AppRaidsHistoryIndexRoute
 }
@@ -197,6 +237,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppCharactersIndexRoute: AppCharactersIndexRoute,
   AppProfileIndexRoute: AppProfileIndexRoute,
+  AppAdminUsersIndexRoute: AppAdminUsersIndexRoute,
   AppRaidsCreateIndexRoute: AppRaidsCreateIndexRoute,
   AppRaidsHistoryIndexRoute: AppRaidsHistoryIndexRoute,
 }
@@ -209,6 +250,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
   LoginIndexRoute: LoginIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiV1SplatRoute: ApiV1SplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

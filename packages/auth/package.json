@@ -8,7 +8,8 @@
     "./schema": "./src/schema.ts",
     "./client": "./src/client.ts",
     "./type": "./src/type.ts",
-    "./roles": "./src/roles.ts"
+    "./roles": "./src/roles.ts",
+    "./permissions": "./src/permissions.ts"
   },
   "scripts": {
     "check": "biome check .",

@@ -23,13 +23,11 @@ describe('AuthCredentialsFormComponent', () => {
       />,
     );
 
-    const form = screen.getByRole('form', { name: 'Sign in form' });
-    await user.click(within(form).getByRole('button', { name: 'Sign in' }));
+    const form = screen.getByRole('form', { name: '登录表单' });
+    await user.click(within(form).getByRole('button', { name: '登录' }));
 
-    expect(screen.getByText('Invalid email address')).toBeTruthy();
-    expect(
-      screen.getByText('Password must be at least 8 characters'),
-    ).toBeTruthy();
+    expect(screen.getByText('邮箱格式无效')).toBeTruthy();
+    expect(screen.getByText('密码至少需要 8 个字符')).toBeTruthy();
     expect(onSignIn).not.toHaveBeenCalled();
   });
 
@@ -48,10 +46,10 @@ describe('AuthCredentialsFormComponent', () => {
       />,
     );
 
-    await user.type(screen.getByLabelText('Email'), 'user@example.com');
-    await user.type(screen.getByLabelText('Password'), 'password123');
-    const form = screen.getByRole('form', { name: 'Sign in form' });
-    await user.click(within(form).getByRole('button', { name: 'Sign in' }));
+    await user.type(screen.getByLabelText('邮箱'), 'user@example.com');
+    await user.type(screen.getByLabelText('密码'), 'password123');
+    const form = screen.getByRole('form', { name: '登录表单' });
+    await user.click(within(form).getByRole('button', { name: '登录' }));
 
     expect(onSignIn).toHaveBeenCalledWith({
       email: 'user@example.com',
@@ -74,9 +72,9 @@ describe('AuthCredentialsFormComponent', () => {
       />,
     );
 
-    await user.type(screen.getByLabelText('Email'), 'new@example.com');
-    await user.type(screen.getByLabelText('Password'), 'password123');
-    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await user.type(screen.getByLabelText('邮箱'), 'new@example.com');
+    await user.type(screen.getByLabelText('密码'), 'password123');
+    await user.click(screen.getByRole('button', { name: '创建账号' }));
 
     expect(onSignUp).toHaveBeenCalledWith({
       email: 'new@example.com',
@@ -95,17 +93,17 @@ describe('AuthCredentialsFormComponent', () => {
       />,
     );
 
-    expect(screen.getByLabelText('Email')).toHaveProperty('disabled', true);
-    expect(screen.getByLabelText('Password')).toHaveProperty('disabled', true);
-    expect(screen.getByRole('button', { name: 'Sign in' })).toHaveProperty(
+    expect(screen.getByLabelText('邮箱')).toHaveProperty('disabled', true);
+    expect(screen.getByLabelText('密码')).toHaveProperty('disabled', true);
+    expect(screen.getByRole('button', { name: '登录' })).toHaveProperty(
       'disabled',
       true,
     );
     expect(
-      screen.getByRole('button', { name: 'Create account' }),
+      screen.getByRole('button', { name: '创建账号' }),
     ).toHaveProperty('disabled', true);
     expect(
-      screen.getByRole('button', { name: 'Sign in with GitHub' }),
+      screen.getByRole('button', { name: '使用 GitHub 登录' }),
     ).toHaveProperty('disabled', true);
   });
 
@@ -122,7 +120,7 @@ describe('AuthCredentialsFormComponent', () => {
       />,
     );
 
-    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await user.click(screen.getByRole('button', { name: '创建账号' }));
 
     expect(onSignUp).not.toHaveBeenCalled();
   });
@@ -141,7 +139,7 @@ describe('AuthCredentialsFormComponent', () => {
     );
 
     await user.click(
-      screen.getByRole('button', { name: 'Sign in with GitHub' }),
+      screen.getByRole('button', { name: '使用 GitHub 登录' }),
     );
     expect(onGitHubSignIn).toHaveBeenCalled();
   });

@@ -27,7 +27,7 @@ export function AppLayoutComponent({ session }: AppLayoutComponentProps) {
         <UserMenuComponent user={session.user} />
       </header>
       <div className="flex min-h-0 flex-1">
-        <AppSidebarComponent />
+        <AppSidebarComponent userRole={session.user.role} />
         <main className="min-w-0 flex-1 overflow-auto p-6">
           <Outlet />
         </main>

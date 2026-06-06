@@ -1,10 +1,16 @@
 import { createAuthClient } from 'better-auth/client';
 import { adminClient } from 'better-auth/client/plugins';
+import { ac, authRoles } from './permissions';
 
 export const authClient = createAuthClient({
   baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
   basePath: '/api/auth',
-  plugins: [adminClient()],
+  plugins: [
+    adminClient({
+      ac,
+      roles: authRoles,
+    }),
+  ],
   fetchOptions: {
     onSuccess: (ctx) => {
       const token = ctx.response.headers.get('set-auth-token');

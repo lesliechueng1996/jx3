@@ -32,7 +32,7 @@ export function LoginComponent({ redirectTo }: LoginComponentProps) {
   const signInMutation = useMutation<SignInResult, Error, AuthCredentials>({
     mutationFn: (data) => authClient.signIn.email(data),
     onSuccess: async (result) => {
-      const message = authErrorMessage(result, 'Sign in failed');
+      const message = authErrorMessage(result, '登录失败');
       if (message) {
         toast.error(message);
         return;
@@ -41,7 +41,7 @@ export function LoginComponent({ redirectTo }: LoginComponentProps) {
       router.navigate({ to: destination });
     },
     onError: () => {
-      toast.error('Sign in failed');
+      toast.error('登录失败');
     },
   });
 
@@ -49,7 +49,7 @@ export function LoginComponent({ redirectTo }: LoginComponentProps) {
     mutationFn: (data) =>
       authClient.signUp.email({ ...data, name: data.email }),
     onSuccess: async (result) => {
-      const message = authErrorMessage(result, 'Sign up failed');
+      const message = authErrorMessage(result, '注册失败');
       if (message) {
         toast.error(message);
         return;
@@ -58,7 +58,7 @@ export function LoginComponent({ redirectTo }: LoginComponentProps) {
       router.navigate({ to: destination });
     },
     onError: () => {
-      toast.error('Sign up failed');
+      toast.error('注册失败');
     },
   });
 
@@ -69,13 +69,13 @@ export function LoginComponent({ redirectTo }: LoginComponentProps) {
         callbackURL: destination,
       }),
     onSuccess: (result) => {
-      const message = authErrorMessage(result, 'GitHub sign in failed');
+      const message = authErrorMessage(result, 'GitHub 登录失败');
       if (message) {
         toast.error(message);
       }
     },
     onError: () => {
-      toast.error('GitHub sign in failed');
+      toast.error('GitHub 登录失败');
     },
   });
 

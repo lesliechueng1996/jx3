@@ -13,14 +13,12 @@ export function NotFoundComponent() {
     <div className="flex min-h-svh items-center justify-center p-4">
       <Card className="mx-auto w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Page not found</CardTitle>
-          <CardDescription>
-            The page you are looking for does not exist.
-          </CardDescription>
+          <CardTitle>页面未找到</CardTitle>
+          <CardDescription>您访问的页面不存在。</CardDescription>
         </CardHeader>
         <CardContent>
           <Button asChild>
-            <Link to="/">Go home</Link>
+            <Link to="/">返回首页</Link>
           </Button>
         </CardContent>
       </Card>

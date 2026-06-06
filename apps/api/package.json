@@ -18,6 +18,7 @@
     "@jx3/db": "workspace:*",
     "@jx3/logger": "workspace:*",
     "@supabase/supabase-js": "^2.106.2",
+    "drizzle-orm": "^0.44.0",
     "elysia": "latest",
     "zod": "^3.24.0"
   },

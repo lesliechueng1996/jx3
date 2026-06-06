@@ -58,10 +58,10 @@ function renderLogin(redirectTo?: string) {
 }
 
 async function submitSignIn(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText('Email'), 'user@example.com');
-  await user.type(screen.getByLabelText('Password'), 'password123');
-  const form = screen.getByRole('form', { name: 'Sign in form' });
-  await user.click(within(form).getByRole('button', { name: 'Sign in' }));
+  await user.type(screen.getByLabelText('邮箱'), 'user@example.com');
+  await user.type(screen.getByLabelText('密码'), 'password123');
+  const form = screen.getByRole('form', { name: '登录表单' });
+  await user.click(within(form).getByRole('button', { name: '登录' }));
 }
 
 afterEach(() => {
@@ -115,7 +115,7 @@ describe('LoginComponent', () => {
     await submitSignIn(user);
 
     await waitFor(() => {
-      expect(toastError).toHaveBeenCalledWith('Sign in failed');
+      expect(toastError).toHaveBeenCalledWith('登录失败');
     });
   });
 
@@ -123,9 +123,9 @@ describe('LoginComponent', () => {
     const user = userEvent.setup();
     renderLogin('/');
 
-    await user.type(screen.getByLabelText('Email'), 'new@example.com');
-    await user.type(screen.getByLabelText('Password'), 'password123');
-    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await user.type(screen.getByLabelText('邮箱'), 'new@example.com');
+    await user.type(screen.getByLabelText('密码'), 'password123');
+    await user.click(screen.getByRole('button', { name: '创建账号' }));
 
     await waitFor(() => {
       expect(signUpEmail).toHaveBeenCalledWith({
@@ -145,9 +145,9 @@ describe('LoginComponent', () => {
     const user = userEvent.setup();
     renderLogin();
 
-    await user.type(screen.getByLabelText('Email'), 'new@example.com');
-    await user.type(screen.getByLabelText('Password'), 'password123');
-    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await user.type(screen.getByLabelText('邮箱'), 'new@example.com');
+    await user.type(screen.getByLabelText('密码'), 'password123');
+    await user.click(screen.getByRole('button', { name: '创建账号' }));
 
     await waitFor(() => {
       expect(toastError).toHaveBeenCalledWith('Email already exists');
@@ -160,12 +160,12 @@ describe('LoginComponent', () => {
     const user = userEvent.setup();
     renderLogin();
 
-    await user.type(screen.getByLabelText('Email'), 'new@example.com');
-    await user.type(screen.getByLabelText('Password'), 'password123');
-    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await user.type(screen.getByLabelText('邮箱'), 'new@example.com');
+    await user.type(screen.getByLabelText('密码'), 'password123');
+    await user.click(screen.getByRole('button', { name: '创建账号' }));
 
     await waitFor(() => {
-      expect(toastError).toHaveBeenCalledWith('Sign up failed');
+      expect(toastError).toHaveBeenCalledWith('注册失败');
     });
   });
 
@@ -178,7 +178,7 @@ describe('LoginComponent', () => {
     renderLogin('/dashboard');
 
     await user.click(
-      screen.getByRole('button', { name: 'Sign in with GitHub' }),
+      screen.getByRole('button', { name: '使用 GitHub 登录' }),
     );
 
     await waitFor(() => {
@@ -196,11 +196,11 @@ describe('LoginComponent', () => {
     renderLogin();
 
     await user.click(
-      screen.getByRole('button', { name: 'Sign in with GitHub' }),
+      screen.getByRole('button', { name: '使用 GitHub 登录' }),
     );
 
     await waitFor(() => {
-      expect(toastError).toHaveBeenCalledWith('GitHub sign in failed');
+      expect(toastError).toHaveBeenCalledWith('GitHub 登录失败');
     });
   });
 

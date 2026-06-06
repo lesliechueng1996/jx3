@@ -1,5 +1,21 @@
 import { describe, expect, it } from 'bun:test';
-import { hasRole, SUPER_ADMIN_ROLE } from '../src/roles';
+import {
+  ADMIN_ROLE,
+  APP_ROLE_LABELS,
+  APP_ROLES,
+  AUTH_PROVIDER_LABELS,
+  hasRole,
+  SUPER_ADMIN_ROLE,
+  USER_ROLE,
+} from '../src/roles';
+
+describe('roles', () => {
+  it('defines app roles and labels', () => {
+    expect(APP_ROLES).toEqual([USER_ROLE, ADMIN_ROLE, SUPER_ADMIN_ROLE]);
+    expect(APP_ROLE_LABELS[SUPER_ADMIN_ROLE]).toBe('超级管理员');
+    expect(AUTH_PROVIDER_LABELS.credential).toBe('密码登录');
+  });
+});
 
 describe('hasRole', () => {
   it('matches exact role', () => {

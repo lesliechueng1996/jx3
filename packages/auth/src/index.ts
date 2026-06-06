@@ -1,6 +1,8 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { admin, bearer } from 'better-auth/plugins';
+import { ac, authRoles } from './permissions';
+import { USER_ROLE } from './roles';
 
 type DrizzleDB = Parameters<typeof drizzleAdapter>[0];
 
@@ -17,7 +19,14 @@ export const createAuth = (db: DrizzleDB) =>
         clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
       },
     },
-    plugins: [admin(), bearer()],
+    plugins: [
+      admin({
+        ac,
+        roles: authRoles,
+        defaultRole: USER_ROLE,
+      }),
+      bearer(),
+    ],
   });
 
 export type Auth = ReturnType<typeof createAuth>;

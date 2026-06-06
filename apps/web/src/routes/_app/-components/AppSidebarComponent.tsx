@@ -1,8 +1,9 @@
+import { hasRole, SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
 import { Link } from '@tanstack/react-router';
-import { ClipboardList, Swords, Users } from 'lucide-react';
+import { ClipboardList, Shield, Swords, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
   {
     to: '/characters' as const,
     label: '我的角色',
@@ -20,11 +21,27 @@ const NAV_ITEMS = [
   },
 ] as const;
 
-export function AppSidebarComponent() {
+const ADMIN_NAV_ITEMS = [
+  {
+    to: '/admin/users' as const,
+    label: '用户管理',
+    icon: Shield,
+  },
+] as const;
+
+type AppSidebarComponentProps = {
+  userRole?: string | null;
+};
+
+export function AppSidebarComponent({ userRole }: AppSidebarComponentProps) {
+  const navItems = hasRole(userRole, SUPER_ADMIN_ROLE)
+    ? [...BASE_NAV_ITEMS, ...ADMIN_NAV_ITEMS]
+    : BASE_NAV_ITEMS;
+
   return (
     <aside className="flex w-56 shrink-0 flex-col border-r border-border bg-sidebar text-sidebar-foreground">
       <nav className="flex flex-col gap-1 p-3">
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <Link
             key={item.to}
             to={item.to}
