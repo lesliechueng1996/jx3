@@ -5,6 +5,7 @@ import { auth } from './lib/auth';
 import { authMacro } from './middleware/auth-macro';
 import { loggerPlugin } from './plugins/logger';
 import { meRoute } from './routes/me';
+import { uploadsRoute } from './routes/uploads';
 
 export const createApp = () =>
   new Elysia()
@@ -24,6 +25,7 @@ export const createApp = () =>
           info: { title: 'JX3 API', version: '1.0.0' },
           tags: [
             { name: 'User', description: 'User resources' },
+            { name: 'Uploads', description: 'File upload resources' },
             {
               name: 'Auth',
               description: 'Better Auth native routes (RPC-style exception)',
@@ -34,6 +36,7 @@ export const createApp = () =>
     )
     .all('/api/auth/*', ({ request }) => auth.handler(request))
     .use(authMacro)
-    .use(meRoute);
+    .use(meRoute)
+    .use(uploadsRoute);
 
 export type App = ReturnType<typeof createApp>;

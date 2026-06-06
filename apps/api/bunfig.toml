@@ -5,6 +5,7 @@ coverageSkipTestFiles = true
 coveragePathIgnorePatterns = [
   "src/index.ts",
   "src/lib/auth.ts",
+  "src/lib/supabase.ts",
   "src/plugins/logger.ts",
   "../../packages/logger/**",
   "**/*.test.ts",

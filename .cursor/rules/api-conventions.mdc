@@ -32,8 +32,11 @@ alwaysApply: false
 
 ## Auth
 
-- Protect routes with the `auth: true` macro (`middleware/auth-macro.ts`), which injects
+- Protect routes with the `auth` macro (`middleware/auth-macro.ts`), which injects
   `user` and `session`. Never read sessions ad hoc inside handlers.
+- Use `auth: true` for authentication only. Pass a required role string (e.g.
+  `SUPER_ADMIN_ROLE` from `@jx3/auth/roles`) to also enforce authorization.
+  Returns 403 when the signed-in user's role does not match.
 
 ## Structure & testing
 

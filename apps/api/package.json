@@ -12,13 +12,14 @@
     "test:cov": "bun test --coverage --coverage-reporter=text --coverage-reporter=lcov"
   },
   "dependencies": {
-    "elysia": "latest",
     "@elysiajs/cors": "latest",
     "@elysiajs/swagger": "latest",
-    "zod": "^3.24.0",
     "@jx3/auth": "workspace:*",
     "@jx3/db": "workspace:*",
-    "@jx3/logger": "workspace:*"
+    "@jx3/logger": "workspace:*",
+    "@supabase/supabase-js": "^2.106.2",
+    "elysia": "latest",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",

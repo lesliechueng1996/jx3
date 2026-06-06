@@ -17,7 +17,7 @@ export function createLoggerPlugin(baseLogger: Logger = rootLogger) {
       log.info({ status: set.status }, 'request completed');
     })
     .onError(({ log, error }) => {
-      log.error({ err: error }, 'request failed');
+      (log ?? baseLogger).error({ err: error }, 'request failed');
     });
 }
 
