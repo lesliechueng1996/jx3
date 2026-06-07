@@ -1,4 +1,4 @@
-import type { ListSchoolsFilters } from '#/lib/api/admin/schools-admin-api';
+import { type KeyboardEvent, useEffect, useState } from 'react';
 import {
   SCHOOL_TYPE_LABELS,
   SCHOOL_TYPES,
@@ -14,48 +14,65 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import type { SchoolsSearch } from './schools-search-schema';
 
 type SchoolFiltersComponentProps = {
-  filters: ListSchoolsFilters;
-  onChange: (filters: ListSchoolsFilters) => void;
-  onCreate: () => void;
+  committedFilters: SchoolsSearch;
+  onSearch: (filters: SchoolsSearch) => void;
+  onReset: () => void;
 };
 
 const ALL_VALUE = '__all__';
 
 export function SchoolFiltersComponent({
-  filters,
-  onChange,
-  onCreate,
+  committedFilters,
+  onSearch,
+  onReset,
 }: SchoolFiltersComponentProps) {
+  const [draft, setDraft] = useState(committedFilters);
+
+  useEffect(() => {
+    setDraft(committedFilters);
+  }, [committedFilters]);
+
+  const handleSearch = () => {
+    onSearch({ ...draft, page: 1 });
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleSearch();
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-border p-4 lg:flex-row lg:items-end lg:justify-between">
-      <div className="grid flex-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="space-y-4 rounded-lg border border-border p-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="filter-school-name">门派名称</Label>
           <Input
             id="filter-school-name"
-            value={filters.name ?? ''}
+            value={draft.name ?? ''}
             placeholder="搜索门派名称"
             onChange={(event) =>
-              onChange({
-                ...filters,
-                page: 1,
+              setDraft((current) => ({
+                ...current,
                 name: event.target.value || undefined,
-              })
+              }))
             }
+            onKeyDown={handleKeyDown}
           />
         </div>
         <div className="space-y-2">
           <Label>类型</Label>
           <Select
-            value={filters.type ?? ALL_VALUE}
+            value={draft.type ?? ALL_VALUE}
             onValueChange={(value) =>
-              onChange({
-                ...filters,
-                page: 1,
+              setDraft((current) => ({
+                ...current,
                 type: value === ALL_VALUE ? undefined : (value as SchoolType),
-              })
+              }))
             }
           >
             <SelectTrigger>
@@ -75,21 +92,26 @@ export function SchoolFiltersComponent({
           <Label htmlFor="filter-school-alias">别称</Label>
           <Input
             id="filter-school-alias"
-            value={filters.alias ?? ''}
+            value={draft.alias ?? ''}
             placeholder="搜索别称"
             onChange={(event) =>
-              onChange({
-                ...filters,
-                page: 1,
+              setDraft((current) => ({
+                ...current,
                 alias: event.target.value || undefined,
-              })
+              }))
             }
+            onKeyDown={handleKeyDown}
           />
         </div>
       </div>
-      <Button type="button" onClick={onCreate}>
-        新建门派
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button type="button" onClick={handleSearch}>
+          搜索
+        </Button>
+        <Button type="button" variant="outline" onClick={onReset}>
+          重置
+        </Button>
+      </div>
     </div>
   );
 }

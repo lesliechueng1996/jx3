@@ -1,23 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getRouteApi } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import type { AdminUserListItem } from '#/lib/api/admin/users-admin-api';
 import {
-  type ListUsersFilters,
   usersAdminApi,
   usersAdminQueryKey,
 } from '#/lib/api/admin/users-admin-api';
 import { ApiRequestError } from '#/lib/api/request';
+import { toRouteSearch } from '#/routes/_app/admin/-components/admin-list-search';
 import { Button } from '@/components/ui/button';
 import { BanUserDialogComponent } from './BanUserDialogComponent';
 import { EditUserDialogComponent } from './EditUserDialogComponent';
 import { UserFiltersComponent } from './UserFiltersComponent';
 import { UserTableComponent } from './UserTableComponent';
+import { DEFAULT_USERS_SEARCH, type UsersSearch } from './users-search-schema';
 
-const DEFAULT_FILTERS: ListUsersFilters = {
-  page: 1,
-  pageSize: 20,
-};
+const usersRouteApi = getRouteApi('/_app/admin/users/');
 
 type UserManagementComponentProps = {
   currentUserId: string;
@@ -26,8 +25,9 @@ type UserManagementComponentProps = {
 export function UserManagementComponent({
   currentUserId,
 }: UserManagementComponentProps) {
+  const navigate = usersRouteApi.useNavigate();
+  const filters = usersRouteApi.useSearch();
   const queryClient = useQueryClient();
-  const [filters, setFilters] = useState<ListUsersFilters>(DEFAULT_FILTERS);
   const [editingUser, setEditingUser] = useState<AdminUserListItem | null>(
     null,
   );
@@ -35,6 +35,13 @@ export function UserManagementComponent({
     null,
   );
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+
+  const updateSearch = (nextFilters: UsersSearch) => {
+    navigate({
+      to: '.',
+      search: toRouteSearch(nextFilters, DEFAULT_USERS_SEARCH),
+    });
+  };
 
   const usersQuery = useQuery({
     queryKey: [...usersAdminQueryKey, filters],
@@ -123,7 +130,11 @@ export function UserManagementComponent({
         </p>
       </div>
 
-      <UserFiltersComponent filters={filters} onChange={setFilters} />
+      <UserFiltersComponent
+        committedFilters={filters}
+        onSearch={updateSearch}
+        onReset={() => updateSearch(DEFAULT_USERS_SEARCH)}
+      />
 
       {usersQuery.isError ? (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
@@ -133,6 +144,7 @@ export function UserManagementComponent({
 
       <UserTableComponent
         items={usersQuery.data?.items ?? []}
+        isLoading={usersQuery.isFetching}
         currentUserId={currentUserId}
         pendingUserId={pendingUserId}
         onBanToggle={(user, banned) => {
@@ -172,9 +184,7 @@ export function UserManagementComponent({
             variant="outline"
             size="sm"
             disabled={filters.page <= 1 || usersQuery.isFetching}
-            onClick={() =>
-              setFilters((current) => ({ ...current, page: current.page - 1 }))
-            }
+            onClick={() => updateSearch({ ...filters, page: filters.page - 1 })}
           >
             上一页
           </Button>
@@ -183,9 +193,7 @@ export function UserManagementComponent({
             variant="outline"
             size="sm"
             disabled={filters.page >= totalPages || usersQuery.isFetching}
-            onClick={() =>
-              setFilters((current) => ({ ...current, page: current.page + 1 }))
-            }
+            onClick={() => updateSearch({ ...filters, page: filters.page + 1 })}
           >
             下一页
           </Button>

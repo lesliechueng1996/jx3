@@ -3,6 +3,7 @@ import {
   SCHOOL_TYPE_LABELS,
   type SchoolType,
 } from '#/lib/api/admin/schools-admin-api';
+import { TableLoadingOverlayComponent } from '@/components/TableLoadingOverlayComponent';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +17,7 @@ import {
 
 type SchoolTableComponentProps = {
   items: AdminSchoolListItem[];
+  isLoading?: boolean;
   pendingSchoolId: string | null;
   onEdit: (school: AdminSchoolListItem) => void;
   onDelete: (school: AdminSchoolListItem) => void;
@@ -25,12 +27,14 @@ const formatType = (type: SchoolType): string => SCHOOL_TYPE_LABELS[type];
 
 export function SchoolTableComponent({
   items,
+  isLoading = false,
   pendingSchoolId,
   onEdit,
   onDelete,
 }: SchoolTableComponentProps) {
   return (
-    <div className="rounded-lg border border-border">
+    <div className="relative rounded-lg border border-border">
+      <TableLoadingOverlayComponent loading={isLoading} />
       <Table>
         <TableHeader>
           <TableRow>
@@ -42,7 +46,7 @@ export function SchoolTableComponent({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.length === 0 ? (
+          {!isLoading && items.length === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={5}

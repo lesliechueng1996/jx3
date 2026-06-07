@@ -43,7 +43,8 @@ export function BanUserDialogComponent({
           <DialogTitle>封禁用户</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          确定要封禁用户 {user?.name ?? ''} 吗？封禁后该用户将无法登录，所有会话将被撤销。
+          确定要封禁用户 {user?.name ?? ''}{' '}
+          吗？封禁后该用户将无法登录，所有会话将被撤销。
         </p>
         <div className="space-y-2">
           <Label htmlFor="ban-reason">封禁原因</Label>

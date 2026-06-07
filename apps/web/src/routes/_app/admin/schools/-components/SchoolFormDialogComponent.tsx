@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -89,6 +90,11 @@ export function SchoolFormDialogComponent({
           <DialogTitle>
             {mode === 'create' ? '新建门派' : '编辑门派'}
           </DialogTitle>
+          <DialogDescription>
+            {mode === 'create'
+              ? '填写门派名称、类型及其他信息以创建新记录。'
+              : '修改门派信息后保存。'}
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">

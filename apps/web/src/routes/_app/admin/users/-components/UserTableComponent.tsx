@@ -4,6 +4,7 @@ import {
   AUTH_PROVIDER_LABELS,
 } from '@jx3/auth/roles';
 import type { AdminUserListItem } from '#/lib/api/admin/users-admin-api';
+import { TableLoadingOverlayComponent } from '@/components/TableLoadingOverlayComponent';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -18,6 +19,7 @@ import {
 
 type UserTableComponentProps = {
   items: AdminUserListItem[];
+  isLoading?: boolean;
   currentUserId: string;
   pendingUserId: string | null;
   onBanToggle: (user: AdminUserListItem, banned: boolean) => void;
@@ -48,6 +50,7 @@ const formatRole = (role: string | null): string => {
 
 export function UserTableComponent({
   items,
+  isLoading = false,
   currentUserId,
   pendingUserId,
   onBanToggle,
@@ -56,7 +59,8 @@ export function UserTableComponent({
   onRevokeSessions,
 }: UserTableComponentProps) {
   return (
-    <div className="rounded-lg border border-border">
+    <div className="relative rounded-lg border border-border">
+      <TableLoadingOverlayComponent loading={isLoading} />
       <Table>
         <TableHeader>
           <TableRow>
@@ -73,7 +77,7 @@ export function UserTableComponent({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.length === 0 ? (
+          {!isLoading && items.length === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={10}
@@ -86,71 +90,71 @@ export function UserTableComponent({
             items.map((user) => {
               const isSelf = user.id === currentUserId;
               return (
-              <TableRow key={user.id}>
-                <TableCell className="font-medium">{user.name}</TableCell>
-                <TableCell>{user.emailMasked}</TableCell>
-                <TableCell>{formatRole(user.role)}</TableCell>
-                <TableCell>
-                  <Switch
-                    checked={user.banned}
-                    disabled={isSelf || pendingUserId === user.id}
-                    onCheckedChange={(checked) => onBanToggle(user, checked)}
-                    aria-label={
-                      isSelf
-                        ? `无法封禁当前登录用户 ${user.name}`
-                        : `切换 ${user.name} 的封禁状态`
-                    }
-                  />
-                </TableCell>
-                <TableCell>{user.banReason ?? '-'}</TableCell>
-                <TableCell>{formatDateTime(user.banDate)}</TableCell>
-                <TableCell>{user.lastLoginIp ?? '-'}</TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {user.providers.length === 0 ? (
-                      <span className="text-muted-foreground">-</span>
-                    ) : (
-                      user.providers.map((provider) => (
-                        <Badge key={provider} variant="secondary">
-                          {AUTH_PROVIDER_LABELS[provider]}
-                        </Badge>
-                      ))
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>{formatDateTime(user.createdAt)}</TableCell>
-                <TableCell>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEdit(user)}
-                    >
-                      编辑
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={pendingUserId === user.id}
-                      onClick={() => onRevokeSessions(user)}
-                    >
-                      撤销会话
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      disabled={pendingUserId === user.id}
-                      onClick={() => onDelete(user)}
-                    >
-                      删除
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell>{user.emailMasked}</TableCell>
+                  <TableCell>{formatRole(user.role)}</TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={user.banned}
+                      disabled={isSelf || pendingUserId === user.id}
+                      onCheckedChange={(checked) => onBanToggle(user, checked)}
+                      aria-label={
+                        isSelf
+                          ? `无法封禁当前登录用户 ${user.name}`
+                          : `切换 ${user.name} 的封禁状态`
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>{user.banReason ?? '-'}</TableCell>
+                  <TableCell>{formatDateTime(user.banDate)}</TableCell>
+                  <TableCell>{user.lastLoginIp ?? '-'}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {user.providers.length === 0 ? (
+                        <span className="text-muted-foreground">-</span>
+                      ) : (
+                        user.providers.map((provider) => (
+                          <Badge key={provider} variant="secondary">
+                            {AUTH_PROVIDER_LABELS[provider]}
+                          </Badge>
+                        ))
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>{formatDateTime(user.createdAt)}</TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onEdit(user)}
+                      >
+                        编辑
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={pendingUserId === user.id}
+                        onClick={() => onRevokeSessions(user)}
+                      >
+                        撤销会话
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        disabled={pendingUserId === user.id}
+                        onClick={() => onDelete(user)}
+                      >
+                        删除
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
             })
           )}
         </TableBody>

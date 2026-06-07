@@ -1,30 +1,40 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getRouteApi } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import type { AdminSchoolListItem } from '#/lib/api/admin/schools-admin-api';
 import {
-  type ListSchoolsFilters,
   schoolsAdminApi,
   schoolsAdminQueryKey,
 } from '#/lib/api/admin/schools-admin-api';
 import { ApiRequestError } from '#/lib/api/request';
+import { toRouteSearch } from '#/routes/_app/admin/-components/admin-list-search';
 import { Button } from '@/components/ui/button';
 import { SchoolFiltersComponent } from './SchoolFiltersComponent';
 import { SchoolFormDialogComponent } from './SchoolFormDialogComponent';
 import { SchoolTableComponent } from './SchoolTableComponent';
+import {
+  DEFAULT_SCHOOLS_SEARCH,
+  type SchoolsSearch,
+} from './schools-search-schema';
 
-const DEFAULT_FILTERS: ListSchoolsFilters = {
-  page: 1,
-  pageSize: 20,
-};
+const schoolsRouteApi = getRouteApi('/_app/admin/schools/');
 
 export function SchoolManagementComponent() {
+  const navigate = schoolsRouteApi.useNavigate();
+  const filters = schoolsRouteApi.useSearch();
   const queryClient = useQueryClient();
-  const [filters, setFilters] = useState<ListSchoolsFilters>(DEFAULT_FILTERS);
   const [editingSchool, setEditingSchool] =
     useState<AdminSchoolListItem | null>(null);
   const [creating, setCreating] = useState(false);
   const [pendingSchoolId, setPendingSchoolId] = useState<string | null>(null);
+
+  const updateSearch = (nextFilters: SchoolsSearch) => {
+    navigate({
+      to: '.',
+      search: toRouteSearch(nextFilters, DEFAULT_SCHOOLS_SEARCH),
+    });
+  };
 
   const schoolsQuery = useQuery({
     queryKey: [...schoolsAdminQueryKey, filters],
@@ -97,10 +107,16 @@ export function SchoolManagementComponent() {
       </div>
 
       <SchoolFiltersComponent
-        filters={filters}
-        onChange={setFilters}
-        onCreate={() => setCreating(true)}
+        committedFilters={filters}
+        onSearch={updateSearch}
+        onReset={() => updateSearch(DEFAULT_SCHOOLS_SEARCH)}
       />
+
+      <div className="flex justify-end">
+        <Button type="button" onClick={() => setCreating(true)}>
+          新建门派
+        </Button>
+      </div>
 
       {schoolsQuery.isError ? (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
@@ -110,6 +126,7 @@ export function SchoolManagementComponent() {
 
       <SchoolTableComponent
         items={schoolsQuery.data?.items ?? []}
+        isLoading={schoolsQuery.isFetching}
         pendingSchoolId={pendingSchoolId}
         onEdit={setEditingSchool}
         onDelete={(school) => {
@@ -132,9 +149,7 @@ export function SchoolManagementComponent() {
             variant="outline"
             size="sm"
             disabled={filters.page <= 1 || schoolsQuery.isFetching}
-            onClick={() =>
-              setFilters((current) => ({ ...current, page: current.page - 1 }))
-            }
+            onClick={() => updateSearch({ ...filters, page: filters.page - 1 })}
           >
             上一页
           </Button>
@@ -143,9 +158,7 @@ export function SchoolManagementComponent() {
             variant="outline"
             size="sm"
             disabled={filters.page >= totalPages || schoolsQuery.isFetching}
-            onClick={() =>
-              setFilters((current) => ({ ...current, page: current.page + 1 }))
-            }
+            onClick={() => updateSearch({ ...filters, page: filters.page + 1 })}
           >
             下一页
           </Button>
