@@ -73,6 +73,21 @@ export type UpdateSchoolBody = z.infer<typeof updateSchoolBodySchema>;
 
 export const updateSchoolResponseSchema = adminSchoolListItemSchema;
 
+export const schoolOptionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export type SchoolOption = z.infer<typeof schoolOptionSchema>;
+
+export const listSchoolOptionsResponseSchema = z.object({
+  items: z.array(schoolOptionSchema),
+});
+
+export type ListSchoolOptionsResponse = z.infer<
+  typeof listSchoolOptionsResponseSchema
+>;
+
 export const successResponseSchema = z.object({
   success: z.literal(true),
 });

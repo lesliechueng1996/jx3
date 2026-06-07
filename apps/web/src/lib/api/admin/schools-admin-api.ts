@@ -58,11 +58,28 @@ const buildSchoolsQuery = (filters: ListSchoolsFilters): string =>
     alias: filters.alias,
   });
 
+export const schoolOptionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export type SchoolOption = z.infer<typeof schoolOptionSchema>;
+
+export const listSchoolOptionsResponseSchema = z.object({
+  items: z.array(schoolOptionSchema),
+});
+
 export const schoolsAdminApi = {
   list(filters: ListSchoolsFilters) {
     return requestJson(
       `/api/v1/schools?${buildSchoolsQuery(filters)}`,
       listSchoolsResponseSchema,
+    );
+  },
+  listOptions() {
+    return requestJson(
+      '/api/v1/schools/options',
+      listSchoolOptionsResponseSchema,
     );
   },
   create(body: SchoolFormValues) {

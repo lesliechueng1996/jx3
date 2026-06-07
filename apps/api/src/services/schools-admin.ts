@@ -44,6 +44,20 @@ const buildWhereClause = (query: ListSchoolsQuery): SQL | undefined => {
   return and(...conditions);
 };
 
+export const listAllSchoolOptions = async (): Promise<{
+  items: { id: string; name: string }[];
+}> => {
+  const rows = await db
+    .select({
+      id: gameSchool.id,
+      name: gameSchool.name,
+    })
+    .from(gameSchool)
+    .orderBy(gameSchool.name);
+
+  return { items: rows };
+};
+
 export const listAdminSchools = async (
   query: ListSchoolsQuery,
 ): Promise<{

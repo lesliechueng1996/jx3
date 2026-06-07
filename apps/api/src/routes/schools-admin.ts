@@ -5,6 +5,7 @@ import { loggerPlugin } from '../plugins/logger';
 import { errorResponse } from '../schemas/common';
 import {
   createSchoolBodySchema,
+  listSchoolOptionsResponseSchema,
   listSchoolsQuerySchema,
   listSchoolsResponseSchema,
   successResponseSchema,
@@ -17,6 +18,7 @@ import {
   getAdminSchoolById,
   isSchoolReferenced,
   listAdminSchools,
+  listAllSchoolOptions,
   updateAdminSchool,
 } from '../services/schools-admin';
 
@@ -40,6 +42,20 @@ export const schoolsAdminRoute = new Elysia({ name: 'schools-admin-routes' })
       summary: 'List schools with pagination and filters',
       description:
         'Returns a paginated list of game schools. Requires super_admin role.',
+    },
+  })
+  .get('/api/v1/schools/options', async () => listAllSchoolOptions(), {
+    auth: SUPER_ADMIN_ROLE,
+    response: {
+      200: listSchoolOptionsResponseSchema,
+      401: t.Any(),
+      403: t.Any(),
+    },
+    detail: {
+      tags: ['Schools'],
+      summary: 'List all schools for dropdowns',
+      description:
+        'Returns all game schools as id/name options. Requires super_admin role.',
     },
   })
   .post(

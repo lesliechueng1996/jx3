@@ -34,6 +34,10 @@ const listAdminSchools = mock(async () => ({
   pageSize: 20,
 }));
 
+const listAllSchoolOptions = mock(async () => ({
+  items: [{ id: 's1', name: '天策' }],
+}));
+
 const getAdminSchoolById = mock(async (schoolId: string) =>
   schoolId === 's1' ? adminSchool : null,
 );
@@ -53,6 +57,7 @@ mock.module('../../src/lib/auth', () => ({
 
 mock.module('../../src/services/schools-admin', () => ({
   listAdminSchools,
+  listAllSchoolOptions,
   getAdminSchoolById,
   createAdminSchool,
   updateAdminSchool,
@@ -68,6 +73,7 @@ describe('schools admin routes', () => {
   beforeEach(() => {
     mockSession = null;
     listAdminSchools.mockClear();
+    listAllSchoolOptions.mockClear();
     getAdminSchoolById.mockClear();
     createAdminSchool.mockClear();
     updateAdminSchool.mockClear();
@@ -105,6 +111,18 @@ describe('schools admin routes', () => {
       total: 1,
     });
     expect(listAdminSchools).toHaveBeenCalled();
+  });
+
+  it('lists school options for super_admin', async () => {
+    mockSession = { user: sessionUser, session: { id: 's1' } };
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/schools/options'),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({
+      items: [{ id: 's1', name: '天策' }],
+    });
+    expect(listAllSchoolOptions).toHaveBeenCalled();
   });
 
   it('creates a school for super_admin', async () => {

@@ -20,6 +20,7 @@ import { Route as AppRaidsHistoryIndexRouteImport } from './routes/_app/raids/hi
 import { Route as AppRaidsCreateIndexRouteImport } from './routes/_app/raids/create/index'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminSchoolsIndexRouteImport } from './routes/_app/admin/schools/index'
+import { Route as AppAdminKungfuIndexRouteImport } from './routes/_app/admin/kungfu/index'
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
@@ -75,6 +76,11 @@ const AppAdminSchoolsIndexRoute = AppAdminSchoolsIndexRouteImport.update({
   path: '/admin/schools/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppAdminKungfuIndexRoute = AppAdminKungfuIndexRouteImport.update({
+  id: '/admin/kungfu/',
+  path: '/admin/kungfu/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/$': typeof ApiV1SplatRoute
   '/characters/': typeof AppCharactersIndexRoute
   '/profile/': typeof AppProfileIndexRoute
+  '/admin/kungfu/': typeof AppAdminKungfuIndexRoute
   '/admin/schools/': typeof AppAdminSchoolsIndexRoute
   '/admin/users/': typeof AppAdminUsersIndexRoute
   '/raids/create/': typeof AppRaidsCreateIndexRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/api/v1/$': typeof ApiV1SplatRoute
   '/characters': typeof AppCharactersIndexRoute
   '/profile': typeof AppProfileIndexRoute
+  '/admin/kungfu': typeof AppAdminKungfuIndexRoute
   '/admin/schools': typeof AppAdminSchoolsIndexRoute
   '/admin/users': typeof AppAdminUsersIndexRoute
   '/raids/create': typeof AppRaidsCreateIndexRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/api/v1/$': typeof ApiV1SplatRoute
   '/_app/characters/': typeof AppCharactersIndexRoute
   '/_app/profile/': typeof AppProfileIndexRoute
+  '/_app/admin/kungfu/': typeof AppAdminKungfuIndexRoute
   '/_app/admin/schools/': typeof AppAdminSchoolsIndexRoute
   '/_app/admin/users/': typeof AppAdminUsersIndexRoute
   '/_app/raids/create/': typeof AppRaidsCreateIndexRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/api/v1/$'
     | '/characters/'
     | '/profile/'
+    | '/admin/kungfu/'
     | '/admin/schools/'
     | '/admin/users/'
     | '/raids/create/'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/api/v1/$'
     | '/characters'
     | '/profile'
+    | '/admin/kungfu'
     | '/admin/schools'
     | '/admin/users'
     | '/raids/create'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/api/v1/$'
     | '/_app/characters/'
     | '/_app/profile/'
+    | '/_app/admin/kungfu/'
     | '/_app/admin/schools/'
     | '/_app/admin/users/'
     | '/_app/raids/create/'
@@ -240,6 +252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminSchoolsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/admin/kungfu/': {
+      id: '/_app/admin/kungfu/'
+      path: '/admin/kungfu'
+      fullPath: '/admin/kungfu/'
+      preLoaderRoute: typeof AppAdminKungfuIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
@@ -247,6 +266,7 @@ interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppCharactersIndexRoute: typeof AppCharactersIndexRoute
   AppProfileIndexRoute: typeof AppProfileIndexRoute
+  AppAdminKungfuIndexRoute: typeof AppAdminKungfuIndexRoute
   AppAdminSchoolsIndexRoute: typeof AppAdminSchoolsIndexRoute
   AppAdminUsersIndexRoute: typeof AppAdminUsersIndexRoute
   AppRaidsCreateIndexRoute: typeof AppRaidsCreateIndexRoute
@@ -257,6 +277,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppCharactersIndexRoute: AppCharactersIndexRoute,
   AppProfileIndexRoute: AppProfileIndexRoute,
+  AppAdminKungfuIndexRoute: AppAdminKungfuIndexRoute,
   AppAdminSchoolsIndexRoute: AppAdminSchoolsIndexRoute,
   AppAdminUsersIndexRoute: AppAdminUsersIndexRoute,
   AppRaidsCreateIndexRoute: AppRaidsCreateIndexRoute,

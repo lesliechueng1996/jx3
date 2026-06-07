@@ -9,6 +9,7 @@ coveragePathIgnorePatterns = [
   "src/plugins/logger.ts",
   "src/services/users-admin.ts",
   "src/services/schools-admin.ts",
+  "src/services/kungfu-admin.ts",
   "../../packages/auth/src/schema.ts",
   "../../packages/db/src/schema/**",
   "../../packages/logger/**",
