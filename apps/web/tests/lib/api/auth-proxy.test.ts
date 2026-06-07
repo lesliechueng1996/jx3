@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildUpstreamRequest, proxyAuth } from '../../src/lib/proxy';
+import {
+  buildUpstreamRequest,
+  proxyAuth,
+} from '../../../src/lib/api/auth-proxy';
 
 describe('buildUpstreamRequest', () => {
   it('forwards method, headers, and splat path to the API', () => {

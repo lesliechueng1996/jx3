@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { getCachedSession } from '#/lib/session-query';
+import { getCachedSession } from '#/lib/auth/session-query';
 import { AppLayoutComponent } from './-components/AppLayoutComponent';
 
 export const Route = createFileRoute('/_app')({
@@ -9,7 +9,7 @@ export const Route = createFileRoute('/_app')({
     if (!session) {
       throw redirect({
         to: '/login',
-        search: { redirect: location.pathname + location.search },
+        search: { redirect: location.href },
       });
     }
 

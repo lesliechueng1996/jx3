@@ -19,6 +19,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppRaidsHistoryIndexRouteImport } from './routes/_app/raids/history/index'
 import { Route as AppRaidsCreateIndexRouteImport } from './routes/_app/raids/create/index'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
+import { Route as AppAdminSchoolsIndexRouteImport } from './routes/_app/admin/schools/index'
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
@@ -69,6 +70,11 @@ const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
   path: '/admin/users/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppAdminSchoolsIndexRoute = AppAdminSchoolsIndexRouteImport.update({
+  id: '/admin/schools/',
+  path: '/admin/schools/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/$': typeof ApiV1SplatRoute
   '/characters/': typeof AppCharactersIndexRoute
   '/profile/': typeof AppProfileIndexRoute
+  '/admin/schools/': typeof AppAdminSchoolsIndexRoute
   '/admin/users/': typeof AppAdminUsersIndexRoute
   '/raids/create/': typeof AppRaidsCreateIndexRoute
   '/raids/history/': typeof AppRaidsHistoryIndexRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/api/v1/$': typeof ApiV1SplatRoute
   '/characters': typeof AppCharactersIndexRoute
   '/profile': typeof AppProfileIndexRoute
+  '/admin/schools': typeof AppAdminSchoolsIndexRoute
   '/admin/users': typeof AppAdminUsersIndexRoute
   '/raids/create': typeof AppRaidsCreateIndexRoute
   '/raids/history': typeof AppRaidsHistoryIndexRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/api/v1/$': typeof ApiV1SplatRoute
   '/_app/characters/': typeof AppCharactersIndexRoute
   '/_app/profile/': typeof AppProfileIndexRoute
+  '/_app/admin/schools/': typeof AppAdminSchoolsIndexRoute
   '/_app/admin/users/': typeof AppAdminUsersIndexRoute
   '/_app/raids/create/': typeof AppRaidsCreateIndexRoute
   '/_app/raids/history/': typeof AppRaidsHistoryIndexRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/api/v1/$'
     | '/characters/'
     | '/profile/'
+    | '/admin/schools/'
     | '/admin/users/'
     | '/raids/create/'
     | '/raids/history/'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/api/v1/$'
     | '/characters'
     | '/profile'
+    | '/admin/schools'
     | '/admin/users'
     | '/raids/create'
     | '/raids/history'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/api/v1/$'
     | '/_app/characters/'
     | '/_app/profile/'
+    | '/_app/admin/schools/'
     | '/_app/admin/users/'
     | '/_app/raids/create/'
     | '/_app/raids/history/'
@@ -221,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminUsersIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/admin/schools/': {
+      id: '/_app/admin/schools/'
+      path: '/admin/schools'
+      fullPath: '/admin/schools/'
+      preLoaderRoute: typeof AppAdminSchoolsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
@@ -228,6 +247,7 @@ interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppCharactersIndexRoute: typeof AppCharactersIndexRoute
   AppProfileIndexRoute: typeof AppProfileIndexRoute
+  AppAdminSchoolsIndexRoute: typeof AppAdminSchoolsIndexRoute
   AppAdminUsersIndexRoute: typeof AppAdminUsersIndexRoute
   AppRaidsCreateIndexRoute: typeof AppRaidsCreateIndexRoute
   AppRaidsHistoryIndexRoute: typeof AppRaidsHistoryIndexRoute
@@ -237,6 +257,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppCharactersIndexRoute: AppCharactersIndexRoute,
   AppProfileIndexRoute: AppProfileIndexRoute,
+  AppAdminSchoolsIndexRoute: AppAdminSchoolsIndexRoute,
   AppAdminUsersIndexRoute: AppAdminUsersIndexRoute,
   AppRaidsCreateIndexRoute: AppRaidsCreateIndexRoute,
   AppRaidsHistoryIndexRoute: AppRaidsHistoryIndexRoute,

@@ -5,6 +5,7 @@ import { auth } from './lib/auth';
 import { authMacro } from './middleware/auth-macro';
 import { loggerPlugin } from './plugins/logger';
 import { meRoute } from './routes/me';
+import { schoolsAdminRoute } from './routes/schools-admin';
 import { uploadsRoute } from './routes/uploads';
 import { usersAdminRoute } from './routes/users-admin';
 
@@ -27,6 +28,7 @@ export const createApp = () =>
           tags: [
             { name: 'User', description: 'User resources' },
             { name: 'Users', description: 'Super admin user management' },
+            { name: 'Schools', description: 'Super admin school management' },
             { name: 'Uploads', description: 'File upload resources' },
             {
               name: 'Auth',
@@ -40,6 +42,7 @@ export const createApp = () =>
     .use(authMacro)
     .use(meRoute)
     .use(uploadsRoute)
-    .use(usersAdminRoute);
+    .use(usersAdminRoute)
+    .use(schoolsAdminRoute);
 
 export type App = ReturnType<typeof createApp>;

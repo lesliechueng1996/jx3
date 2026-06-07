@@ -1,6 +1,6 @@
 import { hasRole, SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
 import { Link } from '@tanstack/react-router';
-import { ClipboardList, Shield, Swords, Users } from 'lucide-react';
+import { ClipboardList, Landmark, Shield, Swords, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const BASE_NAV_ITEMS = [
@@ -26,6 +26,11 @@ const ADMIN_NAV_ITEMS = [
     to: '/admin/users' as const,
     label: '用户管理',
     icon: Shield,
+  },
+  {
+    to: '/admin/schools' as const,
+    label: '门派管理',
+    icon: Landmark,
   },
 ] as const;
 

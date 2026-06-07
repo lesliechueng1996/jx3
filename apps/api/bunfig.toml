@@ -8,6 +8,7 @@ coveragePathIgnorePatterns = [
   "src/lib/supabase.ts",
   "src/plugins/logger.ts",
   "src/services/users-admin.ts",
+  "src/services/schools-admin.ts",
   "../../packages/auth/src/schema.ts",
   "../../packages/db/src/schema/**",
   "../../packages/logger/**",

@@ -2,16 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const getSessionFn = vi.fn();
 
-vi.mock('../../src/lib/get-session', () => ({
+vi.mock('../../../src/lib/auth/get-session', () => ({
   getSessionFn: () => getSessionFn(),
 }));
 
-import { queryClient } from '../../src/lib/query-client';
 import {
   clearCachedSession,
   getCachedSession,
   sessionQueryKey,
-} from '../../src/lib/session-query';
+} from '../../../src/lib/auth/session-query';
+import { queryClient } from '../../../src/lib/query/query-client';
 
 describe('getCachedSession', () => {
   beforeEach(() => {

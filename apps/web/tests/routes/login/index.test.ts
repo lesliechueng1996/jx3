@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const getCachedSession = vi.fn();
 
-vi.mock('../../../src/lib/session-query', () => ({
+vi.mock('../../../src/lib/auth/session-query', () => ({
   getCachedSession: () => getCachedSession(),
 }));
 

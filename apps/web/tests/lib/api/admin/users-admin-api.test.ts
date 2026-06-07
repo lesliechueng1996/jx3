@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { maskEmail } from '../../src/lib/mask-email';
+import { ApiRequestError } from '../../../../src/lib/api/request';
+import { maskEmail } from '../../../../src/lib/utils/mask-email';
 
 describe('maskEmail', () => {
   it('masks email addresses consistently', () => {
@@ -19,8 +20,8 @@ describe('usersAdminApi', () => {
       ),
     );
 
-    const { usersAdminApi, ApiRequestError } = await import(
-      '../../src/lib/users-admin-api'
+    const { usersAdminApi } = await import(
+      '../../../../src/lib/api/admin/users-admin-api'
     );
 
     await expect(usersAdminApi.list({ page: 1, pageSize: 20 })).rejects.toThrow(

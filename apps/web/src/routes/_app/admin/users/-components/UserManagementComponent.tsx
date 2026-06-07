@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import type { AdminUserListItem } from '#/lib/users-admin-api';
+import type { AdminUserListItem } from '#/lib/api/admin/users-admin-api';
 import {
-  ApiRequestError,
   type ListUsersFilters,
   usersAdminApi,
   usersAdminQueryKey,
-} from '#/lib/users-admin-api';
+} from '#/lib/api/admin/users-admin-api';
+import { ApiRequestError } from '#/lib/api/request';
 import { Button } from '@/components/ui/button';
 import { BanUserDialogComponent } from './BanUserDialogComponent';
 import { EditUserDialogComponent } from './EditUserDialogComponent';

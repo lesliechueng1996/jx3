@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { safeRedirectPath } from '#/lib/auth-guard';
-import { getCachedSession } from '#/lib/session-query';
+import { safeRedirectPath } from '#/lib/auth/auth-guard';
+import { getCachedSession } from '#/lib/auth/session-query';
 import { LoginComponent } from './-components/LoginComponent';
 
 export const Route = createFileRoute('/login/')({

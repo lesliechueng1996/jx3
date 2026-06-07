@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { proxyApiV1 } from '#/lib/api-proxy';
+import { proxyApiV1 } from '#/lib/api/v1-proxy';
 
 const handle = ({
   request,

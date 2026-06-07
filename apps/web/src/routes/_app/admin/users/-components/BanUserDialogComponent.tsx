@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { AdminUserListItem } from '#/lib/users-admin-api';
+import type { AdminUserListItem } from '#/lib/api/admin/users-admin-api';
 import { cn } from '#/lib/utils';
 import { Button } from '@/components/ui/button';
 import {

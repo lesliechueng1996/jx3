@@ -1,12 +1,13 @@
 const API_URL = process.env.API_URL ?? 'http://localhost:3001';
 
-export function buildApiV1UpstreamRequest(
+export function buildUpstreamProxyRequest(
   request: Request,
   splat: string,
+  pathPrefix: string,
   apiUrl: string = API_URL,
 ): Request {
   const incoming = new URL(request.url);
-  const target = new URL(`/api/v1/${splat}`, apiUrl);
+  const target = new URL(`${pathPrefix}/${splat}`, apiUrl);
   target.search = incoming.search;
 
   return new Request(target, {
@@ -18,10 +19,11 @@ export function buildApiV1UpstreamRequest(
   } as RequestInit);
 }
 
-export async function proxyApiV1(
+export async function proxyUpstream(
   request: Request,
   splat: string,
+  pathPrefix: string,
 ): Promise<Response> {
-  const upstream = buildApiV1UpstreamRequest(request, splat);
+  const upstream = buildUpstreamProxyRequest(request, splat, pathPrefix);
   return fetch(upstream);
 }

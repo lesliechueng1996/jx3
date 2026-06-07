@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { proxyAuth } from '#/lib/proxy';
+import { proxyAuth } from '#/lib/api/auth-proxy';
 
 const handle = ({
   request,

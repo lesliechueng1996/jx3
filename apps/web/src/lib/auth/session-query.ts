@@ -1,6 +1,6 @@
-import type { Session } from '#/lib/auth-client';
-import { getSessionFn } from '#/lib/get-session';
-import { queryClient } from '#/lib/query-client';
+import type { Session } from '#/lib/auth/auth-client';
+import { getSessionFn } from '#/lib/auth/get-session';
+import { queryClient } from '#/lib/query/query-client';
 
 export const sessionQueryKey = ['session'] as const;
 

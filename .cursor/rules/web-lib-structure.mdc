@@ -1,0 +1,98 @@
+---
+description: apps/web src/lib folder layout, module placement, and shared API extraction rules
+globs: apps/web/src/lib/**
+alwaysApply: false
+---
+
+# Web `src/lib` Structure
+
+Organize `apps/web/src/lib/` by **domain**, not as a flat list of files. Mirror the same folder layout under `apps/web/tests/lib/`.
+
+## Folder Layout
+
+```
+src/lib/
+  api/                     # HTTP client layer and server-side proxy helpers
+    request.ts             # Shared fetch + JSON parsing + ApiRequestError
+    build-query.ts         # Shared URLSearchParams builder
+    upstream-proxy.ts      # Shared upstream Request builder for proxies
+    auth-proxy.ts          # /api/auth/* proxy (TanStack Start route)
+    v1-proxy.ts            # /api/v1/* proxy (TanStack Start route)
+    admin/                 # Admin CRUD API modules (one file per resource)
+      schools-admin-api.ts
+      users-admin-api.ts
+  auth/                    # Authentication client, guards, session helpers
+    auth-client.ts
+    auth-guard.ts
+    get-session.ts
+    session-query.ts
+  query/                   # TanStack Query singleton and shared query config
+    query-client.ts
+  utils/                   # Pure, framework-agnostic helpers
+    index.ts               # cn() — shadcn alias @/lib/utils resolves here
+    avatar-color.ts
+    mask-email.ts
+  logging/                 # Isomorphic logger wrapper
+    logger.ts
+```
+
+## Module Responsibilities
+
+| Folder | Purpose | Examples |
+|--------|---------|----------|
+| `api/` | Typed HTTP calls to backend via `/api/v1/*`, plus proxy wiring for TanStack Start API routes | `requestJson`, `schoolsAdminApi`, `proxyApiV1` |
+| `api/admin/` | Admin-only resource APIs: zod schemas, filter types, query keys, and CRUD methods for one domain | `users-admin-api.ts` |
+| `auth/` | Better Auth client re-export, session resolution, route guards, cached session queries | `getCachedSession`, `safeRedirectPath` |
+| `query/` | App-wide React Query client instance | `queryClient` |
+| `utils/` | Stateless helpers with no API or auth dependency | `cn`, `maskEmail`, `avatarInitial` |
+| `logging/` | Server/client logger factory | `createLogger`, `logger` |
+
+## Where to Put New Code
+
+- **New admin resource API** → `api/admin/<resource>-admin-api.ts`
+- **Shared fetch/error/query-string logic** → `api/request.ts` or `api/build-query.ts` (never duplicated in admin modules)
+- **New auth/session helper** → `auth/`
+- **New generic utility** → `utils/<name>.ts`; export `cn` only from `utils/index.ts`
+- **New proxy target** → thin wrapper in `api/` calling `upstream-proxy.ts`
+- Do **not** add new top-level files directly under `src/lib/`.
+
+## Shared API Extraction Rules
+
+When two or more `api/` modules contain the same logic, extract it upward — do not copy-paste.
+
+### Must live in `api/request.ts`
+
+- `ApiRequestError`
+- `parseJson` / `requestJson` (credentials, JSON headers, error response parsing)
+- Any generic response envelope parsing used by multiple API modules
+
+### Must live in `api/build-query.ts`
+
+- `buildQueryString` for paginated list filters and optional query params
+- Admin list modules pass their filter object; they do not reimplement `URLSearchParams` loops
+
+### Must live in `api/upstream-proxy.ts`
+
+- `buildUpstreamProxyRequest` and `proxyUpstream`
+- `auth-proxy.ts` and `v1-proxy.ts` only supply the path prefix (`/api/auth`, `/api/v1`)
+
+### Stays in `api/admin/<resource>-admin-api.ts`
+
+- Resource-specific zod schemas and inferred types
+- Filter/form value types
+- Query key constants (e.g. `usersAdminQueryKey`)
+- The `*AdminApi` object with endpoint paths and HTTP verbs
+- Domain-only helpers (e.g. `parseAliasInput` for schools)
+
+### Extraction checklist (before adding a second admin API)
+
+1. Does it call `fetch` with JSON + credentials? → use `requestJson` from `api/request.ts`
+2. Does it build `?page=&pageSize=` query strings? → use `buildQueryString` from `api/build-query.ts`
+3. Does it define `ApiRequestError` or error schema again? → import from `api/request.ts` instead
+4. Does it proxy to the backend API server? → extend `upstream-proxy.ts`, do not duplicate `Request` construction
+
+## Imports
+
+- Cross-cutting imports use `#/lib/<folder>/...` (e.g. `#/lib/api/admin/schools-admin-api`)
+- shadcn `cn` stays at `@/lib/utils` (resolves to `utils/index.ts`)
+- Admin API modules import shared helpers from `#/lib/api/request` and `#/lib/api/build-query` — never from sibling admin files

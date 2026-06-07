@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { Link, useRouter } from '@tanstack/react-router';
 import { LogOut, User } from 'lucide-react';
-import type { Session } from '#/lib/auth-client';
-import { authClient } from '#/lib/auth-client';
-import { avatarBackgroundColor, avatarInitial } from '#/lib/avatar-color';
-import { invalidateCachedSession } from '#/lib/session-query';
+import type { Session } from '#/lib/auth/auth-client';
+import { authClient } from '#/lib/auth/auth-client';
+import { invalidateCachedSession } from '#/lib/auth/session-query';
+import { avatarBackgroundColor, avatarInitial } from '#/lib/utils/avatar-color';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 

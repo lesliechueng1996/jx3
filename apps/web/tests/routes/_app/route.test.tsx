@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const getCachedSession = vi.fn();
 
-vi.mock('../../../src/lib/session-query', () => ({
+vi.mock('../../../src/lib/auth/session-query', () => ({
   getCachedSession: () => getCachedSession(),
 }));
 
@@ -19,7 +19,7 @@ describe('app layout route beforeLoad', () => {
     getCachedSession.mockResolvedValue(session);
 
     const result = await Route.options.beforeLoad?.({
-      location: { pathname: '/characters', search: '' },
+      location: { href: '/characters' },
     } as never);
 
     expect(result).toEqual({ session });
@@ -30,7 +30,7 @@ describe('app layout route beforeLoad', () => {
 
     await expect(
       Route.options.beforeLoad?.({
-        location: { pathname: '/characters', search: '?tab=1' },
+        location: { href: '/characters?tab=1' },
       } as never),
     ).rejects.toEqual(
       redirect({

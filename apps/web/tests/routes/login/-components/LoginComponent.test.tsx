@@ -30,7 +30,7 @@ vi.mock('sonner', () => ({
   },
 }));
 
-vi.mock('../../../../src/lib/auth-client', () => ({
+vi.mock('../../../../src/lib/auth/auth-client', () => ({
   authClient: {
     signIn: {
       email: (...args: unknown[]) => signInEmail(...args),

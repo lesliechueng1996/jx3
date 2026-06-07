@@ -6,7 +6,7 @@ import {
   AUTH_PROVIDERS,
   type AuthProvider,
 } from '@jx3/auth/roles';
-import type { ListUsersFilters } from '#/lib/users-admin-api';
+import type { ListUsersFilters } from '#/lib/api/admin/users-admin-api';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {

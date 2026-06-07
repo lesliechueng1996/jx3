@@ -3,7 +3,7 @@ import {
   type AppRole,
   AUTH_PROVIDER_LABELS,
 } from '@jx3/auth/roles';
-import type { AdminUserListItem } from '#/lib/users-admin-api';
+import type { AdminUserListItem } from '#/lib/api/admin/users-admin-api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';

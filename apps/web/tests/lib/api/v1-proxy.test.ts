@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildApiV1UpstreamRequest } from '../../src/lib/api-proxy';
+import { buildApiV1UpstreamRequest } from '../../../src/lib/api/v1-proxy';
 
 describe('buildApiV1UpstreamRequest', () => {
   it('forwards method, body, and query to the API server', () => {

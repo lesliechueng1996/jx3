@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { authClient } from '#/lib/auth-client';
-import { safeRedirectPath } from '#/lib/auth-guard';
-import { invalidateCachedSession } from '#/lib/session-query';
+import { authClient } from '#/lib/auth/auth-client';
+import { safeRedirectPath } from '#/lib/auth/auth-guard';
+import { invalidateCachedSession } from '#/lib/auth/session-query';
 import { AuthCredentialsFormComponent } from './AuthCredentialsFormComponent';
 import type { AuthCredentials } from './auth-credentials-schema';
 

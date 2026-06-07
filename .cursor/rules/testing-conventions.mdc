@@ -9,7 +9,7 @@ alwaysApply: false
 ## Layout
 
 - Place tests in a package-level `tests/` directory, **not** beside source files in `src/`.
-- Mirror the `src/` directory structure inside `tests/`.
+- Mirror the `src/` directory structure inside `tests/` (e.g. `src/lib/api/admin/` → `tests/lib/api/admin/`).
 
 ```
 apps/api/

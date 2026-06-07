@@ -1,5 +1,5 @@
 import { Outlet } from '@tanstack/react-router';
-import type { Session } from '#/lib/auth-client';
+import type { Session } from '#/lib/auth/auth-client';
 import { AppSidebarComponent } from './AppSidebarComponent';
 import { UserMenuComponent } from './UserMenuComponent';
 

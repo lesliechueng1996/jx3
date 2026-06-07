@@ -1,5 +1,7 @@
 import type { APP_ROLES, AuthProvider } from '@jx3/auth/roles';
 import { z } from 'zod';
+import { buildQueryString } from '#/lib/api/build-query';
+import { requestJson } from '#/lib/api/request';
 
 export const adminUserListItemSchema = z.object({
   id: z.string(),
@@ -35,93 +37,16 @@ export type ListUsersFilters = {
   provider?: AuthProvider;
 };
 
-export class ApiRequestError extends Error {
-  constructor(
-    readonly status: number,
-    readonly code: string,
-    message: string,
-  ) {
-    super(message);
-    this.name = 'ApiRequestError';
-  }
-}
-
-const errorResponseSchema = z.object({
-  error: z.object({
-    code: z.string(),
-    message: z.string(),
-  }),
-});
-
-const parseJson = async <T>(
-  response: Response,
-  schema: z.ZodType<T>,
-): Promise<T> => {
-  const payload: unknown = await response.json();
-  return schema.parse(payload);
-};
-
-const requestJson = async <T>(
-  path: string,
-  schema: z.ZodType<T>,
-  init?: RequestInit,
-): Promise<T> => {
-  const response = await fetch(path, {
-    credentials: 'include',
-    ...init,
-    headers: {
-      'content-type': 'application/json',
-      ...init?.headers,
-    },
+const buildUsersQuery = (filters: ListUsersFilters): string =>
+  buildQueryString({
+    page: filters.page,
+    pageSize: filters.pageSize,
+    name: filters.name,
+    email: filters.email,
+    role: filters.role,
+    banned: filters.banned,
+    provider: filters.provider,
   });
-
-  if (!response.ok) {
-    try {
-      const error = await parseJson(response, errorResponseSchema);
-      throw new ApiRequestError(
-        response.status,
-        error.error.code,
-        error.error.message,
-      );
-    } catch (error) {
-      if (error instanceof ApiRequestError) {
-        throw error;
-      }
-      throw new ApiRequestError(
-        response.status,
-        'REQUEST_FAILED',
-        '请求失败',
-      );
-    }
-  }
-
-  return parseJson(response, schema);
-};
-
-const buildUsersQuery = (filters: ListUsersFilters): string => {
-  const params = new URLSearchParams({
-    page: String(filters.page),
-    pageSize: String(filters.pageSize),
-  });
-
-  if (filters.name) {
-    params.set('name', filters.name);
-  }
-  if (filters.email) {
-    params.set('email', filters.email);
-  }
-  if (filters.role) {
-    params.set('role', filters.role);
-  }
-  if (filters.banned !== undefined) {
-    params.set('banned', String(filters.banned));
-  }
-  if (filters.provider) {
-    params.set('provider', filters.provider);
-  }
-
-  return params.toString();
-};
 
 export const usersAdminApi = {
   list(filters: ListUsersFilters) {

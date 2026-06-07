@@ -1,6 +1,6 @@
 import { APP_ROLE_LABELS, APP_ROLES, type AppRole } from '@jx3/auth/roles';
 import { useEffect, useState } from 'react';
-import type { AdminUserListItem } from '#/lib/users-admin-api';
+import type { AdminUserListItem } from '#/lib/api/admin/users-admin-api';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

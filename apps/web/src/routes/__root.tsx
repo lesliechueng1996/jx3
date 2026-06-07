@@ -3,7 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { NotFoundComponent } from '#/components/NotFoundComponent';
-import { queryClient } from '#/lib/query-client';
+import { queryClient } from '#/lib/query/query-client';
 import { Toaster } from '@/components/ui/sonner';
 import appCss from '../styles.css?url';
 

@@ -22,7 +22,7 @@ alwaysApply: false
 ## Styling
 
 - Use Tailwind CSS only. No separate CSS modules, styled-components, or inline styles for layout/theming.
-- Use `cn()` from `#/lib/utils` for conditional class names.
+- Use `cn()` from `@/lib/utils` (or `#/lib/utils`) for conditional class names.
 
 ## Naming
 
@@ -83,7 +83,8 @@ Do not mix API logic and form rendering in a single component.
 ## Data Fetching (TanStack Query)
 
 - Use `@tanstack/react-query` for all client-side API calls (`useQuery`, `useMutation`, `useQueryClient`).
-- Colocate query keys and fetch functions in kebab-case modules under `src/lib/` or next to the consuming `-components/`.
+- Colocate query keys and fetch functions in kebab-case modules under `src/lib/` (see `web-lib-structure.mdc` for folder layout) or next to the consuming `-components/`.
+- Admin resource APIs live in `src/lib/api/admin/`; shared fetch helpers live in `src/lib/api/request.ts` — do not duplicate `requestJson` or `ApiRequestError` per resource.
 - Invalidate or update cache after mutations instead of manual refetch scattered in components.
 - Use route `loader`s for SSR-critical initial data; use React Query for interactive refetching and mutations.
 
@@ -105,7 +106,12 @@ Do not mix API logic and form rendering in a single component.
 src/
   components/ui/           # shadcn / design-system primitives
   components/              # app-wide reusable base components (rare)
-  lib/                     # kebab-case utilities, query client, API helpers
+  lib/                     # domain subfolders — see web-lib-structure.mdc
+    api/                   # request helpers, proxies, admin resource APIs
+    auth/                  # client, guards, session
+    query/                 # query client
+    utils/                 # cn, formatters
+    logging/               # isomorphic logger
   routes/
     __root.tsx
     index.tsx              # / (root — no directory segment in URL)
