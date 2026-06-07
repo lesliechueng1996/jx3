@@ -23,6 +23,8 @@ export const gameKungfu = pgTable('game_kungfu', {
   kungfuType: kungfuTypeEnum('kungfu_type').notNull(),
   attackType: attackTypeEnum('attack_type'),
   attackMethod: attackMethodEnum('attack_method'),
+  // 阵眼名称
+  formationName: t.text('formation_name'),
   // 阵眼效果
   formationEffect: t.text('formation_effect'),
   isPveExternalRecommended: t

@@ -54,6 +54,7 @@ export const adminKungfuListItemSchema = z.object({
   kungfuType: kungfuTypeSchema,
   attackType: attackTypeSchema.nullable(),
   attackMethod: attackMethodSchema.nullable(),
+  formationName: z.string().nullable(),
   formationEffect: z.string().nullable(),
   isPveExternalRecommended: z.boolean(),
   isPveInternalRecommended: z.boolean(),
@@ -93,6 +94,7 @@ export type KungfuFormValues = {
   kungfuType: KungfuType;
   attackType: AttackType | null;
   attackMethod: AttackMethod | null;
+  formationName: string | null;
   formationEffect: string | null;
   isPveExternalRecommended: boolean;
   isPveInternalRecommended: boolean;

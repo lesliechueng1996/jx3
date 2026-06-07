@@ -49,6 +49,7 @@ export const adminKungfuListItemSchema = z.object({
   kungfuType: kungfuTypeSchema,
   attackType: attackTypeSchema.nullable(),
   attackMethod: attackMethodSchema.nullable(),
+  formationName: z.string().nullable(),
   formationEffect: z.string().nullable(),
   isPveExternalRecommended: z.boolean(),
   isPveInternalRecommended: z.boolean(),
@@ -71,6 +72,13 @@ export const listKungfuResponseSchema = z.object({
 export type ListKungfuResponse = z.infer<typeof listKungfuResponseSchema>;
 
 const iconSchema = z
+  .string()
+  .trim()
+  .optional()
+  .nullable()
+  .transform((value) => (value ? value : null));
+
+const formationNameSchema = z
   .string()
   .trim()
   .optional()
@@ -100,6 +108,7 @@ export const createKungfuBodySchema = z.object({
   kungfuType: kungfuTypeSchema,
   attackType: nullableAttackTypeSchema,
   attackMethod: nullableAttackMethodSchema,
+  formationName: formationNameSchema,
   formationEffect: formationEffectSchema,
   isPveExternalRecommended: z.boolean().default(false),
   isPveInternalRecommended: z.boolean().default(false),
@@ -117,6 +126,7 @@ export const updateKungfuBodySchema = z
     kungfuType: kungfuTypeSchema.optional(),
     attackType: nullableAttackTypeSchema,
     attackMethod: nullableAttackMethodSchema,
+    formationName: formationNameSchema,
     formationEffect: formationEffectSchema,
     isPveExternalRecommended: z.boolean().optional(),
     isPveInternalRecommended: z.boolean().optional(),
@@ -131,6 +141,7 @@ export const updateKungfuBodySchema = z
       value.kungfuType !== undefined ||
       value.attackType !== undefined ||
       value.attackMethod !== undefined ||
+      value.formationName !== undefined ||
       value.formationEffect !== undefined ||
       value.isPveExternalRecommended !== undefined ||
       value.isPveInternalRecommended !== undefined ||

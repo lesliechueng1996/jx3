@@ -20,6 +20,7 @@ const toListItem = (row: KungfuRow): AdminKungfuListItem => ({
   kungfuType: row.kungfuType,
   attackType: row.attackType ?? null,
   attackMethod: row.attackMethod ?? null,
+  formationName: row.formationName ?? null,
   formationEffect: row.formationEffect ?? null,
   isPveExternalRecommended: row.isPveExternalRecommended,
   isPveInternalRecommended: row.isPveInternalRecommended,
@@ -87,6 +88,7 @@ const selectKungfuWithSchool = () =>
       kungfuType: gameKungfu.kungfuType,
       attackType: gameKungfu.attackType,
       attackMethod: gameKungfu.attackMethod,
+      formationName: gameKungfu.formationName,
       formationEffect: gameKungfu.formationEffect,
       isPveExternalRecommended: gameKungfu.isPveExternalRecommended,
       isPveInternalRecommended: gameKungfu.isPveInternalRecommended,
@@ -153,6 +155,7 @@ export const createAdminKungfu = async (
       kungfuType: body.kungfuType,
       attackType: body.attackType,
       attackMethod: body.attackMethod,
+      formationName: body.formationName,
       formationEffect: body.formationEffect,
       isPveExternalRecommended: body.isPveExternalRecommended,
       isPveInternalRecommended: body.isPveInternalRecommended,
@@ -188,6 +191,9 @@ export const updateAdminKungfu = async (
       ...(body.attackType !== undefined ? { attackType: body.attackType } : {}),
       ...(body.attackMethod !== undefined
         ? { attackMethod: body.attackMethod }
+        : {}),
+      ...(body.formationName !== undefined
+        ? { formationName: body.formationName }
         : {}),
       ...(body.formationEffect !== undefined
         ? { formationEffect: body.formationEffect }

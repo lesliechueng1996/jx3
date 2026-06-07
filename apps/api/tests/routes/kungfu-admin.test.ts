@@ -10,6 +10,7 @@ const adminKungfu = {
   kungfuType: 'attack' as const,
   attackType: 'external' as const,
   attackMethod: 'melee' as const,
+  formationName: null,
   formationEffect: null,
   isPveExternalRecommended: true,
   isPveInternalRecommended: false,

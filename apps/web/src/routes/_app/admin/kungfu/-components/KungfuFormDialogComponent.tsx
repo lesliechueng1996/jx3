@@ -59,6 +59,7 @@ const emptyForm = (): KungfuFormValues => ({
   kungfuType: 'attack',
   attackType: null,
   attackMethod: null,
+  formationName: null,
   formationEffect: null,
   isPveExternalRecommended: false,
   isPveInternalRecommended: false,
@@ -95,6 +96,8 @@ export function KungfuFormDialogComponent({
         kungfuType: kungfu.kungfuType,
         attackType: kungfu.attackType,
         attackMethod: kungfu.attackMethod,
+        formationName: kungfu.formationName,
+        formationEffect: kungfu.formationEffect,
         isPveExternalRecommended: kungfu.isPveExternalRecommended,
         isPveInternalRecommended: kungfu.isPveInternalRecommended,
         isUnlimited: kungfu.isUnlimited,
@@ -122,6 +125,9 @@ export function KungfuFormDialogComponent({
       ...form,
       name: form.name.trim(),
       icon: form.icon?.trim() ? form.icon.trim() : null,
+      formationName: form.formationName?.trim()
+        ? form.formationName.trim()
+        : null,
       formationEffect: serializeFormationEffectInput(formationEffectInputs),
       alias: parseAliasInput(aliasInput),
     });
@@ -265,6 +271,20 @@ export function KungfuFormDialogComponent({
                 setForm((current) => ({
                   ...current,
                   icon: event.target.value || null,
+                }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="kungfu-formation-name">阵眼名称</Label>
+            <Input
+              id="kungfu-formation-name"
+              value={form.formationName ?? ''}
+              placeholder="可选，填写阵眼名称"
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  formationName: event.target.value || null,
                 }))
               }
             />

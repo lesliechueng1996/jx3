@@ -55,6 +55,7 @@ export function KungfuTableComponent({
             <TableHead>心法类型</TableHead>
             <TableHead>攻击类型</TableHead>
             <TableHead>攻击方式</TableHead>
+            <TableHead>阵眼名称</TableHead>
             <TableHead>外功阵眼</TableHead>
             <TableHead>内功阵眼</TableHead>
             <TableHead>无界</TableHead>
@@ -66,7 +67,7 @@ export function KungfuTableComponent({
           {!isLoading && items.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={11}
+                colSpan={12}
                 className="py-10 text-center text-muted-foreground"
               >
                 暂无心法数据
@@ -91,6 +92,11 @@ export function KungfuTableComponent({
                 <TableCell>{formatKungfuType(kungfu.kungfuType)}</TableCell>
                 <TableCell>{formatAttackType(kungfu.attackType)}</TableCell>
                 <TableCell>{formatAttackMethod(kungfu.attackMethod)}</TableCell>
+                <TableCell>
+                  {kungfu.formationName ?? (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
                 <TableCell>
                   {formatBooleanLabel(kungfu.isPveExternalRecommended)}
                 </TableCell>

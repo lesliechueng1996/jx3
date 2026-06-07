@@ -1,0 +1,1 @@
+ALTER TABLE "game_kungfu" ADD COLUMN "formation_name" text;
