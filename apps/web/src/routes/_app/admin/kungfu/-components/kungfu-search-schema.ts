@@ -19,9 +19,17 @@ const optionalTrimmedString = z
   });
 
 const optionalBoolean = z
-  .enum(['true', 'false'])
+  .union([z.boolean(), z.literal('true'), z.literal('false')])
   .optional()
-  .transform((value) => (value === undefined ? undefined : value === 'true'));
+  .transform((value) => {
+    if (value === true || value === 'true') {
+      return true;
+    }
+    if (value === false || value === 'false') {
+      return false;
+    }
+    return undefined;
+  });
 
 export const kungfuSearchSchema = z.object({
   page: z.coerce.number().int().min(1).catch(DEFAULT_PAGE),
