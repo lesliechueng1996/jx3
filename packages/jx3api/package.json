@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./jx3api": "./src/providers/jx3api/index.ts",
     "./jx3box": "./src/providers/jx3box/index.ts"
   },
   "scripts": {
