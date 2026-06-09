@@ -1,0 +1,45 @@
+---
+description: Third-party JX3 API client conventions in packages/jx3api
+globs: packages/jx3api/**
+alwaysApply: false
+---
+
+# @jx3/jx3api Conventions
+
+## Purpose
+
+`@jx3/jx3api` wraps external JX3 game data APIs behind typed, testable methods.
+Apps (`api`, `web` server functions) import from here — never call upstream URLs directly.
+
+## Layout
+
+```
+packages/jx3api/src/
+  client.ts       — shared fetchJson helper
+  errors.ts       — Jx3ApiError
+  index.ts        — public barrel exports
+  providers/
+    <provider>/   — one folder per upstream (e.g. jx3box)
+      config.ts   — base URLs, constants
+      types/      — raw API types + normalized domain types + mappers
+      <endpoint>.ts — one exported function per upstream endpoint
+```
+
+## Adding an endpoint
+
+1. Add raw + normalized types under `providers/<provider>/types/`.
+2. Map snake_case upstream fields to camelCase domain types in a `map*` function.
+3. Implement the method in `providers/<provider>/<endpoint>.ts` using `fetchJson`.
+4. Re-export from `providers/<provider>/index.ts` and `src/index.ts`.
+5. Add tests under `tests/providers/<provider>/` with mocked `fetch`.
+
+## HTTP & errors
+
+- Use `fetchJson` from `client.ts` for all outbound requests.
+- Throw `Jx3ApiError` with a stable `code` (`NETWORK_ERROR`, `HTTP_ERROR`, `PARSE_ERROR`).
+- Accept optional `logger` from `@jx3/logger` in public methods; do not `console.log`.
+
+## Exports
+
+- Default entry `@jx3/jx3api` — stable public API for apps.
+- Subpath `@jx3/jx3api/<provider>` — provider-scoped imports when needed.

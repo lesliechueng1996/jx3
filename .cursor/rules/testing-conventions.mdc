@@ -39,7 +39,7 @@ import { meRoute } from '../../src/routes/me';
 
 | Package | Runner | Command | Coverage |
 |---------|--------|---------|----------|
-| `apps/api`, `packages/auth`, `packages/logger` | Bun | `bun test` | `bun run test:cov` |
+| `apps/api`, `packages/auth`, `packages/logger`, `packages/jx3api` | Bun | `bun test` | `bun run test:cov` |
 | `apps/web` | Vitest | `vitest run` | `vitest run --coverage` |
 
 Run all suites from repo root: `bun run test`. Coverage: `bun run test:cov`.

@@ -16,6 +16,7 @@ JX3 is a game information management system built as a full-stack web applicatio
 - **Database** (`packages/db`): PostgreSQL + Drizzle ORM + postgres.js driver
 - **Auth** (`packages/auth`): Better Auth (factory pattern, schema exported for db)
 - **Logging** (`packages/logger`): Pino-based structured logging with Elysia plugin
+- **JX3 APIs** (`packages/jx3api`): Typed clients for third-party JX3 game data APIs
 - **Linting/Formatting**: Biome (root config inherited by sub-projects)
 
 ## Commands
@@ -49,7 +50,26 @@ packages/
   db/        — Drizzle ORM schema, db instance, migrations
   auth/      — Better Auth config (createAuth factory), core schema, auth client
   logger/    — Pino logger (createLogger)
+  jx3api/    — Third-party JX3 API clients (jx3box spider, etc.)
 ```
+
+## @jx3/jx3api
+
+Third-party JX3 game API integration. Apps must import upstream calls from here,
+not fetch external URLs directly.
+
+```
+packages/jx3api/src/
+  client.ts              — fetchJson helper
+  errors.ts              — Jx3ApiError
+  providers/<provider>/  — per-upstream folder (config, types, endpoint modules)
+```
+
+| Provider | Method | Upstream |
+|----------|--------|----------|
+| jx3box | `getServerStates()` | `GET spider2.jx3box.com/api/spider/server/server_state` |
+
+See `packages/jx3api/README.md` and `.cursor/rules/jx3api-conventions.mdc` for adding endpoints.
 
 ## Logging
 
@@ -87,4 +107,4 @@ Use Conventional Commits:
 
 Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`
 
-Scope uses package name: `web`, `api`, `db`, `auth`, `logger`. Use `root` or omit for root-level changes.
+Scope uses package name: `web`, `api`, `db`, `auth`, `logger`, `jx3api`. Use `root` or omit for root-level changes.

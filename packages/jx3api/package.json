@@ -1,0 +1,23 @@
+{
+  "name": "@jx3/jx3api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./jx3box": "./src/providers/jx3box/index.ts"
+  },
+  "scripts": {
+    "check": "biome check .",
+    "fix": "biome check --write .",
+    "test": "bun test",
+    "test:cov": "bun test --coverage --coverage-reporter=text --coverage-reporter=lcov"
+  },
+  "dependencies": {
+    "@jx3/logger": "workspace:*"
+  },
+  "devDependencies": {
+    "bun-types": "^1.3.14",
+    "typescript": "^5.8.0"
+  }
+}
