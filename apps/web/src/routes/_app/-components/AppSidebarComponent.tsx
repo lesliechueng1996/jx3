@@ -4,6 +4,7 @@ import {
   BookOpen,
   ClipboardList,
   Landmark,
+  Server,
   Shield,
   Swords,
   Users,
@@ -43,6 +44,11 @@ const ADMIN_NAV_ITEMS = [
     to: '/admin/kungfu' as const,
     label: '心法管理',
     icon: BookOpen,
+  },
+  {
+    to: '/admin/servers' as const,
+    label: '服务器管理',
+    icon: Server,
   },
 ] as const;
 

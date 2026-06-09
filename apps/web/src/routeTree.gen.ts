@@ -19,6 +19,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppRaidsHistoryIndexRouteImport } from './routes/_app/raids/history/index'
 import { Route as AppRaidsCreateIndexRouteImport } from './routes/_app/raids/create/index'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
+import { Route as AppAdminServersIndexRouteImport } from './routes/_app/admin/servers/index'
 import { Route as AppAdminSchoolsIndexRouteImport } from './routes/_app/admin/schools/index'
 import { Route as AppAdminKungfuIndexRouteImport } from './routes/_app/admin/kungfu/index'
 
@@ -71,6 +72,11 @@ const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
   path: '/admin/users/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppAdminServersIndexRoute = AppAdminServersIndexRouteImport.update({
+  id: '/admin/servers/',
+  path: '/admin/servers/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppAdminSchoolsIndexRoute = AppAdminSchoolsIndexRouteImport.update({
   id: '/admin/schools/',
   path: '/admin/schools/',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/profile/': typeof AppProfileIndexRoute
   '/admin/kungfu/': typeof AppAdminKungfuIndexRoute
   '/admin/schools/': typeof AppAdminSchoolsIndexRoute
+  '/admin/servers/': typeof AppAdminServersIndexRoute
   '/admin/users/': typeof AppAdminUsersIndexRoute
   '/raids/create/': typeof AppRaidsCreateIndexRoute
   '/raids/history/': typeof AppRaidsHistoryIndexRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AppProfileIndexRoute
   '/admin/kungfu': typeof AppAdminKungfuIndexRoute
   '/admin/schools': typeof AppAdminSchoolsIndexRoute
+  '/admin/servers': typeof AppAdminServersIndexRoute
   '/admin/users': typeof AppAdminUsersIndexRoute
   '/raids/create': typeof AppRaidsCreateIndexRoute
   '/raids/history': typeof AppRaidsHistoryIndexRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/_app/profile/': typeof AppProfileIndexRoute
   '/_app/admin/kungfu/': typeof AppAdminKungfuIndexRoute
   '/_app/admin/schools/': typeof AppAdminSchoolsIndexRoute
+  '/_app/admin/servers/': typeof AppAdminServersIndexRoute
   '/_app/admin/users/': typeof AppAdminUsersIndexRoute
   '/_app/raids/create/': typeof AppRaidsCreateIndexRoute
   '/_app/raids/history/': typeof AppRaidsHistoryIndexRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/profile/'
     | '/admin/kungfu/'
     | '/admin/schools/'
+    | '/admin/servers/'
     | '/admin/users/'
     | '/raids/create/'
     | '/raids/history/'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/admin/kungfu'
     | '/admin/schools'
+    | '/admin/servers'
     | '/admin/users'
     | '/raids/create'
     | '/raids/history'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/_app/profile/'
     | '/_app/admin/kungfu/'
     | '/_app/admin/schools/'
+    | '/_app/admin/servers/'
     | '/_app/admin/users/'
     | '/_app/raids/create/'
     | '/_app/raids/history/'
@@ -245,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminUsersIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/admin/servers/': {
+      id: '/_app/admin/servers/'
+      path: '/admin/servers'
+      fullPath: '/admin/servers/'
+      preLoaderRoute: typeof AppAdminServersIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/admin/schools/': {
       id: '/_app/admin/schools/'
       path: '/admin/schools'
@@ -268,6 +287,7 @@ interface AppRouteRouteChildren {
   AppProfileIndexRoute: typeof AppProfileIndexRoute
   AppAdminKungfuIndexRoute: typeof AppAdminKungfuIndexRoute
   AppAdminSchoolsIndexRoute: typeof AppAdminSchoolsIndexRoute
+  AppAdminServersIndexRoute: typeof AppAdminServersIndexRoute
   AppAdminUsersIndexRoute: typeof AppAdminUsersIndexRoute
   AppRaidsCreateIndexRoute: typeof AppRaidsCreateIndexRoute
   AppRaidsHistoryIndexRoute: typeof AppRaidsHistoryIndexRoute
@@ -279,6 +299,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppProfileIndexRoute: AppProfileIndexRoute,
   AppAdminKungfuIndexRoute: AppAdminKungfuIndexRoute,
   AppAdminSchoolsIndexRoute: AppAdminSchoolsIndexRoute,
+  AppAdminServersIndexRoute: AppAdminServersIndexRoute,
   AppAdminUsersIndexRoute: AppAdminUsersIndexRoute,
   AppRaidsCreateIndexRoute: AppRaidsCreateIndexRoute,
   AppRaidsHistoryIndexRoute: AppRaidsHistoryIndexRoute,

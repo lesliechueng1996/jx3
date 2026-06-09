@@ -10,6 +10,7 @@ coveragePathIgnorePatterns = [
   "src/services/users-admin.ts",
   "src/services/schools-admin.ts",
   "src/services/kungfu-admin.ts",
+  "src/services/game-servers-admin.ts",
   "../../packages/auth/src/schema.ts",
   "../../packages/db/src/schema/**",
   "../../packages/logger/**",

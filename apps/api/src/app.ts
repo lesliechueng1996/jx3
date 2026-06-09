@@ -4,6 +4,7 @@ import { Elysia } from 'elysia';
 import { auth } from './lib/auth';
 import { authMacro } from './middleware/auth-macro';
 import { loggerPlugin } from './plugins/logger';
+import { gameServersAdminRoute } from './routes/game-servers-admin';
 import { kungfuAdminRoute } from './routes/kungfu-admin';
 import { meRoute } from './routes/me';
 import { schoolsAdminRoute } from './routes/schools-admin';
@@ -31,6 +32,10 @@ export const createApp = () =>
             { name: 'Users', description: 'Super admin user management' },
             { name: 'Schools', description: 'Super admin school management' },
             { name: 'Kungfu', description: 'Super admin kungfu management' },
+            {
+              name: 'GameServers',
+              description: 'Super admin game server management',
+            },
             { name: 'Uploads', description: 'File upload resources' },
             {
               name: 'Auth',
@@ -46,6 +51,7 @@ export const createApp = () =>
     .use(uploadsRoute)
     .use(usersAdminRoute)
     .use(schoolsAdminRoute)
-    .use(kungfuAdminRoute);
+    .use(kungfuAdminRoute)
+    .use(gameServersAdminRoute);
 
 export type App = ReturnType<typeof createApp>;
