@@ -71,6 +71,13 @@
       "when": 1780852618406,
       "tag": "0009_strong_outlaw_kid",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1781030350208,
+      "tag": "0010_unique_blob",
+      "breakpoints": true
     }
   ]
 }

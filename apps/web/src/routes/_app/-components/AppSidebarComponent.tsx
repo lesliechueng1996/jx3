@@ -2,6 +2,7 @@ import { hasRole, SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
 import { Link } from '@tanstack/react-router';
 import {
   BookOpen,
+  CalendarRange,
   ClipboardList,
   Landmark,
   Server,
@@ -49,6 +50,11 @@ const ADMIN_NAV_ITEMS = [
     to: '/admin/servers' as const,
     label: '服务器管理',
     icon: Server,
+  },
+  {
+    to: '/admin/expansions' as const,
+    label: '资料片管理',
+    icon: CalendarRange,
   },
 ] as const;
 
