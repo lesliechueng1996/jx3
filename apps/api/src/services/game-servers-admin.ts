@@ -1,6 +1,11 @@
 import { db } from '@jx3/db';
 import { gameCharacter, gameServer, raidSignup } from '@jx3/db/schema';
-import { type GameServerState, getServerStates } from '@jx3/jx3api';
+import {
+  type GameServerDetail,
+  type GameServerState,
+  getServerStates,
+  trySearchGameServer,
+} from '@jx3/jx3api';
 import type { Logger } from '@jx3/logger';
 import { and, asc, eq, ne } from 'drizzle-orm';
 import type {
@@ -9,14 +14,18 @@ import type {
   UpdateGameServerBody,
 } from '../schemas/game-servers-admin';
 
-export const mapGameServerStateToCreateBody = (
-  state: GameServerState,
+export const mapGameServerDetailToCreateBody = (
+  detail: GameServerDetail,
 ): CreateGameServerBody => ({
-  serverId: state.serverName,
-  zone: state.zoneName,
-  name: state.serverName,
-  alias: state.mainServer !== state.serverName ? [state.mainServer] : [],
+  serverId: detail.id,
+  zone: detail.zone,
+  name: detail.name,
+  alias: detail.alias,
 });
+
+export const collectUniqueServerNames = (
+  states: GameServerState[],
+): string[] => [...new Set(states.map((state) => state.serverName))];
 
 const toListItem = (
   row: typeof gameServer.$inferSelect,
@@ -132,12 +141,18 @@ export const syncAdminGameServersFromJx3box = async (
   options: { logger?: Logger } = {},
 ): Promise<{ synced: number }> => {
   const states = await getServerStates({ logger: options.logger });
-
   const uniqueByServerId = new Map<string, CreateGameServerBody>();
-  for (const state of states) {
-    const body = mapGameServerStateToCreateBody(state);
+
+  for (const name of collectUniqueServerNames(states)) {
+    const detail = await trySearchGameServer(name, { logger: options.logger });
+    if (!detail) {
+      continue;
+    }
+
+    const body = mapGameServerDetailToCreateBody(detail);
     uniqueByServerId.set(body.serverId, body);
   }
+
   const items = [...uniqueByServerId.values()];
 
   await db.transaction(async (tx) => {

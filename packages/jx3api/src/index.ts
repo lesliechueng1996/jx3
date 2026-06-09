@@ -8,6 +8,7 @@ export {
   mapMasterSearchData,
   type SearchGameServerOptions,
   searchGameServer,
+  trySearchGameServer,
 } from './providers/jx3api';
 export {
   type GameServerState,

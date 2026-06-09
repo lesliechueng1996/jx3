@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, mock } from 'bun:test';
 import { Jx3ApiError } from '../../../src/errors';
-import { searchGameServer } from '../../../src/providers/jx3api/master-search';
+import {
+  searchGameServer,
+  trySearchGameServer,
+} from '../../../src/providers/jx3api/master-search';
 import type {
   Jx3apiEnvelopeRaw,
   Jx3apiMasterSearchDataRaw,
@@ -61,6 +64,24 @@ describe('searchGameServer', () => {
       alias: ['双梦镇', '双梦'],
       slaveServers: ['梦江南', '枫泾古镇', '如梦令'],
     });
+  });
+
+  it('returns null when upstream returns code 400', async () => {
+    stubGlobalFetch(() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            code: 400,
+            msg: 'server not found',
+            data: null,
+            time: 1781029187,
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
+
+    await expect(trySearchGameServer('unknown')).resolves.toBeNull();
   });
 
   it('throws Jx3ApiError when upstream returns non-200 code', async () => {

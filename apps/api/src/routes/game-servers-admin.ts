@@ -71,7 +71,7 @@ export const gameServersAdminRoute = new Elysia({
         tags: ['GameServers'],
         summary: 'Sync game servers from jx3box',
         description:
-          'Replaces all game servers with data from jx3box spider API. Requires super_admin role.',
+          'Replaces all game servers with data from jx3box and jx3api master search. Requires super_admin role.',
       },
     },
   )

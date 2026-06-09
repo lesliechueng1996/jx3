@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'bun:test';
-import type { GameServerState } from '@jx3/jx3api';
-import { mapGameServerStateToCreateBody } from '../../src/services/game-servers-admin';
+import type { GameServerDetail, GameServerState } from '@jx3/jx3api';
+import {
+  collectUniqueServerNames,
+  mapGameServerDetailToCreateBody,
+} from '../../src/services/game-servers-admin';
 
 const baseState: GameServerState = {
   zoneName: '电信区',
@@ -15,28 +18,39 @@ const baseState: GameServerState = {
   mainServer: '唯我独尊',
 };
 
-describe('mapGameServerStateToCreateBody', () => {
-  it('maps jx3box server state to create body', () => {
-    expect(mapGameServerStateToCreateBody(baseState)).toEqual({
-      serverId: '唯我独尊',
+const baseDetail: GameServerDetail = {
+  id: '0502',
+  center: '24',
+  zone: '电信区',
+  name: '梦江南',
+  event: 36,
+  voice: {
+    浩气盟: [32968],
+    恶人谷: [36911],
+  },
+  alias: ['双梦镇', '双梦'],
+  slaveServers: ['梦江南', '枫泾古镇', '如梦令'],
+};
+
+describe('mapGameServerDetailToCreateBody', () => {
+  it('maps jx3api server detail to create body', () => {
+    expect(mapGameServerDetailToCreateBody(baseDetail)).toEqual({
+      serverId: '0502',
       zone: '电信区',
-      name: '唯我独尊',
-      alias: [],
+      name: '梦江南',
+      alias: ['双梦镇', '双梦'],
     });
   });
+});
 
-  it('uses main server as alias when it differs from server name', () => {
+describe('collectUniqueServerNames', () => {
+  it('deduplicates server names from jx3box states', () => {
     expect(
-      mapGameServerStateToCreateBody({
-        ...baseState,
-        serverName: '幽月轮',
-        mainServer: '唯我独尊',
-      }),
-    ).toEqual({
-      serverId: '幽月轮',
-      zone: '电信区',
-      name: '幽月轮',
-      alias: ['唯我独尊'],
-    });
+      collectUniqueServerNames([
+        baseState,
+        { ...baseState, zoneName: '网通区' },
+        { ...baseState, serverName: '幽月轮', mainServer: '幽月轮' },
+      ]),
+    ).toEqual(['唯我独尊', '幽月轮']);
   });
 });

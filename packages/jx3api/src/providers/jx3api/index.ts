@@ -2,6 +2,7 @@ export { JX3API_BASE_URL } from './config';
 export {
   type SearchGameServerOptions,
   searchGameServer,
+  trySearchGameServer,
 } from './master-search';
 export {
   type GameServerDetail,
