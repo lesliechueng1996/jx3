@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, mock } from 'bun:test';
 import { getServerStates } from '../../../src/providers/jx3box/server-state';
 import type { Jx3boxServerStateRaw } from '../../../src/providers/jx3box/types/server-state';
+import { stubGlobalFetch } from '../../helpers/mock-fetch';
 
 const originalFetch = globalThis.fetch;
 
@@ -26,14 +27,14 @@ afterEach(() => {
 
 describe('getServerStates', () => {
   it('fetches and normalizes server state from jx3box', async () => {
-    globalThis.fetch = mock((url) => {
+    stubGlobalFetch((url) => {
       expect(url).toBe(
         'https://spider2.jx3box.com/api/spider/server/server_state',
       );
       return Promise.resolve(
         new Response(JSON.stringify(sampleRaw), { status: 200 }),
       );
-    }) as typeof fetch;
+    });
 
     const servers = await getServerStates();
 

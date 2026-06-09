@@ -5,6 +5,7 @@ import type {
   Jx3apiEnvelopeRaw,
   Jx3apiMasterSearchDataRaw,
 } from '../../../src/providers/jx3api/types/master-search';
+import { stubGlobalFetch } from '../../helpers/mock-fetch';
 
 const originalFetch = globalThis.fetch;
 
@@ -36,14 +37,14 @@ afterEach(() => {
 
 describe('searchGameServer', () => {
   it('fetches and normalizes server detail from jx3api', async () => {
-    globalThis.fetch = mock((url) => {
+    stubGlobalFetch((url) => {
       expect(url).toBe(
         'https://www.jx3api.com/data/master/search?name=%E6%A2%A6%E6%B1%9F%E5%8D%97',
       );
       return Promise.resolve(
         new Response(JSON.stringify(sampleEnvelope), { status: 200 }),
       );
-    }) as typeof fetch;
+    });
 
     const server = await searchGameServer('梦江南');
 
@@ -63,7 +64,7 @@ describe('searchGameServer', () => {
   });
 
   it('throws Jx3ApiError when upstream returns non-200 code', async () => {
-    globalThis.fetch = mock(() =>
+    stubGlobalFetch(() =>
       Promise.resolve(
         new Response(
           JSON.stringify({
@@ -75,7 +76,7 @@ describe('searchGameServer', () => {
           { status: 200 },
         ),
       ),
-    ) as typeof fetch;
+    );
 
     await expect(searchGameServer('unknown')).rejects.toEqual(
       new Jx3ApiError('server not found', { code: 'UPSTREAM_ERROR' }),
