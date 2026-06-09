@@ -3,6 +3,7 @@ import type { GameServerDetail, GameServerState } from '@jx3/jx3api';
 import {
   collectUniqueServerNames,
   mapGameServerDetailToCreateBody,
+  planGameServerSync,
 } from '../../src/services/game-servers-admin';
 
 const baseState: GameServerState = {
@@ -52,5 +53,54 @@ describe('collectUniqueServerNames', () => {
         { ...baseState, serverName: '幽月轮', mainServer: '幽月轮' },
       ]),
     ).toEqual(['唯我独尊', '幽月轮']);
+  });
+});
+
+describe('planGameServerSync', () => {
+  it('updates matching servers by name and inserts missing ones', () => {
+    expect(
+      planGameServerSync(
+        [
+          {
+            id: 'gs-1',
+            serverId: 'old-id',
+            zone: '旧大区',
+            name: '梦江南',
+            alias: ['旧别名'],
+          },
+        ],
+        [
+          {
+            serverId: '0502',
+            zone: '电信区',
+            name: '梦江南',
+            alias: ['双梦镇', '双梦'],
+          },
+          {
+            serverId: '1001',
+            zone: '电信区',
+            name: '幽月轮',
+            alias: [],
+          },
+        ],
+      ),
+    ).toEqual({
+      toUpdate: [
+        {
+          id: 'gs-1',
+          serverId: '0502',
+          zone: '电信区',
+          alias: ['双梦镇', '双梦'],
+        },
+      ],
+      toInsert: [
+        {
+          serverId: '1001',
+          zone: '电信区',
+          name: '幽月轮',
+          alias: [],
+        },
+      ],
+    });
   });
 });

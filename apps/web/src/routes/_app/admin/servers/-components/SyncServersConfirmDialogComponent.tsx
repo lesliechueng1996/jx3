@@ -28,7 +28,7 @@ export function SyncServersConfirmDialogComponent({
           <DialogTitle>同步服务器数据</DialogTitle>
           <DialogDescription>
             此操作将从 JX3Box
-            拉取最新服务器列表，并覆盖当前数据库中的全部服务器记录。已有的手动修改将丢失，请确认后继续。
+            拉取最新服务器列表，并按名称更新已有服务器的 ID、大区与别名，同时插入数据库中尚未存在的记录。不会删除已有服务器，请确认后继续。
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

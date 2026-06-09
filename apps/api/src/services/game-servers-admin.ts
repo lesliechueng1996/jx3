@@ -27,6 +27,56 @@ export const collectUniqueServerNames = (
   states: GameServerState[],
 ): string[] => [...new Set(states.map((state) => state.serverName))];
 
+export type ExistingGameServerRow = {
+  id: string;
+  serverId: string;
+  zone: string;
+  name: string;
+  alias: string[];
+};
+
+export type GameServerSyncUpdate = {
+  id: string;
+  serverId: string;
+  zone: string;
+  alias: string[];
+};
+
+export const planGameServerSync = (
+  existing: ExistingGameServerRow[],
+  incoming: CreateGameServerBody[],
+): {
+  toUpdate: GameServerSyncUpdate[];
+  toInsert: CreateGameServerBody[];
+} => {
+  const existingByName = new Map<string, ExistingGameServerRow>();
+  for (const row of existing) {
+    if (!existingByName.has(row.name)) {
+      existingByName.set(row.name, row);
+    }
+  }
+
+  const toUpdate: GameServerSyncUpdate[] = [];
+  const toInsert: CreateGameServerBody[] = [];
+
+  for (const item of incoming) {
+    const match = existingByName.get(item.name);
+    if (match) {
+      toUpdate.push({
+        id: match.id,
+        serverId: item.serverId,
+        zone: item.zone,
+        alias: item.alias,
+      });
+      continue;
+    }
+
+    toInsert.push(item);
+  }
+
+  return { toUpdate, toInsert };
+};
+
 const toListItem = (
   row: typeof gameServer.$inferSelect,
 ): AdminGameServerListItem => ({
@@ -141,7 +191,7 @@ export const syncAdminGameServersFromJx3box = async (
   options: { logger?: Logger } = {},
 ): Promise<{ synced: number }> => {
   const states = await getServerStates({ logger: options.logger });
-  const uniqueByServerId = new Map<string, CreateGameServerBody>();
+  const uniqueByName = new Map<string, CreateGameServerBody>();
 
   for (const name of collectUniqueServerNames(states)) {
     const detail = await trySearchGameServer(name, { logger: options.logger });
@@ -150,16 +200,28 @@ export const syncAdminGameServersFromJx3box = async (
     }
 
     const body = mapGameServerDetailToCreateBody(detail);
-    uniqueByServerId.set(body.serverId, body);
+    uniqueByName.set(body.name, body);
   }
 
-  const items = [...uniqueByServerId.values()];
+  const incoming = [...uniqueByName.values()];
+  const existingRows = await db.select().from(gameServer);
+  const { toUpdate, toInsert } = planGameServerSync(existingRows, incoming);
 
   await db.transaction(async (tx) => {
-    await tx.delete(gameServer);
-    if (items.length > 0) {
+    for (const item of toUpdate) {
+      await tx
+        .update(gameServer)
+        .set({
+          serverId: item.serverId,
+          zone: item.zone,
+          alias: item.alias,
+        })
+        .where(eq(gameServer.id, item.id));
+    }
+
+    if (toInsert.length > 0) {
       await tx.insert(gameServer).values(
-        items.map((item) => ({
+        toInsert.map((item) => ({
           serverId: item.serverId,
           zone: item.zone,
           name: item.name,
@@ -169,7 +231,7 @@ export const syncAdminGameServersFromJx3box = async (
     }
   });
 
-  return { synced: items.length };
+  return { synced: toUpdate.length + toInsert.length };
 };
 
 export const isDuplicateGameServerId = async (
