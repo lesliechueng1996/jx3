@@ -177,9 +177,7 @@ describe('LoginComponent', () => {
     const user = userEvent.setup();
     renderLogin('/dashboard');
 
-    await user.click(
-      screen.getByRole('button', { name: '使用 GitHub 登录' }),
-    );
+    await user.click(screen.getByRole('button', { name: '使用 GitHub 登录' }));
 
     await waitFor(() => {
       expect(signInSocial).toHaveBeenCalledWith({
@@ -195,9 +193,7 @@ describe('LoginComponent', () => {
     const user = userEvent.setup();
     renderLogin();
 
-    await user.click(
-      screen.getByRole('button', { name: '使用 GitHub 登录' }),
-    );
+    await user.click(screen.getByRole('button', { name: '使用 GitHub 登录' }));
 
     await waitFor(() => {
       expect(toastError).toHaveBeenCalledWith('GitHub 登录失败');

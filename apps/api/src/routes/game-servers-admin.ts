@@ -7,6 +7,7 @@ import {
   createGameServerBodySchema,
   listGameServersResponseSchema,
   successResponseSchema,
+  syncGameServersResponseSchema,
   updateGameServerBodySchema,
   updateGameServerResponseSchema,
 } from '../schemas/game-servers-admin';
@@ -17,6 +18,7 @@ import {
   isDuplicateGameServerId,
   isGameServerReferenced,
   listAdminGameServers,
+  syncAdminGameServersFromJx3box,
   updateAdminGameServer,
 } from '../services/game-servers-admin';
 
@@ -43,6 +45,36 @@ export const gameServersAdminRoute = new Elysia({
         'Returns all game servers without pagination. Requires super_admin role.',
     },
   })
+  .post(
+    '/api/v1/game-servers/sync',
+    async ({ log, set }) => {
+      try {
+        return await syncAdminGameServersFromJx3box({ logger: log });
+      } catch (error) {
+        log.error({ err: error }, 'failed to sync game servers from jx3box');
+        set.status = 502;
+        return errorResponse(
+          'SYNC_FAILED',
+          'Failed to sync game servers from upstream',
+        );
+      }
+    },
+    {
+      auth: SUPER_ADMIN_ROLE,
+      response: {
+        200: syncGameServersResponseSchema,
+        401: t.Any(),
+        403: t.Any(),
+        502: t.Any(),
+      },
+      detail: {
+        tags: ['GameServers'],
+        summary: 'Sync game servers from jx3box',
+        description:
+          'Replaces all game servers with data from jx3box spider API. Requires super_admin role.',
+      },
+    },
+  )
   .post(
     '/api/v1/game-servers',
     async ({ body, set, log }) => {

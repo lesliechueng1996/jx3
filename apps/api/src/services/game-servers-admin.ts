@@ -1,11 +1,22 @@
 import { db } from '@jx3/db';
 import { gameCharacter, gameServer, raidSignup } from '@jx3/db/schema';
+import { type GameServerState, getServerStates } from '@jx3/jx3api';
+import type { Logger } from '@jx3/logger';
 import { and, asc, eq, ne } from 'drizzle-orm';
 import type {
   AdminGameServerListItem,
   CreateGameServerBody,
   UpdateGameServerBody,
 } from '../schemas/game-servers-admin';
+
+export const mapGameServerStateToCreateBody = (
+  state: GameServerState,
+): CreateGameServerBody => ({
+  serverId: state.serverName,
+  zone: state.zoneName,
+  name: state.serverName,
+  alias: state.mainServer !== state.serverName ? [state.mainServer] : [],
+});
 
 const toListItem = (
   row: typeof gameServer.$inferSelect,
@@ -115,6 +126,35 @@ export const deleteAdminGameServer = async (id: string): Promise<boolean> => {
     .returning({ id: gameServer.id });
 
   return rows.length > 0;
+};
+
+export const syncAdminGameServersFromJx3box = async (
+  options: { logger?: Logger } = {},
+): Promise<{ synced: number }> => {
+  const states = await getServerStates({ logger: options.logger });
+
+  const uniqueByServerId = new Map<string, CreateGameServerBody>();
+  for (const state of states) {
+    const body = mapGameServerStateToCreateBody(state);
+    uniqueByServerId.set(body.serverId, body);
+  }
+  const items = [...uniqueByServerId.values()];
+
+  await db.transaction(async (tx) => {
+    await tx.delete(gameServer);
+    if (items.length > 0) {
+      await tx.insert(gameServer).values(
+        items.map((item) => ({
+          serverId: item.serverId,
+          zone: item.zone,
+          name: item.name,
+          alias: item.alias,
+        })),
+      );
+    }
+  });
+
+  return { synced: items.length };
 };
 
 export const isDuplicateGameServerId = async (

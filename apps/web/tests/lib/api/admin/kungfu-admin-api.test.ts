@@ -21,15 +21,10 @@ describe('kungfu alias helpers', () => {
 
 describe('formation effect helpers', () => {
   it('returns six empty lines when value is null', () => {
-    expect(emptyFormationEffectInputs()).toEqual([
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-    ]);
-    expect(parseFormationEffectInput(null)).toEqual(emptyFormationEffectInputs());
+    expect(emptyFormationEffectInputs()).toEqual(['', '', '', '', '', '']);
+    expect(parseFormationEffectInput(null)).toEqual(
+      emptyFormationEffectInputs(),
+    );
   });
 
   it('splits stored value by newline into six inputs', () => {
@@ -57,7 +52,9 @@ describe('formation effect helpers', () => {
   });
 
   it('returns null when all six inputs are empty', () => {
-    expect(serializeFormationEffectInput(emptyFormationEffectInputs())).toBeNull();
+    expect(
+      serializeFormationEffectInput(emptyFormationEffectInputs()),
+    ).toBeNull();
   });
 });
 

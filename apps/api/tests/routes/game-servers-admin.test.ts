@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import { Elysia } from 'elysia';
-import { SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
+import { SUPER_ADMIN_ROLE, USER_ROLE, type AppRole } from '@jx3/auth/roles';
 
 const adminGameServer = {
   id: 'gs1',
@@ -12,7 +12,15 @@ const adminGameServer = {
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
-const sessionUser = {
+const sessionUser: {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  image: null;
+  role: AppRole;
+  createdAt: Date;
+} = {
   id: 'admin-1',
   name: 'Admin',
   email: 'admin@example.com',
@@ -40,6 +48,7 @@ const updateAdminGameServer = mock(async () => adminGameServer);
 const isDuplicateGameServerId = mock(async () => false);
 const isGameServerReferenced = mock(async () => false);
 const deleteAdminGameServer = mock(async () => true);
+const syncAdminGameServersFromJx3box = mock(async () => ({ synced: 42 }));
 
 mock.module('../../src/lib/auth', () => ({
   auth: {
@@ -57,6 +66,7 @@ mock.module('../../src/services/game-servers-admin', () => ({
   isDuplicateGameServerId,
   isGameServerReferenced,
   deleteAdminGameServer,
+  syncAdminGameServersFromJx3box,
 }));
 
 const { gameServersAdminRoute } = await import(
@@ -75,6 +85,7 @@ describe('game servers admin routes', () => {
     isDuplicateGameServerId.mockClear();
     isGameServerReferenced.mockClear();
     deleteAdminGameServer.mockClear();
+    syncAdminGameServersFromJx3box.mockClear();
     getAdminGameServerById.mockImplementation(async (id: string) =>
       id === 'gs1' ? adminGameServer : null,
     );
@@ -83,6 +94,9 @@ describe('game servers admin routes', () => {
     isDuplicateGameServerId.mockImplementation(async () => false);
     isGameServerReferenced.mockImplementation(async () => false);
     deleteAdminGameServer.mockImplementation(async () => true);
+    syncAdminGameServersFromJx3box.mockImplementation(async () => ({
+      synced: 42,
+    }));
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -94,7 +108,7 @@ describe('game servers admin routes', () => {
 
   it('returns 403 for non super_admin users', async () => {
     mockSession = {
-      user: { ...sessionUser, role: 'user' },
+      user: { ...sessionUser, role: USER_ROLE },
       session: { id: 's1' },
     };
     const res = await app().handle(
@@ -113,6 +127,31 @@ describe('game servers admin routes', () => {
       items: [adminGameServer],
     });
     expect(listAdminGameServers).toHaveBeenCalled();
+  });
+
+  it('syncs game servers for super_admin', async () => {
+    mockSession = { user: sessionUser, session: { id: 's1' } };
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/game-servers/sync', {
+        method: 'POST',
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ synced: 42 });
+    expect(syncAdminGameServersFromJx3box).toHaveBeenCalled();
+  });
+
+  it('returns 502 when sync fails', async () => {
+    mockSession = { user: sessionUser, session: { id: 's1' } };
+    syncAdminGameServersFromJx3box.mockImplementation(async () => {
+      throw new Error('upstream failed');
+    });
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/game-servers/sync', {
+        method: 'POST',
+      }),
+    );
+    expect(res.status).toBe(502);
   });
 
   it('creates a game server for super_admin', async () => {

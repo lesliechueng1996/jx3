@@ -14,5 +14,6 @@ coveragePathIgnorePatterns = [
   "../../packages/auth/src/schema.ts",
   "../../packages/db/src/schema/**",
   "../../packages/logger/**",
+  "../../packages/jx3api/**",
   "**/*.test.ts",
 ]

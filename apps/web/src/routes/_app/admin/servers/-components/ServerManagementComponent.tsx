@@ -10,12 +10,14 @@ import { ApiRequestError } from '#/lib/api/request';
 import { Button } from '@/components/ui/button';
 import { ServerFormDialogComponent } from './ServerFormDialogComponent';
 import { ServerTableComponent } from './ServerTableComponent';
+import { SyncServersConfirmDialogComponent } from './SyncServersConfirmDialogComponent';
 
 export function ServerManagementComponent() {
   const queryClient = useQueryClient();
   const [editingServer, setEditingServer] =
     useState<AdminGameServerListItem | null>(null);
   const [creating, setCreating] = useState(false);
+  const [syncConfirmOpen, setSyncConfirmOpen] = useState(false);
   const [pendingServerId, setPendingServerId] = useState<string | null>(null);
 
   const serversQuery = useQuery({
@@ -74,6 +76,16 @@ export function ServerManagementComponent() {
     onSettled: () => setPendingServerId(null),
   });
 
+  const syncMutation = useMutation({
+    mutationFn: gameServersAdminApi.sync,
+    onSuccess: async (result) => {
+      toast.success(`已同步 ${result.synced} 台服务器`);
+      setSyncConfirmOpen(false);
+      await invalidateServers();
+    },
+    onError: (error) => handleError(error, '同步服务器数据失败'),
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -83,9 +95,18 @@ export function ServerManagementComponent() {
             管理游戏服务器信息，仅超级管理员可访问。
           </p>
         </div>
-        <Button type="button" onClick={() => setCreating(true)}>
-          新建服务器
-        </Button>
+        <div className="flex shrink-0 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setSyncConfirmOpen(true)}
+          >
+            同步服务器数据
+          </Button>
+          <Button type="button" onClick={() => setCreating(true)}>
+            新建服务器
+          </Button>
+        </div>
       </div>
 
       {serversQuery.isError ? (
@@ -106,6 +127,13 @@ export function ServerManagementComponent() {
           setPendingServerId(server.id);
           deleteMutation.mutate(server.id);
         }}
+      />
+
+      <SyncServersConfirmDialogComponent
+        open={syncConfirmOpen}
+        pending={syncMutation.isPending}
+        onOpenChange={setSyncConfirmOpen}
+        onConfirm={() => syncMutation.mutate()}
       />
 
       <ServerFormDialogComponent

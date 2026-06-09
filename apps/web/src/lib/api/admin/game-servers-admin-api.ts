@@ -23,6 +23,14 @@ export type ListGameServersResponse = z.infer<
   typeof listGameServersResponseSchema
 >;
 
+export const syncGameServersResponseSchema = z.object({
+  synced: z.number().int().nonnegative(),
+});
+
+export type SyncGameServersResponse = z.infer<
+  typeof syncGameServersResponseSchema
+>;
+
 export type GameServerFormValues = {
   serverId: string;
   zone: string;
@@ -55,6 +63,13 @@ export const gameServersAdminApi = {
       `/api/v1/game-servers/${id}`,
       z.object({ success: z.literal(true) }),
       { method: 'DELETE' },
+    );
+  },
+  sync() {
+    return requestJson(
+      '/api/v1/game-servers/sync',
+      syncGameServersResponseSchema,
+      { method: 'POST' },
     );
   },
 };

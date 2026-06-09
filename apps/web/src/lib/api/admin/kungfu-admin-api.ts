@@ -178,9 +178,7 @@ export const FORMATION_EFFECT_LEVEL_LABELS = [
 export const emptyFormationEffectInputs = (): string[] =>
   Array.from({ length: FORMATION_EFFECT_LEVEL_COUNT }, () => '');
 
-export const parseFormationEffectInput = (
-  value: string | null,
-): string[] => {
+export const parseFormationEffectInput = (value: string | null): string[] => {
   if (!value) {
     return emptyFormationEffectInputs();
   }

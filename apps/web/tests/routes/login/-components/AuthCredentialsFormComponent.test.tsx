@@ -99,9 +99,10 @@ describe('AuthCredentialsFormComponent', () => {
       'disabled',
       true,
     );
-    expect(
-      screen.getByRole('button', { name: '创建账号' }),
-    ).toHaveProperty('disabled', true);
+    expect(screen.getByRole('button', { name: '创建账号' })).toHaveProperty(
+      'disabled',
+      true,
+    );
     expect(
       screen.getByRole('button', { name: '使用 GitHub 登录' }),
     ).toHaveProperty('disabled', true);
@@ -138,9 +139,7 @@ describe('AuthCredentialsFormComponent', () => {
       />,
     );
 
-    await user.click(
-      screen.getByRole('button', { name: '使用 GitHub 登录' }),
-    );
+    await user.click(screen.getByRole('button', { name: '使用 GitHub 登录' }));
     expect(onGitHubSignIn).toHaveBeenCalled();
   });
 });

@@ -54,3 +54,11 @@ export const updateGameServerResponseSchema = adminGameServerListItemSchema;
 export const successResponseSchema = z.object({
   success: z.literal(true),
 });
+
+export const syncGameServersResponseSchema = z.object({
+  synced: z.number().int().nonnegative(),
+});
+
+export type SyncGameServersResponse = z.infer<
+  typeof syncGameServersResponseSchema
+>;
