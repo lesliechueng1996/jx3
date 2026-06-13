@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import { Elysia } from 'elysia';
-import { SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
+import {
+  SUPER_ADMIN_ROLE,
+  USER_ROLE,
+  type AppRole,
+} from '@jx3/auth/roles';
 
 const adminKungfu = {
   id: 'k1',
@@ -21,7 +25,15 @@ const adminKungfu = {
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
-const sessionUser = {
+const sessionUser: {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  image: null;
+  role: AppRole;
+  createdAt: Date;
+} = {
   id: 'admin-1',
   name: 'Admin',
   email: 'admin@example.com',
@@ -98,7 +110,7 @@ describe('kungfu admin routes', () => {
 
   it('returns 403 for non super_admin users', async () => {
     mockSession = {
-      user: { ...sessionUser, role: 'user' },
+      user: { ...sessionUser, role: USER_ROLE },
       session: { id: 's1' },
     };
     const res = await app().handle(new Request('http://localhost/api/v1/kungfu'));

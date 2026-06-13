@@ -2,10 +2,21 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import { SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
+import {
+  SUPER_ADMIN_ROLE,
+  USER_ROLE,
+  type AppRole,
+} from '@jx3/auth/roles';
 import { Elysia } from 'elysia';
 
-const user = {
+const user: {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  role: AppRole;
+  createdAt: Date;
+} = {
   id: 'u1',
   name: 'Admin',
   email: 'admin@example.com',
@@ -82,7 +93,7 @@ describe('uploadsRoute', () => {
   });
 
   it('returns 403 for non super_admin users', async () => {
-    user.role = 'user';
+    user.role = USER_ROLE;
     mockSession = { user, session: { id: 's1' } };
     const res = await postUpload();
     expect(res.status).toBe(403);

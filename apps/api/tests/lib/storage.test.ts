@@ -43,7 +43,7 @@ describe('resolveUploadFolder', () => {
 describe('uploadFile', () => {
   it('uploads to supabase and returns public url', async () => {
     const { uploadFile } = await import('../../src/lib/storage');
-    const file = new File([0x89, 0x50, 0x4e, 0x47], 'test.png', {
+    const file = new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], 'test.png', {
       type: 'image/png',
     });
 

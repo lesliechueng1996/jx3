@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { toRouteSearch } from '../../../../src/routes/_app/admin/-components/admin-list-search';
 
+type AdminListSearch = {
+  page: number;
+  pageSize: number;
+  name?: string;
+  role?: string;
+};
+
 describe('toRouteSearch', () => {
-  const defaults = {
+  const defaults: AdminListSearch = {
     page: 1,
     pageSize: 10,
   };

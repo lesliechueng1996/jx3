@@ -12,6 +12,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "check": "biome check .",
+    "typecheck": "tsc --noEmit",
     "fix": "biome check --fix ."
   },
   "dependencies": {

@@ -10,6 +10,7 @@
   },
   "scripts": {
     "check": "biome check .",
+    "typecheck": "tsc --noEmit",
     "fix": "biome check --write .",
     "test": "bun test",
     "test:cov": "bun test --coverage --coverage-reporter=text --coverage-reporter=lcov"

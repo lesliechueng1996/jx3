@@ -9,19 +9,27 @@ vi.mock('../../../src/lib/auth/session-query', () => ({
 
 import { Route } from '../../../src/routes/login/index';
 
+type LoginSearch = {
+  redirect?: string;
+};
+
+const validateSearch = Route.options.validateSearch as (
+  search: Record<string, unknown>,
+) => LoginSearch;
+
 describe('login route validateSearch', () => {
   it('keeps string redirect values', () => {
-    const search = Route.options.validateSearch?.({
-      redirect: '/settings',
-    } as never);
+    const search = validateSearch({
+      redirect: '/profile',
+    });
 
-    expect(search).toEqual({ redirect: '/settings' });
+    expect(search).toEqual({ redirect: '/profile' });
   });
 
   it('drops non-string redirect values', () => {
-    const search = Route.options.validateSearch?.({
+    const search = validateSearch({
       redirect: 123,
-    } as never);
+    });
 
     expect(search).toEqual({ redirect: undefined });
   });
@@ -37,9 +45,9 @@ describe('login route beforeLoad', () => {
 
     await expect(
       Route.options.beforeLoad?.({
-        search: { redirect: '/settings' },
+        search: { redirect: '/profile' },
       } as never),
-    ).rejects.toEqual(redirect({ to: '/settings' }));
+    ).rejects.toEqual(redirect({ to: '/profile' }));
   });
 
   it('sanitizes unsafe redirect targets', async () => {
@@ -57,7 +65,7 @@ describe('login route beforeLoad', () => {
 
     await expect(
       Route.options.beforeLoad?.({
-        search: { redirect: '/settings' },
+        search: { redirect: '/profile' },
       } as never),
     ).resolves.toBeUndefined();
   });

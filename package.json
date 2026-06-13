@@ -5,6 +5,7 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "check": "turbo check",
+    "typecheck": "turbo typecheck",
     "fix": "turbo fix",
     "test": "turbo test",
     "test:cov": "turbo test:cov"

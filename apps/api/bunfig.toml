@@ -4,7 +4,6 @@ coverageThreshold = 0.9
 coverageSkipTestFiles = true
 coveragePathIgnorePatterns = [
   "src/index.ts",
-  "src/lib/auth.ts",
   "src/lib/supabase.ts",
   "src/plugins/logger.ts",
   "src/services/users-admin.ts",
@@ -13,9 +12,6 @@ coveragePathIgnorePatterns = [
   "src/services/game-servers-admin.ts",
   "src/services/expansions-admin.ts",
   "src/services/seasons-admin.ts",
-  "../../packages/auth/src/schema.ts",
-  "../../packages/db/src/schema/**",
-  "../../packages/logger/**",
-  "../../packages/jx3api/**",
+  "../../packages/**",
   "**/*.test.ts",
 ]

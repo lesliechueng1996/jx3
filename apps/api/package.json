@@ -7,6 +7,7 @@
     "build": "bun build src/index.ts --outdir dist --target bun",
     "lint": "biome lint ./src",
     "check": "biome check ./src",
+    "typecheck": "tsc --noEmit",
     "fix": "biome check --write ./src",
     "test": "bun test",
     "test:cov": "bun test --coverage --coverage-reporter=text --coverage-reporter=lcov"
