@@ -96,6 +96,20 @@ export const clearLeaderExcept = (
         : false,
   }));
 
+export const clearDarkRunExcept = (
+  signups: SignupDraft[],
+  groupNumber: number,
+  positionNumber: number,
+): SignupDraft[] =>
+  signups.map((signup) => ({
+    ...signup,
+    isDarkRun:
+      signup.groupNumber === groupNumber &&
+      signup.positionNumber === positionNumber
+        ? signup.isDarkRun
+        : false,
+  }));
+
 export const clearFormationCoreInGroupExcept = (
   signups: SignupDraft[],
   groupNumber: number,

@@ -182,6 +182,15 @@ const validateLeaderCount = (signups: SignupInput[]): void => {
   }
 };
 
+const validateDarkRunCount = (signups: SignupInput[]): void => {
+  const darkRunCount = signups.filter((signup) => signup.isDarkRun).length;
+  if (darkRunCount > 1) {
+    throw new RaidRunValidationError(
+      'Only one dark run payer is allowed per raid run',
+    );
+  }
+};
+
 const toDbDungeonId = (dungeonId: string | null | undefined): string => {
   if (!dungeonId) {
     return DRAFT_DUNGEON_SENTINEL;
@@ -390,6 +399,7 @@ const validatePublishRun = (
   assertReservedTotal(reserved);
   validateDraftSignups(signups, reserved);
   validateLeaderCount(signups);
+  validateDarkRunCount(signups);
 };
 
 const buildSignupInsertValues = (

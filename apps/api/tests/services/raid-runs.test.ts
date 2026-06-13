@@ -285,6 +285,18 @@ describe('raid-runs service', () => {
     );
   });
 
+  it('rejects two dark run payers on publish', async () => {
+    const signupRows = buildSignupRows();
+    signupRows[0] = { ...signupRows[0]!, isDarkRun: true };
+    signupRows[1] = { ...signupRows[1]!, isDarkRun: true };
+
+    mockDb.setResults([[runRow], [{ id: 'dungeon-1' }], signupRows]);
+
+    await expect(publishRaidRun('run-1', 'user-1')).rejects.toBeInstanceOf(
+      RaidRunValidationError,
+    );
+  });
+
   it('rejects invalid dungeon on create', async () => {
     getAdminDungeonById.mockImplementation(async () => null);
 

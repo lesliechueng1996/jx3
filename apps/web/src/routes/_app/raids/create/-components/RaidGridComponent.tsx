@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { RaidSlotIndicatorsComponent } from './RaidSlotIndicatorsComponent';
 import type { SignupDraft } from './raid-run-form-schema';
 import { ROLE_CELL_CLASSES, ROLE_LABELS, slotKey } from './role-slot-utils';
 
@@ -53,15 +54,22 @@ export function RaidGridComponent({
                 disabled={disabled}
                 onClick={() => onSelect(groupNumber, positionNumber)}
                 className={cn(
-                  'flex min-h-16 flex-col items-start justify-between rounded-md border p-2 text-left transition-colors',
+                  'relative flex min-h-16 flex-col items-start justify-between rounded-md border p-2 text-left transition-colors',
                   ROLE_CELL_CLASSES[signup.role],
                   isSelected && 'ring-2 ring-primary ring-offset-2',
                   disabled && 'cursor-not-allowed opacity-60',
                 )}
               >
-                <Badge variant="secondary" className="text-[10px]">
-                  {ROLE_LABELS[signup.role]}
-                </Badge>
+                <div className="flex w-full items-start justify-between gap-1">
+                  <Badge variant="secondary" className="text-[10px]">
+                    {ROLE_LABELS[signup.role]}
+                  </Badge>
+                  <RaidSlotIndicatorsComponent
+                    isLeader={signup.isLeader}
+                    isDarkRun={signup.isDarkRun}
+                    isFormationCore={signup.isFormationCore}
+                  />
+                </div>
                 <span className="line-clamp-2 text-xs font-medium">
                   {signup.characterName?.trim() || '空位'}
                 </span>

@@ -162,7 +162,7 @@ export function SignupPanelComponent({
             onChange={(event) => onChange({ isLeader: event.target.checked })}
             className="size-4 rounded border"
           />
-          是否团长
+          是否团长（全团互斥）
         </label>
         <label className="flex items-center gap-2 text-sm">
           <input
@@ -172,7 +172,7 @@ export function SignupPanelComponent({
             onChange={(event) => onChange({ isDarkRun: event.target.checked })}
             className="size-4 rounded border"
           />
-          是否黑本
+          是否黑本（全团互斥）
         </label>
         <label className="flex items-center gap-2 text-sm">
           <input

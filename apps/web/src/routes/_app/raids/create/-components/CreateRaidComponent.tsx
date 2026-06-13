@@ -11,6 +11,7 @@ import type { RaidRunDraft, SignupDraft } from './raid-run-form-schema';
 import { draftSaveSchema, publishSchema } from './raid-run-form-schema';
 import {
   applyReservedRoles,
+  clearDarkRunExcept,
   clearFormationCoreInGroupExcept,
   clearLeaderExcept,
   createInitialRaidRunDraft,
@@ -189,6 +190,19 @@ export function CreateRaidComponent({
         signup.groupNumber === selected.groupNumber &&
         signup.positionNumber === selected.positionNumber
           ? { ...signup, isLeader: true }
+          : signup,
+      );
+    }
+
+    if (patch.isDarkRun) {
+      signups = clearDarkRunExcept(
+        signups,
+        selected.groupNumber,
+        selected.positionNumber,
+      ).map((signup) =>
+        signup.groupNumber === selected.groupNumber &&
+        signup.positionNumber === selected.positionNumber
+          ? { ...signup, isDarkRun: true }
           : signup,
       );
     }

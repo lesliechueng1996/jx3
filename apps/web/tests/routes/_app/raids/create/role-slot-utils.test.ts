@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyReservedRoles,
+  clearDarkRunExcept,
+  clearLeaderExcept,
   createInitialRaidRunDraft,
   updateSignupAt,
 } from '#/routes/_app/raids/create/-components/raid-signup-draft';
@@ -113,6 +115,40 @@ describe('raid-signup-draft', () => {
 
     expect(findUpdated(next, 2, 3)?.characterName).toBe('测试角色');
     expect(findUpdated(next, 1, 1)?.characterName).toBeNull();
+  });
+
+  it('clears leader from other slots when setting a new leader', () => {
+    const signups = createInitialRaidRunDraft().signups.map((signup) =>
+      signup.groupNumber === 1 && signup.positionNumber === 1
+        ? { ...signup, isLeader: true }
+        : signup,
+    );
+
+    const next = clearLeaderExcept(signups, 3, 2).map((signup) =>
+      signup.groupNumber === 3 && signup.positionNumber === 2
+        ? { ...signup, isLeader: true }
+        : signup,
+    );
+
+    expect(findUpdated(next, 1, 1)?.isLeader).toBe(false);
+    expect(findUpdated(next, 3, 2)?.isLeader).toBe(true);
+  });
+
+  it('clears dark run from other slots when setting a new dark run payer', () => {
+    const signups = createInitialRaidRunDraft().signups.map((signup) =>
+      signup.groupNumber === 2 && signup.positionNumber === 4
+        ? { ...signup, isDarkRun: true }
+        : signup,
+    );
+
+    const next = clearDarkRunExcept(signups, 4, 1).map((signup) =>
+      signup.groupNumber === 4 && signup.positionNumber === 1
+        ? { ...signup, isDarkRun: true }
+        : signup,
+    );
+
+    expect(findUpdated(next, 2, 4)?.isDarkRun).toBe(false);
+    expect(findUpdated(next, 4, 1)?.isDarkRun).toBe(true);
   });
 });
 
