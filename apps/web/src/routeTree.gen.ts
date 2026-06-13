@@ -24,6 +24,7 @@ import { Route as AppAdminSchoolsIndexRouteImport } from './routes/_app/admin/sc
 import { Route as AppAdminKungfuIndexRouteImport } from './routes/_app/admin/kungfu/index'
 import { Route as AppAdminExpansionsIndexRouteImport } from './routes/_app/admin/expansions/index'
 import { Route as AppAdminDungeonsIndexRouteImport } from './routes/_app/admin/dungeons/index'
+import { Route as AppRaidsCreateRaidRunIdIndexRouteImport } from './routes/_app/raids/create/$raidRunId/index'
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
@@ -99,6 +100,12 @@ const AppAdminDungeonsIndexRoute = AppAdminDungeonsIndexRouteImport.update({
   path: '/admin/dungeons/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppRaidsCreateRaidRunIdIndexRoute =
+  AppRaidsCreateRaidRunIdIndexRouteImport.update({
+    id: '/raids/create/$raidRunId/',
+    path: '/raids/create/$raidRunId/',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/admin/users/': typeof AppAdminUsersIndexRoute
   '/raids/create/': typeof AppRaidsCreateIndexRoute
   '/raids/history/': typeof AppRaidsHistoryIndexRoute
+  '/raids/create/$raidRunId/': typeof AppRaidsCreateRaidRunIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
@@ -131,6 +139,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AppAdminUsersIndexRoute
   '/raids/create': typeof AppRaidsCreateIndexRoute
   '/raids/history': typeof AppRaidsHistoryIndexRoute
+  '/raids/create/$raidRunId': typeof AppRaidsCreateRaidRunIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -149,6 +158,7 @@ export interface FileRoutesById {
   '/_app/admin/users/': typeof AppAdminUsersIndexRoute
   '/_app/raids/create/': typeof AppRaidsCreateIndexRoute
   '/_app/raids/history/': typeof AppRaidsHistoryIndexRoute
+  '/_app/raids/create/$raidRunId/': typeof AppRaidsCreateRaidRunIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/admin/users/'
     | '/raids/create/'
     | '/raids/history/'
+    | '/raids/create/$raidRunId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/raids/create'
     | '/raids/history'
+    | '/raids/create/$raidRunId'
   id:
     | '__root__'
     | '/_app'
@@ -200,6 +212,7 @@ export interface FileRouteTypes {
     | '/_app/admin/users/'
     | '/_app/raids/create/'
     | '/_app/raids/history/'
+    | '/_app/raids/create/$raidRunId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminDungeonsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/raids/create/$raidRunId/': {
+      id: '/_app/raids/create/$raidRunId/'
+      path: '/raids/create/$raidRunId'
+      fullPath: '/raids/create/$raidRunId/'
+      preLoaderRoute: typeof AppRaidsCreateRaidRunIdIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
@@ -331,6 +351,7 @@ interface AppRouteRouteChildren {
   AppAdminUsersIndexRoute: typeof AppAdminUsersIndexRoute
   AppRaidsCreateIndexRoute: typeof AppRaidsCreateIndexRoute
   AppRaidsHistoryIndexRoute: typeof AppRaidsHistoryIndexRoute
+  AppRaidsCreateRaidRunIdIndexRoute: typeof AppRaidsCreateRaidRunIdIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
@@ -345,6 +366,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppAdminUsersIndexRoute: AppAdminUsersIndexRoute,
   AppRaidsCreateIndexRoute: AppRaidsCreateIndexRoute,
   AppRaidsHistoryIndexRoute: AppRaidsHistoryIndexRoute,
+  AppRaidsCreateRaidRunIdIndexRoute: AppRaidsCreateRaidRunIdIndexRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(

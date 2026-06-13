@@ -9,6 +9,7 @@ import { expansionsAdminRoute } from './routes/expansions-admin';
 import { gameServersAdminRoute } from './routes/game-servers-admin';
 import { kungfuAdminRoute } from './routes/kungfu-admin';
 import { meRoute } from './routes/me';
+import { raidRunsRoute } from './routes/raid-runs';
 import { schoolsAdminRoute } from './routes/schools-admin';
 import { seasonsAdminRoute } from './routes/seasons-admin';
 import { uploadsRoute } from './routes/uploads';
@@ -20,7 +21,7 @@ export const createApp = () =>
     .use(
       cors({
         origin: process.env.WEB_ORIGIN ?? 'http://localhost:3000',
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         credentials: true,
         allowedHeaders: ['Content-Type', 'Authorization'],
       }),
@@ -47,6 +48,10 @@ export const createApp = () =>
               name: 'Dungeons',
               description: 'Super admin dungeon management',
             },
+            {
+              name: 'Raids',
+              description: 'Raid run creation and management',
+            },
             { name: 'Uploads', description: 'File upload resources' },
             {
               name: 'Auth',
@@ -66,6 +71,7 @@ export const createApp = () =>
     .use(gameServersAdminRoute)
     .use(expansionsAdminRoute)
     .use(seasonsAdminRoute)
-    .use(dungeonsAdminRoute);
+    .use(dungeonsAdminRoute)
+    .use(raidRunsRoute);
 
 export type App = ReturnType<typeof createApp>;
