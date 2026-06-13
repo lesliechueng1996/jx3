@@ -1,7 +1,11 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import {
+  gameReferenceApi,
+  gameReferenceQueryKey,
+} from '#/lib/api/game-reference-api';
 import { type RaidRunResponse, raidRunsApi } from '#/lib/api/raid-runs-api';
 import { ApiRequestError } from '#/lib/api/request';
 import { Button } from '@/components/ui/button';
@@ -11,12 +15,10 @@ import type { RaidRunDraft, SignupDraft } from './raid-run-form-schema';
 import { draftSaveSchema, publishSchema } from './raid-run-form-schema';
 import {
   applyReservedRoles,
-  clearDarkRunExcept,
-  clearFormationCoreInGroupExcept,
-  clearLeaderExcept,
+  applySignupPatch,
   createInitialRaidRunDraft,
   findSignup,
-  updateSignupAt,
+  swapSignupsAt,
 } from './raid-signup-draft';
 import { isReservedTotalValid } from './role-slot-utils';
 import { SignupPanelComponent } from './SignupPanelComponent';
@@ -104,6 +106,32 @@ export function CreateRaidComponent({
     );
   }, [draft.signups, selected]);
 
+  const serversQuery = useQuery({
+    queryKey: [...gameReferenceQueryKey, 'servers'],
+    queryFn: () => gameReferenceApi.listGameServers(),
+  });
+
+  const kungfuQuery = useQuery({
+    queryKey: [...gameReferenceQueryKey, 'kungfu', 'all'],
+    queryFn: () => gameReferenceApi.listAllKungfuOptions(),
+  });
+
+  const serverNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const server of serversQuery.data?.items ?? []) {
+      map.set(server.id, server.name);
+    }
+    return map;
+  }, [serversQuery.data?.items]);
+
+  const kungfuIconById = useMemo(() => {
+    const map = new Map<string, string | null>();
+    for (const kungfu of kungfuQuery.data?.items ?? []) {
+      map.set(kungfu.id, kungfu.icon);
+    }
+    return map;
+  }, [kungfuQuery.data?.items]);
+
   const handleError = (error: unknown, fallbackMessage: string) => {
     if (error instanceof ApiRequestError) {
       toast.error(error.message);
@@ -174,53 +202,25 @@ export function CreateRaidComponent({
       return;
     }
 
-    let signups = updateSignupAt(
-      draft.signups,
-      selected.groupNumber,
-      selected.positionNumber,
-      patch,
+    setDraft(
+      applySignupPatch(
+        draft,
+        selected.groupNumber,
+        selected.positionNumber,
+        patch,
+      ),
     );
+  };
 
-    if (patch.isLeader) {
-      signups = clearLeaderExcept(
-        signups,
-        selected.groupNumber,
-        selected.positionNumber,
-      ).map((signup) =>
-        signup.groupNumber === selected.groupNumber &&
-        signup.positionNumber === selected.positionNumber
-          ? { ...signup, isLeader: true }
-          : signup,
-      );
-    }
-
-    if (patch.isDarkRun) {
-      signups = clearDarkRunExcept(
-        signups,
-        selected.groupNumber,
-        selected.positionNumber,
-      ).map((signup) =>
-        signup.groupNumber === selected.groupNumber &&
-        signup.positionNumber === selected.positionNumber
-          ? { ...signup, isDarkRun: true }
-          : signup,
-      );
-    }
-
-    if (patch.isFormationCore) {
-      signups = clearFormationCoreInGroupExcept(
-        signups,
-        selected.groupNumber,
-        selected.positionNumber,
-      ).map((signup) =>
-        signup.groupNumber === selected.groupNumber &&
-        signup.positionNumber === selected.positionNumber
-          ? { ...signup, isFormationCore: true }
-          : signup,
-      );
-    }
-
-    setDraft({ ...draft, signups });
+  const handleSwap = (
+    from: { groupNumber: number; positionNumber: number },
+    to: { groupNumber: number; positionNumber: number },
+  ) => {
+    setDraft({
+      ...draft,
+      signups: swapSignupsAt(draft.signups, from, to),
+    });
+    setSelected(to);
   };
 
   const publishDisabled = mode === 'create' || !raidRunId || isPublished;
@@ -256,9 +256,12 @@ export function CreateRaidComponent({
             signups={draft.signups}
             selected={selected}
             disabled={isPublished}
+            serverNameById={serverNameById}
+            kungfuIconById={kungfuIconById}
             onSelect={(groupNumber, positionNumber) =>
               setSelected({ groupNumber, positionNumber })
             }
+            onSwap={handleSwap}
           />
         </section>
 

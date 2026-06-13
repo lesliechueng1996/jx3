@@ -70,3 +70,35 @@ export const getReservedTotal = (reserved: ReservedCounts): number =>
 
 export const isReservedTotalValid = (reserved: ReservedCounts): boolean =>
   getReservedTotal(reserved) <= 25;
+
+export const deriveReservedCounts = (
+  roles: RaidSignupRole[],
+): ReservedCounts => ({
+  reservedDps: roles.filter((role) => role === 'dps').length,
+  reservedHealer: roles.filter((role) => role === 'healer').length,
+  reservedTank: roles.filter((role) => role === 'tank').length,
+  reservedBoss: roles.filter((role) => role === 'boss').length,
+});
+
+export type SlotCoordinate = {
+  groupNumber: number;
+  positionNumber: number;
+};
+
+export const formatSlotDisplayName = (
+  characterName: string | null | undefined,
+  serverName: string | null | undefined,
+): string => {
+  const name = characterName?.trim();
+  const server = serverName?.trim();
+
+  if (name && server) {
+    return `${name}·${server}`;
+  }
+
+  if (name) {
+    return name;
+  }
+
+  return '空位';
+};

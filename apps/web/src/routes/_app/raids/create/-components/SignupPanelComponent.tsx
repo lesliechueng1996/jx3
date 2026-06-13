@@ -3,7 +3,6 @@ import {
   gameReferenceApi,
   gameReferenceQueryKey,
 } from '#/lib/api/game-reference-api';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -15,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { SignupDraft } from './raid-run-form-schema';
-import { ROLE_LABELS } from './role-slot-utils';
+import { RAID_SIGNUP_ROLES, ROLE_LABELS } from './role-slot-utils';
 
 type SignupPanelComponentProps = {
   signup: SignupDraft | null;
@@ -64,7 +63,30 @@ export function SignupPanelComponent({
         <h3 className="font-medium">
           {signup.groupNumber} 队 · 第 {signup.positionNumber} 位
         </h3>
-        <Badge variant="outline">{ROLE_LABELS[signup.role]}</Badge>
+      </div>
+
+      <div className="space-y-2">
+        <Label>职能</Label>
+        <Select
+          disabled={disabled}
+          value={signup.role}
+          onValueChange={(value) =>
+            onChange({
+              role: value as SignupDraft['role'],
+            })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {RAID_SIGNUP_ROLES.map((role) => (
+              <SelectItem key={role} value={role}>
+                {ROLE_LABELS[role]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">

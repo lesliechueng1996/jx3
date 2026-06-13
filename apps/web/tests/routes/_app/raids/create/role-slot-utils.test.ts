@@ -1,13 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyReservedRoles,
+  applySignupPatch,
   clearDarkRunExcept,
   clearLeaderExcept,
   createInitialRaidRunDraft,
+  swapSignupsAt,
+  syncReservedCounts,
   updateSignupAt,
 } from '#/routes/_app/raids/create/-components/raid-signup-draft';
 import {
   computeSlotRoles,
+  deriveReservedCounts,
+  formatSlotDisplayName,
   getReservedTotal,
   getSlotIndex,
   isReservedTotalValid,
@@ -75,6 +80,31 @@ describe('role-slot-utils', () => {
         reservedBoss: 1,
       }),
     ).toBe(false);
+  });
+
+  it('derives reserved counts from signup roles', () => {
+    expect(
+      deriveReservedCounts([
+        'dps',
+        'dps',
+        'healer',
+        'tank',
+        'boss',
+        ...Array.from({ length: 20 }, () => 'pending' as const),
+      ]),
+    ).toEqual({
+      reservedDps: 2,
+      reservedHealer: 1,
+      reservedTank: 1,
+      reservedBoss: 1,
+    });
+  });
+
+  it('formats slot display name', () => {
+    expect(formatSlotDisplayName('四堆', '梦江南')).toBe('四堆·梦江南');
+    expect(formatSlotDisplayName('四堆', null)).toBe('四堆');
+    expect(formatSlotDisplayName(null, '梦江南')).toBe('空位');
+    expect(formatSlotDisplayName(null, null)).toBe('空位');
   });
 });
 
@@ -149,6 +179,58 @@ describe('raid-signup-draft', () => {
 
     expect(findUpdated(next, 2, 4)?.isDarkRun).toBe(false);
     expect(findUpdated(next, 4, 1)?.isDarkRun).toBe(true);
+  });
+
+  it('syncs reserved counts when signup role changes', () => {
+    const draft = createInitialRaidRunDraft();
+    const next = applySignupPatch(draft, 1, 1, { role: 'tank' });
+
+    expect(next.reservedTank).toBe(1);
+    expect(findUpdated(next.signups, 1, 1)?.role).toBe('tank');
+  });
+
+  it('swaps two signup slots', () => {
+    const signups = createInitialRaidRunDraft().signups.map((signup) => {
+      if (signup.groupNumber === 1 && signup.positionNumber === 1) {
+        return { ...signup, characterName: 'A', role: 'dps' as const };
+      }
+      if (signup.groupNumber === 2 && signup.positionNumber === 3) {
+        return { ...signup, characterName: 'B', role: 'healer' as const };
+      }
+      return signup;
+    });
+
+    const next = swapSignupsAt(
+      signups,
+      { groupNumber: 1, positionNumber: 1 },
+      { groupNumber: 2, positionNumber: 3 },
+    );
+
+    expect(findUpdated(next, 1, 1)?.characterName).toBe('B');
+    expect(findUpdated(next, 1, 1)?.role).toBe('healer');
+    expect(findUpdated(next, 2, 3)?.characterName).toBe('A');
+    expect(findUpdated(next, 2, 3)?.role).toBe('dps');
+  });
+
+  it('syncs reserved counts from all signups', () => {
+    const draft = {
+      ...createInitialRaidRunDraft(),
+      signups: createInitialRaidRunDraft().signups.map((signup, index) => ({
+        ...signup,
+        role:
+          index < 2
+            ? ('dps' as const)
+            : index === 2
+              ? ('healer' as const)
+              : ('pending' as const),
+      })),
+    };
+
+    const synced = syncReservedCounts(draft);
+    expect(synced.reservedDps).toBe(2);
+    expect(synced.reservedHealer).toBe(1);
+    expect(synced.reservedTank).toBe(0);
+    expect(synced.reservedBoss).toBe(0);
   });
 });
 

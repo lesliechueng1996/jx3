@@ -103,11 +103,12 @@ const selectKungfuWithSchool = () =>
 
 export const listAllKungfuOptions = async (
   schoolId?: string,
-): Promise<{ items: { id: string; name: string }[] }> => {
+): Promise<{ items: { id: string; name: string; icon: string | null }[] }> => {
   const query = db
     .select({
       id: gameKungfu.id,
       name: gameKungfu.name,
+      icon: gameKungfu.icon,
     })
     .from(gameKungfu)
     .orderBy(asc(gameKungfu.name));

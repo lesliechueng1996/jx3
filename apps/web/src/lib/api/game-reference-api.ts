@@ -11,6 +11,7 @@ import { requestJson } from '#/lib/api/request';
 export const kungfuOptionSchema = z.object({
   id: z.string(),
   name: z.string(),
+  icon: z.string().nullable(),
 });
 
 export const listKungfuOptionsResponseSchema = z.object({
@@ -43,6 +44,12 @@ export const gameReferenceApi = {
     const query = buildQueryString({ schoolId });
     return requestJson(
       `/api/v1/kungfu/options?${query}`,
+      listKungfuOptionsResponseSchema,
+    );
+  },
+  listAllKungfuOptions() {
+    return requestJson(
+      '/api/v1/kungfu/options',
       listKungfuOptionsResponseSchema,
     );
   },
