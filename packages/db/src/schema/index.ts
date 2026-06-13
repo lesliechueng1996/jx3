@@ -8,4 +8,5 @@ export * from './raid-loot';
 export * from './raid-run';
 export * from './raid-signup';
 export * from './school';
+export * from './season';
 export * from './server';

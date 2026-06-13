@@ -12,6 +12,8 @@ export const gameDungeon = pgTable('game_dungeon', {
   id: t.uuid('id').primaryKey().defaultRandom(),
   name: t.text('name').notNull(),
   expansionId: t.uuid('expansion_id').notNull(),
+  // 所属赛季 (关联 game_season, 应用层校验)
+  seasonId: t.uuid('season_id').notNull(),
   playerLimit: t.integer('player_limit').notNull(),
   difficulty: dungeonDifficultyEnum('difficulty').notNull(),
   levelRequirement: t.integer('level_requirement').notNull(),
