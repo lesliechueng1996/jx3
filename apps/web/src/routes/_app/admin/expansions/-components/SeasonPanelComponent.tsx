@@ -106,7 +106,7 @@ export function SeasonPanelComponent({ expansion }: SeasonPanelComponentProps) {
 
       <SeasonTableComponent
         items={seasonsQuery.data?.items ?? []}
-        isLoading={seasonsQuery.isFetching}
+        isLoading={seasonsQuery.isPending || seasonsQuery.isFetching}
         pendingSeasonId={pendingSeasonId}
         onEdit={setEditingSeason}
         onDelete={(season) => {

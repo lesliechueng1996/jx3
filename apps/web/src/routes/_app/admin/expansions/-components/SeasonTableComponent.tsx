@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 
 type SeasonTableComponentProps = {
   items: AdminSeasonListItem[];
@@ -35,7 +36,12 @@ export function SeasonTableComponent({
   onDelete,
 }: SeasonTableComponentProps) {
   return (
-    <div className="relative rounded-md border border-border bg-muted/30">
+    <div
+      className={cn(
+        'relative rounded-md border border-border bg-muted/30',
+        isLoading && 'min-h-40',
+      )}
+    >
       <TableLoadingOverlayComponent loading={isLoading} />
       <Table>
         <TableHeader>

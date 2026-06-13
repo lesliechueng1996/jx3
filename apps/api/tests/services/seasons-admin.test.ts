@@ -77,13 +77,17 @@ describe('seasons-admin service', () => {
         description: null,
         startDate: '2023-12-01',
         endDate: null,
-        sortOrder: 0,
+        sortOrder: 1,
       }),
     ).rejects.toThrow(SeasonValidationError);
   });
 
-  it('creates a season with the next sort order', async () => {
-    mockDb.setResults([[expansionRow], [{ maxSortOrder: 2 }], [seasonRow]]);
+  it('creates a season with sort order 1 when none exist', async () => {
+    mockDb.setResults([
+      [expansionRow],
+      [{ maxSortOrder: null }],
+      [{ ...seasonRow, sortOrder: 1 }],
+    ]);
 
     const created = await createAdminSeason('exp-1', {
       name: '赛季一',
@@ -93,6 +97,23 @@ describe('seasons-admin service', () => {
     });
 
     expect(created.sortOrder).toBe(1);
+  });
+
+  it('creates a season with the next sort order', async () => {
+    mockDb.setResults([
+      [expansionRow],
+      [{ maxSortOrder: 2 }],
+      [{ ...seasonRow, sortOrder: 3 }],
+    ]);
+
+    const created = await createAdminSeason('exp-1', {
+      name: '赛季一',
+      description: '描述',
+      startDate: '2024-02-01',
+      endDate: '2024-06-30',
+    });
+
+    expect(created.sortOrder).toBe(3);
   });
 
   it('updates an existing season', async () => {
@@ -132,7 +153,7 @@ describe('seasons-admin service', () => {
         description: null,
         startDate: '2025-01-01',
         endDate: null,
-        sortOrder: 0,
+        sortOrder: 1,
       }),
     ).rejects.toThrow(SeasonValidationError);
   });
@@ -146,7 +167,7 @@ describe('seasons-admin service', () => {
         description: null,
         startDate: '2024-02-01',
         endDate: '2023-12-31',
-        sortOrder: 0,
+        sortOrder: 1,
       }),
     ).rejects.toThrow(SeasonValidationError);
   });
@@ -171,7 +192,7 @@ describe('seasons-admin service', () => {
         description: null,
         startDate: '2024-02-01',
         endDate: '2025-01-01',
-        sortOrder: 0,
+        sortOrder: 1,
       }),
     ).rejects.toThrow(SeasonValidationError);
   });
@@ -209,7 +230,7 @@ describe('seasons-admin service', () => {
         description: null,
         startDate: '2024-02-01',
         endDate: '2024-01-01',
-        sortOrder: 0,
+        sortOrder: 1,
       }),
     ).rejects.toThrow(SeasonValidationError);
   });
@@ -223,7 +244,7 @@ describe('seasons-admin service', () => {
         description: null,
         startDate: '2024-02-01',
         endDate: null,
-        sortOrder: 0,
+        sortOrder: 1,
       }),
     ).rejects.toThrow('Expansion not found');
   });

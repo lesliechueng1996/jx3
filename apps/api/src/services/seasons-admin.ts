@@ -73,7 +73,7 @@ const resolveNextSortOrder = async (expansionId: string): Promise<number> => {
     .where(eq(gameSeason.expansionId, expansionId));
 
   const currentMax = rows[0]?.maxSortOrder;
-  return currentMax === null || currentMax === undefined ? 0 : currentMax + 1;
+  return currentMax === null || currentMax === undefined ? 1 : currentMax + 1;
 };
 
 export const listAdminSeasons = async (

@@ -20,7 +20,7 @@ const adminSeason = {
   description: '第一赛季',
   startDate: '2024-01-01',
   endDate: '2024-06-30',
-  sortOrder: 0,
+  sortOrder: 1,
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
 };

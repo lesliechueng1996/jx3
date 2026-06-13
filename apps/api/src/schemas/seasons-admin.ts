@@ -42,7 +42,7 @@ export const createSeasonBodySchema = z
       .transform((value) => (value ? value : null)),
     startDate: dateStringSchema,
     endDate: optionalDateStringSchema,
-    sortOrder: z.number().int().min(0).optional(),
+    sortOrder: z.number().int().min(1).optional(),
   })
   .refine((value) => !value.endDate || value.startDate <= value.endDate, {
     message: 'Start date must be on or before end date',
@@ -62,7 +62,7 @@ export const updateSeasonBodySchema = z
       .transform((value) => (value === undefined ? undefined : value || null)),
     startDate: dateStringSchema.optional(),
     endDate: optionalDateStringSchema,
-    sortOrder: z.number().int().min(0).optional(),
+    sortOrder: z.number().int().min(1).optional(),
   })
   .refine(
     (value) =>

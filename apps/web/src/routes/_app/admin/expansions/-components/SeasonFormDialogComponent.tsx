@@ -30,7 +30,7 @@ const emptyForm = (): SeasonFormValues => ({
   description: null,
   startDate: '',
   endDate: null,
-  sortOrder: 0,
+  sortOrder: 1,
 });
 
 export function SeasonFormDialogComponent({
@@ -45,7 +45,7 @@ export function SeasonFormDialogComponent({
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [sortOrder, setSortOrder] = useState('0');
+  const [sortOrder, setSortOrder] = useState('1');
 
   useEffect(() => {
     if (mode === 'edit' && season) {
@@ -72,7 +72,7 @@ export function SeasonFormDialogComponent({
     name.trim().length > 0 &&
     startDate.length > 0 &&
     Number.isInteger(parsedSortOrder) &&
-    parsedSortOrder >= 0;
+    parsedSortOrder >= 1;
 
   const handleSubmit = () => {
     if (!isValid) {
@@ -144,7 +144,7 @@ export function SeasonFormDialogComponent({
               <Input
                 id="season-sort-order"
                 type="number"
-                min={0}
+                min={1}
                 value={sortOrder}
                 onChange={(event) => setSortOrder(event.target.value)}
               />
