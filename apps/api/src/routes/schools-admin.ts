@@ -45,17 +45,16 @@ export const schoolsAdminRoute = new Elysia({ name: 'schools-admin-routes' })
     },
   })
   .get('/api/v1/schools/options', async () => listAllSchoolOptions(), {
-    auth: SUPER_ADMIN_ROLE,
+    auth: true,
     response: {
       200: listSchoolOptionsResponseSchema,
       401: t.Any(),
-      403: t.Any(),
     },
     detail: {
       tags: ['Schools'],
       summary: 'List all schools for dropdowns',
       description:
-        'Returns all game schools as id/name options. Requires super_admin role.',
+        'Returns all game schools as id/name options. Requires authentication.',
     },
   })
   .post(

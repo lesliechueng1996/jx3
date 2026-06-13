@@ -1,6 +1,6 @@
 import { db } from '@jx3/db';
 import { gameKungfu, gameSchool, raidSignup } from '@jx3/db/schema';
-import { and, count, desc, eq, ilike, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike, type SQL } from 'drizzle-orm';
 import type {
   AdminKungfuListItem,
   CreateKungfuBody,
@@ -100,6 +100,24 @@ const selectKungfuWithSchool = () =>
     })
     .from(gameKungfu)
     .innerJoin(gameSchool, eq(gameKungfu.schoolId, gameSchool.id));
+
+export const listAllKungfuOptions = async (
+  schoolId?: string,
+): Promise<{ items: { id: string; name: string }[] }> => {
+  const query = db
+    .select({
+      id: gameKungfu.id,
+      name: gameKungfu.name,
+    })
+    .from(gameKungfu)
+    .orderBy(asc(gameKungfu.name));
+
+  const rows = schoolId
+    ? await query.where(eq(gameKungfu.schoolId, schoolId))
+    : await query;
+
+  return { items: rows };
+};
 
 export const listAdminKungfu = async (
   query: ListKungfuQuery,

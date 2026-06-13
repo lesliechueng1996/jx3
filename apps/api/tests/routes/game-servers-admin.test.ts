@@ -106,13 +106,30 @@ describe('game servers admin routes', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns 403 for non super_admin users', async () => {
+  it('lists game servers for authenticated users', async () => {
     mockSession = {
       user: { ...sessionUser, role: USER_ROLE },
       session: { id: 's1' },
     };
     const res = await app().handle(
       new Request('http://localhost/api/v1/game-servers'),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({
+      items: [adminGameServer],
+    });
+    expect(listAdminGameServers).toHaveBeenCalled();
+  });
+
+  it('returns 403 for non super_admin users on sync', async () => {
+    mockSession = {
+      user: { ...sessionUser, role: USER_ROLE },
+      session: { id: 's1' },
+    };
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/game-servers/sync', {
+        method: 'POST',
+      }),
     );
     expect(res.status).toBe(403);
   });

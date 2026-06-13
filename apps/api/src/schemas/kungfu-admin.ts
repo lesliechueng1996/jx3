@@ -158,3 +158,26 @@ export const updateKungfuResponseSchema = adminKungfuListItemSchema;
 export const successResponseSchema = z.object({
   success: z.literal(true),
 });
+
+export const listKungfuOptionsQuerySchema = z.object({
+  schoolId: z.string().uuid().optional(),
+});
+
+export type ListKungfuOptionsQuery = z.infer<
+  typeof listKungfuOptionsQuerySchema
+>;
+
+export const kungfuOptionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export type KungfuOption = z.infer<typeof kungfuOptionSchema>;
+
+export const listKungfuOptionsResponseSchema = z.object({
+  items: z.array(kungfuOptionSchema),
+});
+
+export type ListKungfuOptionsResponse = z.infer<
+  typeof listKungfuOptionsResponseSchema
+>;

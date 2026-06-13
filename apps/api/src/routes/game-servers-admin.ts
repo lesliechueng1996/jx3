@@ -32,17 +32,16 @@ export const gameServersAdminRoute = new Elysia({
   .use(loggerPlugin)
   .use(authMacro)
   .get('/api/v1/game-servers', async () => listAdminGameServers(), {
-    auth: SUPER_ADMIN_ROLE,
+    auth: true,
     response: {
       200: listGameServersResponseSchema,
       401: t.Any(),
-      403: t.Any(),
     },
     detail: {
       tags: ['GameServers'],
       summary: 'List all game servers',
       description:
-        'Returns all game servers without pagination. Requires super_admin role.',
+        'Returns all game servers without pagination. Requires authentication.',
     },
   })
   .post(

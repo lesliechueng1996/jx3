@@ -51,6 +51,10 @@ const listAdminKungfu = mock(async () => ({
   pageSize: 20,
 }));
 
+const listAllKungfuOptions = mock(async () => ({
+  items: [{ id: 'k1', name: '傲血战意' }],
+}));
+
 const getAdminKungfuById = mock(async (kungfuId: string) =>
   kungfuId === 'k1' ? adminKungfu : null,
 );
@@ -70,6 +74,7 @@ mock.module('../../src/lib/auth', () => ({
 
 mock.module('../../src/services/kungfu-admin', () => ({
   listAdminKungfu,
+  listAllKungfuOptions,
   getAdminKungfuById,
   createAdminKungfu,
   updateAdminKungfu,
@@ -85,6 +90,7 @@ describe('kungfu admin routes', () => {
   beforeEach(() => {
     mockSession = null;
     listAdminKungfu.mockClear();
+    listAllKungfuOptions.mockClear();
     getAdminKungfuById.mockClear();
     createAdminKungfu.mockClear();
     updateAdminKungfu.mockClear();
@@ -106,7 +112,7 @@ describe('kungfu admin routes', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns 403 for non super_admin users', async () => {
+  it('returns 403 for non super_admin users on admin list', async () => {
     mockSession = {
       user: { ...sessionUser, role: USER_ROLE },
       session: { id: 's1' },
@@ -115,6 +121,25 @@ describe('kungfu admin routes', () => {
       new Request('http://localhost/api/v1/kungfu'),
     );
     expect(res.status).toBe(403);
+  });
+
+  it('lists kungfu options for authenticated users', async () => {
+    mockSession = {
+      user: { ...sessionUser, role: USER_ROLE },
+      session: { id: 's1' },
+    };
+    const res = await app().handle(
+      new Request(
+        'http://localhost/api/v1/kungfu/options?schoolId=00000000-0000-4000-8000-000000000001',
+      ),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({
+      items: [{ id: 'k1', name: '傲血战意' }],
+    });
+    expect(listAllKungfuOptions).toHaveBeenCalledWith(
+      '00000000-0000-4000-8000-000000000001',
+    );
   });
 
   it('lists kungfu for super_admin', async () => {

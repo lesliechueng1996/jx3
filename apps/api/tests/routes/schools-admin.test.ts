@@ -103,7 +103,7 @@ describe('schools admin routes', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns 403 for non super_admin users', async () => {
+  it('returns 403 for non super_admin users on admin list', async () => {
     mockSession = {
       user: { ...sessionUser, role: USER_ROLE },
       session: { id: 's1' },
@@ -112,6 +112,21 @@ describe('schools admin routes', () => {
       new Request('http://localhost/api/v1/schools'),
     );
     expect(res.status).toBe(403);
+  });
+
+  it('lists school options for authenticated users', async () => {
+    mockSession = {
+      user: { ...sessionUser, role: USER_ROLE },
+      session: { id: 's1' },
+    };
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/schools/options'),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({
+      items: [{ id: 's1', name: '天策' }],
+    });
+    expect(listAllSchoolOptions).toHaveBeenCalled();
   });
 
   it('lists schools for super_admin', async () => {

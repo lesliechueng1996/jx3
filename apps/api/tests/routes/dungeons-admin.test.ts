@@ -117,13 +117,33 @@ describe('dungeons admin routes', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns 403 for non super_admin users', async () => {
+  it('lists dungeons for authenticated users', async () => {
     mockSession = {
       user: { ...sessionUser, role: USER_ROLE },
       session: { id: 's1' },
     };
     const res = await app().handle(
       new Request('http://localhost/api/v1/dungeons'),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({
+      items: [adminDungeon],
+      total: 1,
+    });
+    expect(listAdminDungeons).toHaveBeenCalled();
+  });
+
+  it('returns 403 for non super_admin users on create', async () => {
+    mockSession = {
+      user: { ...sessionUser, role: USER_ROLE },
+      session: { id: 's1' },
+    };
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/dungeons', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(createBody),
+      }),
     );
     expect(res.status).toBe(403);
   });

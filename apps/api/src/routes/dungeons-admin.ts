@@ -29,18 +29,17 @@ export const dungeonsAdminRoute = new Elysia({ name: 'dungeons-admin-routes' })
   .use(loggerPlugin)
   .use(authMacro)
   .get('/api/v1/dungeons', async ({ query }) => listAdminDungeons(query), {
-    auth: SUPER_ADMIN_ROLE,
+    auth: true,
     query: listDungeonsQuerySchema,
     response: {
       200: listDungeonsResponseSchema,
       401: t.Any(),
-      403: t.Any(),
     },
     detail: {
       tags: ['Dungeons'],
       summary: 'List dungeons with pagination and filters',
       description:
-        'Returns a paginated list of game dungeons. Requires super_admin role.',
+        'Returns a paginated list of game dungeons. Supports name search via the name query parameter. Requires authentication.',
     },
   })
   .post(

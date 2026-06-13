@@ -5,6 +5,8 @@ import { loggerPlugin } from '../plugins/logger';
 import { errorResponse } from '../schemas/common';
 import {
   createKungfuBodySchema,
+  listKungfuOptionsQuerySchema,
+  listKungfuOptionsResponseSchema,
   listKungfuQuerySchema,
   listKungfuResponseSchema,
   successResponseSchema,
@@ -17,6 +19,7 @@ import {
   getAdminKungfuById,
   isKungfuReferenced,
   listAdminKungfu,
+  listAllKungfuOptions,
   updateAdminKungfu,
 } from '../services/kungfu-admin';
 
@@ -42,6 +45,24 @@ export const kungfuAdminRoute = new Elysia({ name: 'kungfu-admin-routes' })
         'Returns a paginated list of game kungfu. Requires super_admin role.',
     },
   })
+  .get(
+    '/api/v1/kungfu/options',
+    async ({ query }) => listAllKungfuOptions(query.schoolId),
+    {
+      auth: true,
+      query: listKungfuOptionsQuerySchema,
+      response: {
+        200: listKungfuOptionsResponseSchema,
+        401: t.Any(),
+      },
+      detail: {
+        tags: ['Kungfu'],
+        summary: 'List kungfu for dropdowns',
+        description:
+          'Returns game kungfu as id/name options, optionally filtered by schoolId. Requires authentication.',
+      },
+    },
+  )
   .post(
     '/api/v1/kungfu',
     async ({ body, set, log }) => {
