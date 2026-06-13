@@ -9,8 +9,8 @@
     "check": "biome check .",
     "typecheck": "tsc --noEmit",
     "fix": "biome check --write .",
-    "test": "bun test",
-    "test:cov": "bun test --coverage --coverage-reporter=text --coverage-reporter=lcov"
+    "test": "bun test --isolate",
+    "test:cov": "bun test --isolate --coverage --coverage-reporter=text --coverage-reporter=lcov"
   },
   "dependencies": {
     "@elysiajs/cors": "latest",

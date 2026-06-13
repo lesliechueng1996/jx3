@@ -32,6 +32,9 @@ bun run build
 bun run lint
 bun run check
 
+# Typescript type check
+bun run typecheck
+
 # Run tests
 bun run test
 
