@@ -65,7 +65,13 @@ describe('createLoggerPlugin', () => {
 
     expect(res.status).toBe(201);
     expect(await res.json()).toEqual({ ok: true });
-    expect(baseLogger.childLogger.info).toHaveBeenCalled();
+    expect(baseLogger.childLogger.info).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 201,
+        durationMs: expect.any(Number),
+      }),
+      'request completed',
+    );
   });
 
   it('works with the real logger instance', async () => {

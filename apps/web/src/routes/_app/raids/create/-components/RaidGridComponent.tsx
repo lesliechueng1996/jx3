@@ -234,6 +234,7 @@ export function RaidGridComponent({
 
   return (
     <DndContext
+      id="raid-grid-dnd"
       sensors={sensors}
       onDragStart={(event) => setActiveId(String(event.active.id))}
       onDragEnd={handleDragEnd}
