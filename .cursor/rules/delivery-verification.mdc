@@ -1,0 +1,43 @@
+---
+description: Run check and typecheck before delivering code changes
+alwaysApply: true
+---
+
+# Delivery Verification
+
+Before marking a coding task complete or handing changes to the user, run verification and fix failures first.
+
+## Required commands
+
+From the repo root:
+
+```bash
+bun run check
+bun run typecheck
+```
+
+When changes are scoped to a single package, you may run filtered checks instead:
+
+```bash
+bun run --filter @jx3/api check
+bun run --filter @jx3/api typecheck
+```
+
+Replace `@jx3/api` with the package you touched (`@jx3/web`, `@jx3/db`, etc.).
+
+## When to run
+
+- After implementing or modifying code
+- Before saying work is done, tests pass, or a PR/commit is ready
+- After fixing lint, format, or type errors reported by the user or CI
+
+## On failure
+
+- Fix Biome/format issues (`bun run fix` in the affected package, then re-run `check`)
+- Fix TypeScript errors before delivery
+- Do not claim completion without command output showing success
+
+## Optional (when relevant)
+
+- `bun run test` — when behavior changed or tests were added/updated
+- `bun run --filter <package> test` — for package-scoped test runs

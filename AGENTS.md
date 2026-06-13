@@ -43,6 +43,17 @@ bun run --filter @jx3/web dev
 bun run --filter @jx3/api dev
 ```
 
+## Before Delivery
+
+After code changes, run from the repo root before marking work complete:
+
+```bash
+bun run check
+bun run typecheck
+```
+
+Fix any Biome or TypeScript failures first. For a single package, use `bun run --filter @jx3/<package> check` and `typecheck`. Run `bun run test` when behavior or tests changed.
+
 ## Architecture
 
 ```
