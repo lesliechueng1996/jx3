@@ -1,8 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import {
-  gameReferenceApi,
-  gameReferenceQueryKey,
-} from '#/lib/api/game-reference-api';
+import { useMemo } from 'react';
+import type { AdminGameServerListItem } from '#/lib/api/admin/game-servers-admin-api';
+import type { SchoolOption } from '#/lib/api/admin/schools-admin-api';
+import type { KungfuOption } from '#/lib/api/game-reference-api';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -20,6 +19,9 @@ type SignupPanelComponentProps = {
   signup: SignupDraft | null;
   disabled?: boolean;
   onChange: (patch: Partial<SignupDraft>) => void;
+  servers: AdminGameServerListItem[];
+  schools: SchoolOption[];
+  kungfus: KungfuOption[];
 };
 
 const NONE_VALUE = '__none__';
@@ -28,22 +30,17 @@ export function SignupPanelComponent({
   signup,
   disabled = false,
   onChange,
+  servers,
+  schools,
+  kungfus,
 }: SignupPanelComponentProps) {
-  const serversQuery = useQuery({
-    queryKey: [...gameReferenceQueryKey, 'servers'],
-    queryFn: () => gameReferenceApi.listGameServers(),
-  });
+  const kungfusForSchool = useMemo(() => {
+    if (!signup?.schoolId) {
+      return [];
+    }
 
-  const schoolsQuery = useQuery({
-    queryKey: [...gameReferenceQueryKey, 'schools'],
-    queryFn: () => gameReferenceApi.listSchoolOptions(),
-  });
-
-  const kungfuQuery = useQuery({
-    queryKey: [...gameReferenceQueryKey, 'kungfu', signup?.schoolId],
-    queryFn: () => gameReferenceApi.listKungfuOptions(signup?.schoolId ?? ''),
-    enabled: Boolean(signup?.schoolId),
-  });
+    return kungfus.filter((kungfu) => kungfu.schoolId === signup.schoolId);
+  }, [kungfus, signup?.schoolId]);
 
   if (!signup) {
     return (
@@ -52,10 +49,6 @@ export function SignupPanelComponent({
       </div>
     );
   }
-
-  const servers = serversQuery.data?.items ?? [];
-  const schools = schoolsQuery.data?.items ?? [];
-  const kungfus = kungfuQuery.data?.items ?? [];
 
   return (
     <div className="space-y-4">
@@ -166,7 +159,7 @@ export function SignupPanelComponent({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={NONE_VALUE}>未选择</SelectItem>
-            {kungfus.map((kungfu) => (
+            {kungfusForSchool.map((kungfu) => (
               <SelectItem key={kungfu.id} value={kungfu.id}>
                 {kungfu.name}
               </SelectItem>

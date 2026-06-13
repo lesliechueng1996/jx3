@@ -170,6 +170,7 @@ export type ListKungfuOptionsQuery = z.infer<
 export const kungfuOptionSchema = z.object({
   id: z.string(),
   name: z.string(),
+  schoolId: z.string(),
   icon: z.string().nullable(),
 });
 

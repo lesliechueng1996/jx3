@@ -52,7 +52,14 @@ const listAdminKungfu = mock(async () => ({
 }));
 
 const listAllKungfuOptions = mock(async () => ({
-  items: [{ id: 'k1', name: '傲血战意', icon: 'https://example.com/icon.png' }],
+  items: [
+    {
+      id: 'k1',
+      name: '傲血战意',
+      schoolId: '00000000-0000-4000-8000-000000000001',
+      icon: 'https://example.com/icon.png',
+    },
+  ],
 }));
 
 const getAdminKungfuById = mock(async (kungfuId: string) =>
@@ -136,7 +143,12 @@ describe('kungfu admin routes', () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({
       items: [
-        { id: 'k1', name: '傲血战意', icon: 'https://example.com/icon.png' },
+        {
+          id: 'k1',
+          name: '傲血战意',
+          schoolId: '00000000-0000-4000-8000-000000000001',
+          icon: 'https://example.com/icon.png',
+        },
       ],
     });
     expect(listAllKungfuOptions).toHaveBeenCalledWith(

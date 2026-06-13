@@ -111,6 +111,11 @@ export function CreateRaidComponent({
     queryFn: () => gameReferenceApi.listGameServers(),
   });
 
+  const schoolsQuery = useQuery({
+    queryKey: [...gameReferenceQueryKey, 'schools'],
+    queryFn: () => gameReferenceApi.listSchoolOptions(),
+  });
+
   const kungfuQuery = useQuery({
     queryKey: [...gameReferenceQueryKey, 'kungfu', 'all'],
     queryFn: () => gameReferenceApi.listAllKungfuOptions(),
@@ -273,6 +278,9 @@ export function CreateRaidComponent({
             signup={selectedSignup}
             disabled={isPublished}
             onChange={updateSignup}
+            servers={serversQuery.data?.items ?? []}
+            schools={schoolsQuery.data?.items ?? []}
+            kungfus={kungfuQuery.data?.items ?? []}
           />
         </section>
       </div>
