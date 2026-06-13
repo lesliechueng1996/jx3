@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { type AppRole, SUPER_ADMIN_ROLE, USER_ROLE } from '@jx3/auth/roles';
 import { Elysia } from 'elysia';
-import {
-  SUPER_ADMIN_ROLE,
-  USER_ROLE,
-  type AppRole,
-} from '@jx3/auth/roles';
 
 const adminExpansion = {
   id: 'e1',
@@ -174,7 +170,9 @@ describe('expansions admin routes', () => {
   it('deletes an expansion for super_admin', async () => {
     mockSession = { user: sessionUser, session: { id: 's1' } };
     const res = await app().handle(
-      new Request('http://localhost/api/v1/expansions/e1', { method: 'DELETE' }),
+      new Request('http://localhost/api/v1/expansions/e1', {
+        method: 'DELETE',
+      }),
     );
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ success: true });
@@ -185,7 +183,9 @@ describe('expansions admin routes', () => {
     mockSession = { user: sessionUser, session: { id: 's1' } };
     isExpansionReferenced.mockImplementation(async () => true);
     const res = await app().handle(
-      new Request('http://localhost/api/v1/expansions/e1', { method: 'DELETE' }),
+      new Request('http://localhost/api/v1/expansions/e1', {
+        method: 'DELETE',
+      }),
     );
     expect(res.status).toBe(409);
     expect(deleteAdminExpansion).not.toHaveBeenCalled();
@@ -242,7 +242,9 @@ describe('expansions admin routes', () => {
       throw new Error('delete failed');
     });
     const res = await app().handle(
-      new Request('http://localhost/api/v1/expansions/e1', { method: 'DELETE' }),
+      new Request('http://localhost/api/v1/expansions/e1', {
+        method: 'DELETE',
+      }),
     );
     expect(res.status).toBe(400);
   });

@@ -1,12 +1,8 @@
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import {
-  SUPER_ADMIN_ROLE,
-  USER_ROLE,
-  type AppRole,
-} from '@jx3/auth/roles';
+import { type AppRole, SUPER_ADMIN_ROLE, USER_ROLE } from '@jx3/auth/roles';
 import { Elysia } from 'elysia';
 
 const user: {
@@ -37,10 +33,9 @@ mock.module('../../src/lib/auth', () => ({
 
 const { authMacro } = await import('../../src/middleware/auth-macro');
 const { uploadsRoute } = await import('../../src/routes/uploads');
-const {
-  setSupabaseClientForTests,
-  resetSupabaseClientForTests,
-} = await import('../../src/lib/supabase');
+const { setSupabaseClientForTests, resetSupabaseClientForTests } = await import(
+  '../../src/lib/supabase'
+);
 const { UploadStorageError, UploadValidationError } = await import(
   '../../src/lib/storage'
 );
@@ -114,9 +109,12 @@ describe('uploadsRoute', () => {
     const txtPath = join(tempDir, 'test.txt');
     writeFileSync(txtPath, 'hello');
     const form = new FormData();
-    form.append('file', new File([Buffer.from('hello')], 'test.txt', {
-      type: 'text/plain',
-    }));
+    form.append(
+      'file',
+      new File([Buffer.from('hello')], 'test.txt', {
+        type: 'text/plain',
+      }),
+    );
 
     const res = await makeApp().handle(
       new Request('http://localhost/api/v1/uploads', {
@@ -134,7 +132,9 @@ describe('uploadsRoute', () => {
   it('returns 500 for storage errors', async () => {
     mockSession = { user, session: { id: 's1' } };
     resetSupabaseClientForTests();
-    setSupabaseClientForTests(createMockSupabase('bucket unavailable') as never);
+    setSupabaseClientForTests(
+      createMockSupabase('bucket unavailable') as never,
+    );
     const res = await postUpload();
     expect(res.status).toBe(500);
     expect(await res.json()).toEqual({

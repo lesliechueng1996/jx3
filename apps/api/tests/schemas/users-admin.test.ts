@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import {
-  maskEmail,
-  normalizeProviders,
-} from '../../src/schemas/users-admin';
+import { maskEmail, normalizeProviders } from '../../src/schemas/users-admin';
 
 describe('maskEmail', () => {
   it('masks the local part and keeps the domain', () => {

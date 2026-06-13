@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { type AppRole, SUPER_ADMIN_ROLE, USER_ROLE } from '@jx3/auth/roles';
 import { Elysia } from 'elysia';
-import {
-  SUPER_ADMIN_ROLE,
-  USER_ROLE,
-  type AppRole,
-} from '@jx3/auth/roles';
 
 const adminExpansion = {
   id: 'e1',
@@ -60,8 +56,9 @@ const listAdminSeasons = mock(async () => ({
   items: [adminSeason],
 }));
 
-const getAdminSeasonById = mock(async (expansionId: string, seasonId: string) =>
-  expansionId === 'e1' && seasonId === 's1' ? adminSeason : null,
+const getAdminSeasonById = mock(
+  async (expansionId: string, seasonId: string) =>
+    expansionId === 'e1' && seasonId === 's1' ? adminSeason : null,
 );
 
 const createAdminSeason = mock(async () => adminSeason);

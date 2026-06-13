@@ -5,10 +5,10 @@
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun",
-    "lint": "biome lint ./src",
-    "check": "biome check ./src",
+    "lint": "biome lint .",
+    "check": "biome check .",
     "typecheck": "tsc --noEmit",
-    "fix": "biome check --write ./src",
+    "fix": "biome check --write .",
     "test": "bun test",
     "test:cov": "bun test --coverage --coverage-reporter=text --coverage-reporter=lcov"
   },

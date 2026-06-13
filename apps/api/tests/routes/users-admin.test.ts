@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { type AppRole, SUPER_ADMIN_ROLE, USER_ROLE } from '@jx3/auth/roles';
 import { Elysia } from 'elysia';
-import {
-  SUPER_ADMIN_ROLE,
-  USER_ROLE,
-  type AppRole,
-} from '@jx3/auth/roles';
 
 const adminUser = {
   id: 'u1',
@@ -100,13 +96,17 @@ describe('users admin routes', () => {
     adminUpdateUser.mockImplementation(async () => ({ user: adminUser }));
     setRole.mockImplementation(async () => ({ user: adminUser }));
     removeUser.mockImplementation(async () => ({ success: true }));
-    banUser.mockImplementation(async () => ({ user: { ...adminUser, banned: true } }));
+    banUser.mockImplementation(async () => ({
+      user: { ...adminUser, banned: true },
+    }));
     unbanUser.mockImplementation(async () => ({ user: adminUser }));
     revokeUserSessions.mockImplementation(async () => ({ success: true }));
   });
 
   it('returns 401 when unauthenticated', async () => {
-    const res = await app().handle(new Request('http://localhost/api/v1/users'));
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/users'),
+    );
     expect(res.status).toBe(401);
   });
 
@@ -115,13 +115,17 @@ describe('users admin routes', () => {
       user: { ...sessionUser, role: USER_ROLE },
       session: { id: 's1' },
     };
-    const res = await app().handle(new Request('http://localhost/api/v1/users'));
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/users'),
+    );
     expect(res.status).toBe(403);
   });
 
   it('lists users for super_admin', async () => {
     mockSession = { user: sessionUser, session: { id: 's1' } };
-    const res = await app().handle(new Request('http://localhost/api/v1/users'));
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/users'),
+    );
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({
       items: [adminUser],
@@ -223,7 +227,9 @@ describe('users admin routes', () => {
     mockSession = { user: sessionUser, session: { id: 's1' } };
     getAdminUserById.mockImplementationOnce(async () => null);
     const res = await app().handle(
-      new Request('http://localhost/api/v1/users/missing', { method: 'DELETE' }),
+      new Request('http://localhost/api/v1/users/missing', {
+        method: 'DELETE',
+      }),
     );
     expect(res.status).toBe(404);
   });

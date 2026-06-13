@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { type AppRole, SUPER_ADMIN_ROLE, USER_ROLE } from '@jx3/auth/roles';
 import { Elysia } from 'elysia';
-import { SUPER_ADMIN_ROLE, USER_ROLE, type AppRole } from '@jx3/auth/roles';
 
 const adminGameServer = {
   id: 'gs1',

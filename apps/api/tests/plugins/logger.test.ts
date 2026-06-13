@@ -17,11 +17,9 @@ describe('createLoggerPlugin', () => {
 
   it('logs failed requests without swallowing errors', async () => {
     const log = createLogger('test-api');
-    const app = new Elysia()
-      .use(createLoggerPlugin(log))
-      .get('/fail', () => {
-        throw new Error('boom');
-      });
+    const app = new Elysia().use(createLoggerPlugin(log)).get('/fail', () => {
+      throw new Error('boom');
+    });
 
     const res = await app.handle(new Request('http://localhost/fail'));
     expect(res.status).toBe(500);

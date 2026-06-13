@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { type AppRole, SUPER_ADMIN_ROLE, USER_ROLE } from '@jx3/auth/roles';
 import { Elysia } from 'elysia';
-import {
-  SUPER_ADMIN_ROLE,
-  USER_ROLE,
-  type AppRole,
-} from '@jx3/auth/roles';
 
 const adminSchool = {
   id: 's1',
@@ -101,7 +97,9 @@ describe('schools admin routes', () => {
   });
 
   it('returns 401 when unauthenticated', async () => {
-    const res = await app().handle(new Request('http://localhost/api/v1/schools'));
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/schools'),
+    );
     expect(res.status).toBe(401);
   });
 
@@ -110,13 +108,17 @@ describe('schools admin routes', () => {
       user: { ...sessionUser, role: USER_ROLE },
       session: { id: 's1' },
     };
-    const res = await app().handle(new Request('http://localhost/api/v1/schools'));
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/schools'),
+    );
     expect(res.status).toBe(403);
   });
 
   it('lists schools for super_admin', async () => {
     mockSession = { user: sessionUser, session: { id: 's1' } };
-    const res = await app().handle(new Request('http://localhost/api/v1/schools'));
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/schools'),
+    );
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({
       items: [adminSchool],
@@ -207,7 +209,9 @@ describe('schools admin routes', () => {
     mockSession = { user: sessionUser, session: { id: 's1' } };
     getAdminSchoolById.mockImplementation(async () => null);
     const res = await app().handle(
-      new Request('http://localhost/api/v1/schools/missing', { method: 'DELETE' }),
+      new Request('http://localhost/api/v1/schools/missing', {
+        method: 'DELETE',
+      }),
     );
     expect(res.status).toBe(404);
   });
