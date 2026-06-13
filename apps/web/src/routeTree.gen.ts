@@ -23,6 +23,7 @@ import { Route as AppAdminServersIndexRouteImport } from './routes/_app/admin/se
 import { Route as AppAdminSchoolsIndexRouteImport } from './routes/_app/admin/schools/index'
 import { Route as AppAdminKungfuIndexRouteImport } from './routes/_app/admin/kungfu/index'
 import { Route as AppAdminExpansionsIndexRouteImport } from './routes/_app/admin/expansions/index'
+import { Route as AppAdminDungeonsIndexRouteImport } from './routes/_app/admin/dungeons/index'
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
@@ -93,6 +94,11 @@ const AppAdminExpansionsIndexRoute = AppAdminExpansionsIndexRouteImport.update({
   path: '/admin/expansions/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppAdminDungeonsIndexRoute = AppAdminDungeonsIndexRouteImport.update({
+  id: '/admin/dungeons/',
+  path: '/admin/dungeons/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/$': typeof ApiV1SplatRoute
   '/characters/': typeof AppCharactersIndexRoute
   '/profile/': typeof AppProfileIndexRoute
+  '/admin/dungeons/': typeof AppAdminDungeonsIndexRoute
   '/admin/expansions/': typeof AppAdminExpansionsIndexRoute
   '/admin/kungfu/': typeof AppAdminKungfuIndexRoute
   '/admin/schools/': typeof AppAdminSchoolsIndexRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/api/v1/$': typeof ApiV1SplatRoute
   '/characters': typeof AppCharactersIndexRoute
   '/profile': typeof AppProfileIndexRoute
+  '/admin/dungeons': typeof AppAdminDungeonsIndexRoute
   '/admin/expansions': typeof AppAdminExpansionsIndexRoute
   '/admin/kungfu': typeof AppAdminKungfuIndexRoute
   '/admin/schools': typeof AppAdminSchoolsIndexRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/api/v1/$': typeof ApiV1SplatRoute
   '/_app/characters/': typeof AppCharactersIndexRoute
   '/_app/profile/': typeof AppProfileIndexRoute
+  '/_app/admin/dungeons/': typeof AppAdminDungeonsIndexRoute
   '/_app/admin/expansions/': typeof AppAdminExpansionsIndexRoute
   '/_app/admin/kungfu/': typeof AppAdminKungfuIndexRoute
   '/_app/admin/schools/': typeof AppAdminSchoolsIndexRoute
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/api/v1/$'
     | '/characters/'
     | '/profile/'
+    | '/admin/dungeons/'
     | '/admin/expansions/'
     | '/admin/kungfu/'
     | '/admin/schools/'
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/api/v1/$'
     | '/characters'
     | '/profile'
+    | '/admin/dungeons'
     | '/admin/expansions'
     | '/admin/kungfu'
     | '/admin/schools'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/api/v1/$'
     | '/_app/characters/'
     | '/_app/profile/'
+    | '/_app/admin/dungeons/'
     | '/_app/admin/expansions/'
     | '/_app/admin/kungfu/'
     | '/_app/admin/schools/'
@@ -297,6 +309,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminExpansionsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/admin/dungeons/': {
+      id: '/_app/admin/dungeons/'
+      path: '/admin/dungeons'
+      fullPath: '/admin/dungeons/'
+      preLoaderRoute: typeof AppAdminDungeonsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
@@ -304,6 +323,7 @@ interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppCharactersIndexRoute: typeof AppCharactersIndexRoute
   AppProfileIndexRoute: typeof AppProfileIndexRoute
+  AppAdminDungeonsIndexRoute: typeof AppAdminDungeonsIndexRoute
   AppAdminExpansionsIndexRoute: typeof AppAdminExpansionsIndexRoute
   AppAdminKungfuIndexRoute: typeof AppAdminKungfuIndexRoute
   AppAdminSchoolsIndexRoute: typeof AppAdminSchoolsIndexRoute
@@ -317,6 +337,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppCharactersIndexRoute: AppCharactersIndexRoute,
   AppProfileIndexRoute: AppProfileIndexRoute,
+  AppAdminDungeonsIndexRoute: AppAdminDungeonsIndexRoute,
   AppAdminExpansionsIndexRoute: AppAdminExpansionsIndexRoute,
   AppAdminKungfuIndexRoute: AppAdminKungfuIndexRoute,
   AppAdminSchoolsIndexRoute: AppAdminSchoolsIndexRoute,

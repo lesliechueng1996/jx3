@@ -79,3 +79,30 @@ export const updateExpansionResponseSchema = adminExpansionListItemSchema;
 export const successResponseSchema = z.object({
   success: z.literal(true),
 });
+
+export const adminExpansionSeasonOptionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export type AdminExpansionSeasonOption = z.infer<
+  typeof adminExpansionSeasonOptionSchema
+>;
+
+export const adminExpansionFilterOptionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  seasons: z.array(adminExpansionSeasonOptionSchema),
+});
+
+export type AdminExpansionFilterOption = z.infer<
+  typeof adminExpansionFilterOptionSchema
+>;
+
+export const listExpansionFilterOptionsResponseSchema = z.object({
+  items: z.array(adminExpansionFilterOptionSchema),
+});
+
+export type ListExpansionFilterOptionsResponse = z.infer<
+  typeof listExpansionFilterOptionsResponseSchema
+>;

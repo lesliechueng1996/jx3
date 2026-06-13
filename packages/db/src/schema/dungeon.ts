@@ -18,7 +18,7 @@ export const gameDungeon = pgTable('game_dungeon', {
   difficulty: dungeonDifficultyEnum('difficulty').notNull(),
   levelRequirement: t.integer('level_requirement').notNull(),
   bossCount: t.integer('boss_count').notNull(),
-  // CD 刷新日 (ISO 周几: 1=周一 ... 7=周日; 空数组表示无周常 CD)
+  // CD 刷新日 (ISO 周几: 1=周一 ... 7=周日; 空数组表示无每周 CD)
   resetWeekdays: t.integer('reset_weekdays').array().notNull().default([]),
   createdAt: t
     .timestamp('created_at', { withTimezone: true })

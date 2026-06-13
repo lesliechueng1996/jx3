@@ -1,7 +1,8 @@
 import { db } from '@jx3/db';
 import { gameDungeon, gameExpansion, gameSeason } from '@jx3/db/schema';
-import { desc, eq } from 'drizzle-orm';
+import { asc, desc, eq } from 'drizzle-orm';
 import type {
+  AdminExpansionFilterOption,
   AdminExpansionListItem,
   CreateExpansionBody,
   UpdateExpansionBody,
@@ -29,6 +30,44 @@ export const listAdminExpansions = async (): Promise<{
     .orderBy(desc(gameExpansion.startDate));
 
   return { items: rows.map(toListItem) };
+};
+
+export const listExpansionFilterOptions = async (): Promise<{
+  items: AdminExpansionFilterOption[];
+}> => {
+  const [expansionRows, seasonRows] = await Promise.all([
+    db
+      .select({ id: gameExpansion.id, name: gameExpansion.name })
+      .from(gameExpansion)
+      .orderBy(desc(gameExpansion.startDate)),
+    db
+      .select({
+        id: gameSeason.id,
+        name: gameSeason.name,
+        expansionId: gameSeason.expansionId,
+      })
+      .from(gameSeason)
+      .orderBy(asc(gameSeason.sortOrder), desc(gameSeason.startDate)),
+  ]);
+
+  const seasonsByExpansion = new Map<
+    string,
+    AdminExpansionFilterOption['seasons']
+  >();
+
+  for (const season of seasonRows) {
+    const current = seasonsByExpansion.get(season.expansionId) ?? [];
+    current.push({ id: season.id, name: season.name });
+    seasonsByExpansion.set(season.expansionId, current);
+  }
+
+  return {
+    items: expansionRows.map((expansion) => ({
+      id: expansion.id,
+      name: expansion.name,
+      seasons: seasonsByExpansion.get(expansion.id) ?? [],
+    })),
+  };
 };
 
 export const getAdminExpansionById = async (

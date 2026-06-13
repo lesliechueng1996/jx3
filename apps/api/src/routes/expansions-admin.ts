@@ -5,6 +5,7 @@ import { loggerPlugin } from '../plugins/logger';
 import { errorResponse } from '../schemas/common';
 import {
   createExpansionBodySchema,
+  listExpansionFilterOptionsResponseSchema,
   listExpansionsResponseSchema,
   successResponseSchema,
   updateExpansionBodySchema,
@@ -16,6 +17,7 @@ import {
   getAdminExpansionById,
   isExpansionReferenced,
   listAdminExpansions,
+  listExpansionFilterOptions,
   updateAdminExpansion,
 } from '../services/expansions-admin';
 
@@ -42,6 +44,24 @@ export const expansionsAdminRoute = new Elysia({
         'Returns all game expansions without pagination. Requires super_admin role.',
     },
   })
+  .get(
+    '/api/v1/expansions/filter-options',
+    async () => listExpansionFilterOptions(),
+    {
+      auth: SUPER_ADMIN_ROLE,
+      response: {
+        200: listExpansionFilterOptionsResponseSchema,
+        401: t.Any(),
+        403: t.Any(),
+      },
+      detail: {
+        tags: ['Expansions'],
+        summary: 'List expansion and season filter options',
+        description:
+          'Returns all expansions with nested seasons for admin filter dropdowns. Requires super_admin role.',
+      },
+    },
+  )
   .post(
     '/api/v1/expansions',
     async ({ body, set, log }) => {

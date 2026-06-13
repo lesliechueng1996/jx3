@@ -57,8 +57,19 @@ mock.module('../../src/lib/auth', () => ({
   },
 }));
 
+const listExpansionFilterOptions = mock(async () => ({
+  items: [
+    {
+      id: 'e1',
+      name: '横刀断浪',
+      seasons: [{ id: 's1', name: '第一赛季' }],
+    },
+  ],
+}));
+
 mock.module('../../src/services/expansions-admin', () => ({
   listAdminExpansions,
+  listExpansionFilterOptions,
   getAdminExpansionById,
   createAdminExpansion,
   updateAdminExpansion,
@@ -76,6 +87,7 @@ describe('expansions admin routes', () => {
   beforeEach(() => {
     mockSession = null;
     listAdminExpansions.mockClear();
+    listExpansionFilterOptions.mockClear();
     getAdminExpansionById.mockClear();
     createAdminExpansion.mockClear();
     updateAdminExpansion.mockClear();
@@ -88,6 +100,15 @@ describe('expansions admin routes', () => {
     updateAdminExpansion.mockImplementation(async () => adminExpansion);
     isExpansionReferenced.mockImplementation(async () => false);
     deleteAdminExpansion.mockImplementation(async () => true);
+    listExpansionFilterOptions.mockImplementation(async () => ({
+      items: [
+        {
+          id: 'e1',
+          name: '横刀断浪',
+          seasons: [{ id: 's1', name: '第一赛季' }],
+        },
+      ],
+    }));
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -118,6 +139,24 @@ describe('expansions admin routes', () => {
       items: [adminExpansion],
     });
     expect(listAdminExpansions).toHaveBeenCalled();
+  });
+
+  it('lists expansion filter options for super_admin', async () => {
+    mockSession = { user: sessionUser, session: { id: 's1' } };
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/expansions/filter-options'),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({
+      items: [
+        {
+          id: 'e1',
+          name: '横刀断浪',
+          seasons: [{ id: 's1', name: '第一赛季' }],
+        },
+      ],
+    });
+    expect(listExpansionFilterOptions).toHaveBeenCalled();
   });
 
   it('creates an expansion for super_admin', async () => {

@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import {
   BookOpen,
   CalendarRange,
+  Castle,
   ClipboardList,
   Landmark,
   Server,
@@ -55,6 +56,11 @@ const ADMIN_NAV_ITEMS = [
     to: '/admin/expansions' as const,
     label: '资料片管理',
     icon: CalendarRange,
+  },
+  {
+    to: '/admin/dungeons' as const,
+    label: '副本管理',
+    icon: Castle,
   },
 ] as const;
 

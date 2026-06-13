@@ -13,6 +13,7 @@ const {
   getAdminExpansionById,
   isExpansionReferenced,
   listAdminExpansions,
+  listExpansionFilterOptions,
   updateAdminExpansion,
 } = await import('../../src/services/expansions-admin');
 
@@ -49,6 +50,29 @@ describe('expansions-admin service', () => {
           endDate: '2024-12-31',
           createdAt: createdAt.toISOString(),
           updatedAt: updatedAt.toISOString(),
+        },
+      ],
+    });
+  });
+
+  it('lists expansion filter options with nested seasons', async () => {
+    mockDb.setResults([
+      [{ id: 'exp-1', name: '横刀断浪' }],
+      [
+        {
+          id: 'season-1',
+          name: '第一赛季',
+          expansionId: 'exp-1',
+        },
+      ],
+    ]);
+
+    await expect(listExpansionFilterOptions()).resolves.toEqual({
+      items: [
+        {
+          id: 'exp-1',
+          name: '横刀断浪',
+          seasons: [{ id: 'season-1', name: '第一赛季' }],
         },
       ],
     });

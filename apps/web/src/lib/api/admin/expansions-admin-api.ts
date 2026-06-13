@@ -36,6 +36,12 @@ export const expansionsAdminApi = {
   list() {
     return requestJson('/api/v1/expansions', listExpansionsResponseSchema);
   },
+  listFilterOptions() {
+    return requestJson(
+      '/api/v1/expansions/filter-options',
+      listExpansionFilterOptionsResponseSchema,
+    );
+  },
   create(body: ExpansionFormValues) {
     return requestJson('/api/v1/expansions', adminExpansionListItemSchema, {
       method: 'POST',
@@ -62,3 +68,30 @@ export const expansionsAdminApi = {
 };
 
 export const expansionsAdminQueryKey = ['admin-expansions'] as const;
+
+export const adminExpansionSeasonOptionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export type AdminExpansionSeasonOption = z.infer<
+  typeof adminExpansionSeasonOptionSchema
+>;
+
+export const adminExpansionFilterOptionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  seasons: z.array(adminExpansionSeasonOptionSchema),
+});
+
+export type AdminExpansionFilterOption = z.infer<
+  typeof adminExpansionFilterOptionSchema
+>;
+
+export const listExpansionFilterOptionsResponseSchema = z.object({
+  items: z.array(adminExpansionFilterOptionSchema),
+});
+
+export type ListExpansionFilterOptionsResponse = z.infer<
+  typeof listExpansionFilterOptionsResponseSchema
+>;
