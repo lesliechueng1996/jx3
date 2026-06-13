@@ -1,5 +1,9 @@
 import type { RaidRunDraft, SignupDraft } from './raid-run-form-schema';
-import { computeSlotRoles, type RaidSignupRole } from './role-slot-utils';
+import {
+  computeSlotRoles,
+  getSlotIndex,
+  type RaidSignupRole,
+} from './role-slot-utils';
 
 export const createEmptySignup = (
   groupNumber: number,
@@ -22,8 +26,8 @@ export const createEmptySignup = (
 export const createInitialSignups = (): SignupDraft[] => {
   const signups: SignupDraft[] = [];
 
-  for (let position = 1; position <= 5; position += 1) {
-    for (let group = 1; group <= 5; group += 1) {
+  for (let group = 1; group <= 5; group += 1) {
+    for (let position = 1; position <= 5; position += 1) {
       signups.push(createEmptySignup(group, position));
     }
   }
@@ -56,9 +60,11 @@ export const applyReservedRoles = (draft: RaidRunDraft): RaidRunDraft => {
 
   return {
     ...draft,
-    signups: draft.signups.map((signup, index) => ({
+    signups: draft.signups.map((signup) => ({
       ...signup,
-      role: roles[index] ?? 'pending',
+      role:
+        roles[getSlotIndex(signup.groupNumber, signup.positionNumber)] ??
+        'pending',
     })),
   };
 };

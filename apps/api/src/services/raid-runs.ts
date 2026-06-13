@@ -60,10 +60,12 @@ export const computeSlotRoles = (
     ...Array.from({ length: reserved.reservedBoss }, () => 'boss' as const),
   ];
 
-  for (let position = 1; position <= 5; position += 1) {
-    for (let group = 1; group <= 5; group += 1) {
-      const index = (position - 1) * 5 + (group - 1);
-      roles[index] = sequence[index] ?? 'pending';
+  let slot = 0;
+  for (let group = 1; group <= 5; group += 1) {
+    for (let position = 1; position <= 5; position += 1) {
+      const index = getSlotIndex(group, position);
+      roles[index] = sequence[slot] ?? 'pending';
+      slot += 1;
     }
   }
 
@@ -76,7 +78,7 @@ export const slotKey = (groupNumber: number, positionNumber: number): string =>
 export const getSlotIndex = (
   groupNumber: number,
   positionNumber: number,
-): number => (positionNumber - 1) * 5 + (groupNumber - 1);
+): number => (groupNumber - 1) * 5 + (positionNumber - 1);
 
 export const deriveSignupFields = (
   role: RaidSignupRole,

@@ -58,9 +58,9 @@ const buildSignups = () => {
   const roles = computeSlotRoles(reserved);
   const signups = [];
 
-  for (let positionNumber = 1; positionNumber <= 5; positionNumber += 1) {
-    for (let groupNumber = 1; groupNumber <= 5; groupNumber += 1) {
-      const index = (positionNumber - 1) * 5 + (groupNumber - 1);
+  for (let groupNumber = 1; groupNumber <= 5; groupNumber += 1) {
+    for (let positionNumber = 1; positionNumber <= 5; positionNumber += 1) {
+      const index = (groupNumber - 1) * 5 + (positionNumber - 1);
       signups.push({
         groupNumber,
         positionNumber,
@@ -161,6 +161,25 @@ describe('raid-runs service', () => {
     });
   });
 
+  it('fills columns top-to-bottom then left-to-right', () => {
+    const roles = computeSlotRoles({
+      reservedTank: 3,
+      reservedHealer: 5,
+      reservedDps: 0,
+      reservedBoss: 0,
+    });
+
+    expect(roles[0]).toBe('healer');
+    expect(roles[1]).toBe('healer');
+    expect(roles[2]).toBe('healer');
+    expect(roles[3]).toBe('healer');
+    expect(roles[4]).toBe('healer');
+    expect(roles[5]).toBe('tank');
+    expect(roles[6]).toBe('tank');
+    expect(roles[7]).toBe('tank');
+    expect(roles[8]).toBe('pending');
+  });
+
   it('creates a pending raid run draft with 25 signups', async () => {
     const signupRows = buildSignupRows();
     mockDb.setResults([[runRow], signupRows]);
@@ -244,7 +263,7 @@ describe('raid-runs service', () => {
   it('rejects duplicate formation cores in the same group', async () => {
     const signups = buildSignups();
     signups[0] = { ...signups[0]!, isFormationCore: true };
-    signups[5] = { ...signups[5]!, isFormationCore: true };
+    signups[1] = { ...signups[1]!, isFormationCore: true };
 
     await expect(
       createRaidRunDraft('user-1', {

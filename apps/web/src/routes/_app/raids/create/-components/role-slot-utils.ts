@@ -34,7 +34,7 @@ export const ROLE_CELL_CLASSES: Record<RaidSignupRole, string> = {
 export const getSlotIndex = (
   groupNumber: number,
   positionNumber: number,
-): number => (positionNumber - 1) * 5 + (groupNumber - 1);
+): number => (groupNumber - 1) * 5 + (positionNumber - 1);
 
 export const slotKey = (groupNumber: number, positionNumber: number): string =>
   `${groupNumber}-${positionNumber}`;
@@ -50,10 +50,12 @@ export const computeSlotRoles = (
     ...Array.from({ length: reserved.reservedBoss }, () => 'boss' as const),
   ];
 
-  for (let position = 1; position <= 5; position += 1) {
-    for (let group = 1; group <= 5; group += 1) {
+  let slot = 0;
+  for (let group = 1; group <= 5; group += 1) {
+    for (let position = 1; position <= 5; position += 1) {
       const index = getSlotIndex(group, position);
-      roles[index] = sequence[index] ?? 'pending';
+      roles[index] = sequence[slot] ?? 'pending';
+      slot += 1;
     }
   }
 
