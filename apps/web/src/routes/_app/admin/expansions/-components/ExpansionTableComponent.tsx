@@ -1,3 +1,5 @@
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { Fragment } from 'react';
 import type { AdminExpansionListItem } from '#/lib/api/admin/expansions-admin-api';
 import { TableLoadingOverlayComponent } from '@/components/TableLoadingOverlayComponent';
 import { Button } from '@/components/ui/button';
@@ -9,11 +11,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
+import { SeasonPanelComponent } from './SeasonPanelComponent';
 
 type ExpansionTableComponentProps = {
   items: AdminExpansionListItem[];
   isLoading?: boolean;
   pendingExpansionId: string | null;
+  expandedExpansionId: string | null;
+  onToggleExpand: (expansionId: string) => void;
   onEdit: (expansion: AdminExpansionListItem) => void;
   onDelete: (expansion: AdminExpansionListItem) => void;
 };
@@ -31,6 +37,8 @@ export function ExpansionTableComponent({
   items,
   isLoading = false,
   pendingExpansionId,
+  expandedExpansionId,
+  onToggleExpand,
   onEdit,
   onDelete,
 }: ExpansionTableComponentProps) {
@@ -40,6 +48,7 @@ export function ExpansionTableComponent({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-10" />
             <TableHead>资料片名称</TableHead>
             <TableHead>资料片等级</TableHead>
             <TableHead>描述</TableHead>
@@ -52,47 +61,85 @@ export function ExpansionTableComponent({
           {!isLoading && items.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 className="py-10 text-center text-muted-foreground"
               >
                 暂无资料片数据
               </TableCell>
             </TableRow>
           ) : (
-            items.map((expansion) => (
-              <TableRow key={expansion.id}>
-                <TableCell className="font-medium">{expansion.name}</TableCell>
-                <TableCell>{expansion.level}</TableCell>
-                <TableCell className="max-w-xs truncate">
-                  {expansion.description ?? (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-                <TableCell>{formatDate(expansion.startDate)}</TableCell>
-                <TableCell>{formatDate(expansion.endDate)}</TableCell>
-                <TableCell>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEdit(expansion)}
+            items.map((expansion) => {
+              const isExpanded = expandedExpansionId === expansion.id;
+
+              return (
+                <Fragment key={expansion.id}>
+                  <TableRow>
+                    <TableCell>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-expanded={isExpanded}
+                        aria-label={
+                          isExpanded ? '收起赛季列表' : '展开赛季列表'
+                        }
+                        onClick={() => onToggleExpand(expansion.id)}
+                      >
+                        {isExpanded ? (
+                          <ChevronDown className="size-4" />
+                        ) : (
+                          <ChevronRight className="size-4" />
+                        )}
+                      </Button>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {expansion.name}
+                    </TableCell>
+                    <TableCell>{expansion.level}</TableCell>
+                    <TableCell className="max-w-xs truncate">
+                      {expansion.description ?? (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>{formatDate(expansion.startDate)}</TableCell>
+                    <TableCell>{formatDate(expansion.endDate)}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onEdit(expansion)}
+                        >
+                          编辑
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          disabled={pendingExpansionId === expansion.id}
+                          onClick={() => onDelete(expansion)}
+                        >
+                          删除
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                  {isExpanded ? (
+                    <TableRow
+                      className={cn(
+                        'bg-muted/20 hover:bg-muted/20',
+                        '[&>td]:p-0',
+                      )}
                     >
-                      编辑
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      disabled={pendingExpansionId === expansion.id}
-                      onClick={() => onDelete(expansion)}
-                    >
-                      删除
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
+                      <TableCell colSpan={7}>
+                        <SeasonPanelComponent expansion={expansion} />
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                </Fragment>
+              );
+            })
           )}
         </TableBody>
       </Table>

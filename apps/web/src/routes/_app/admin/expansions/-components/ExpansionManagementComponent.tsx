@@ -19,6 +19,9 @@ export function ExpansionManagementComponent() {
   const [pendingExpansionId, setPendingExpansionId] = useState<string | null>(
     null,
   );
+  const [expandedExpansionId, setExpandedExpansionId] = useState<string | null>(
+    null,
+  );
 
   const expansionsQuery = useQuery({
     queryKey: expansionsAdminQueryKey,
@@ -101,6 +104,12 @@ export function ExpansionManagementComponent() {
         items={expansionsQuery.data?.items ?? []}
         isLoading={expansionsQuery.isFetching}
         pendingExpansionId={pendingExpansionId}
+        expandedExpansionId={expandedExpansionId}
+        onToggleExpand={(expansionId) => {
+          setExpandedExpansionId((current) =>
+            current === expansionId ? null : expansionId,
+          );
+        }}
         onEdit={setEditingExpansion}
         onDelete={(expansion) => {
           if (!window.confirm(`确定删除资料片 ${expansion.name} 吗？`)) {

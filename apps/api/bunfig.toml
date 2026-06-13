@@ -12,6 +12,7 @@ coveragePathIgnorePatterns = [
   "src/services/kungfu-admin.ts",
   "src/services/game-servers-admin.ts",
   "src/services/expansions-admin.ts",
+  "src/services/seasons-admin.ts",
   "../../packages/auth/src/schema.ts",
   "../../packages/db/src/schema/**",
   "../../packages/logger/**",

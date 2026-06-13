@@ -1,5 +1,5 @@
 import { db } from '@jx3/db';
-import { gameDungeon, gameExpansion } from '@jx3/db/schema';
+import { gameDungeon, gameExpansion, gameSeason } from '@jx3/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import type {
   AdminExpansionListItem,
@@ -99,13 +99,20 @@ export const updateAdminExpansion = async (
 export const isExpansionReferenced = async (
   expansionId: string,
 ): Promise<boolean> => {
-  const rows = await db
-    .select({ id: gameDungeon.id })
-    .from(gameDungeon)
-    .where(eq(gameDungeon.expansionId, expansionId))
-    .limit(1);
+  const [dungeonRows, seasonRows] = await Promise.all([
+    db
+      .select({ id: gameDungeon.id })
+      .from(gameDungeon)
+      .where(eq(gameDungeon.expansionId, expansionId))
+      .limit(1),
+    db
+      .select({ id: gameSeason.id })
+      .from(gameSeason)
+      .where(eq(gameSeason.expansionId, expansionId))
+      .limit(1),
+  ]);
 
-  return rows.length > 0;
+  return dungeonRows.length > 0 || seasonRows.length > 0;
 };
 
 export const deleteAdminExpansion = async (

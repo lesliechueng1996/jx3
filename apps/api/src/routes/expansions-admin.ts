@@ -127,7 +127,7 @@ export const expansionsAdminRoute = new Elysia({
         set.status = 409;
         return errorResponse(
           'EXPANSION_IN_USE',
-          'Expansion is referenced by dungeons and cannot be deleted',
+          'Expansion is referenced by seasons or dungeons and cannot be deleted',
         );
       }
 

@@ -9,6 +9,7 @@ import { gameServersAdminRoute } from './routes/game-servers-admin';
 import { kungfuAdminRoute } from './routes/kungfu-admin';
 import { meRoute } from './routes/me';
 import { schoolsAdminRoute } from './routes/schools-admin';
+import { seasonsAdminRoute } from './routes/seasons-admin';
 import { uploadsRoute } from './routes/uploads';
 import { usersAdminRoute } from './routes/users-admin';
 
@@ -58,6 +59,7 @@ export const createApp = () =>
     .use(schoolsAdminRoute)
     .use(kungfuAdminRoute)
     .use(gameServersAdminRoute)
-    .use(expansionsAdminRoute);
+    .use(expansionsAdminRoute)
+    .use(seasonsAdminRoute);
 
 export type App = ReturnType<typeof createApp>;
