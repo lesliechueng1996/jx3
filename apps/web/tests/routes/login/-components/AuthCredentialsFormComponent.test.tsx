@@ -11,16 +11,9 @@ describe('AuthCredentialsFormComponent', () => {
   it('shows validation errors for invalid input', async () => {
     const user = userEvent.setup();
     const onSignIn = vi.fn();
-    const onSignUp = vi.fn();
-    const onGitHubSignIn = vi.fn();
 
     render(
-      <AuthCredentialsFormComponent
-        onSignIn={onSignIn}
-        onSignUp={onSignUp}
-        onGitHubSignIn={onGitHubSignIn}
-        isSubmitting={false}
-      />,
+      <AuthCredentialsFormComponent onSignIn={onSignIn} isSubmitting={false} />,
     );
 
     const form = screen.getByRole('form', { name: '登录表单' });
@@ -34,16 +27,9 @@ describe('AuthCredentialsFormComponent', () => {
   it('calls onSignIn with validated data', async () => {
     const user = userEvent.setup();
     const onSignIn = vi.fn();
-    const onSignUp = vi.fn();
-    const onGitHubSignIn = vi.fn();
 
     render(
-      <AuthCredentialsFormComponent
-        onSignIn={onSignIn}
-        onSignUp={onSignUp}
-        onGitHubSignIn={onGitHubSignIn}
-        isSubmitting={false}
-      />,
+      <AuthCredentialsFormComponent onSignIn={onSignIn} isSubmitting={false} />,
     );
 
     await user.type(screen.getByLabelText('邮箱'), 'user@example.com');
@@ -57,40 +43,9 @@ describe('AuthCredentialsFormComponent', () => {
     });
   });
 
-  it('calls onSignUp with validated data', async () => {
-    const user = userEvent.setup();
-    const onSignIn = vi.fn();
-    const onSignUp = vi.fn();
-    const onGitHubSignIn = vi.fn();
-
-    render(
-      <AuthCredentialsFormComponent
-        onSignIn={onSignIn}
-        onSignUp={onSignUp}
-        onGitHubSignIn={onGitHubSignIn}
-        isSubmitting={false}
-      />,
-    );
-
-    await user.type(screen.getByLabelText('邮箱'), 'new@example.com');
-    await user.type(screen.getByLabelText('密码'), 'password123');
-    await user.click(screen.getByRole('button', { name: '创建账号' }));
-
-    expect(onSignUp).toHaveBeenCalledWith({
-      email: 'new@example.com',
-      password: 'password123',
-    });
-    expect(onSignIn).not.toHaveBeenCalled();
-  });
-
   it('disables actions while submitting', () => {
     render(
-      <AuthCredentialsFormComponent
-        onSignIn={vi.fn()}
-        onSignUp={vi.fn()}
-        onGitHubSignIn={vi.fn()}
-        isSubmitting={true}
-      />,
+      <AuthCredentialsFormComponent onSignIn={vi.fn()} isSubmitting={true} />,
     );
 
     expect(screen.getByLabelText('邮箱')).toHaveProperty('disabled', true);
@@ -99,47 +54,17 @@ describe('AuthCredentialsFormComponent', () => {
       'disabled',
       true,
     );
-    expect(screen.getByRole('button', { name: '创建账号' })).toHaveProperty(
-      'disabled',
-      true,
-    );
-    expect(
-      screen.getByRole('button', { name: '使用 GitHub 登录' }),
-    ).toHaveProperty('disabled', true);
   });
 
-  it('does not call onSignUp when validation fails', async () => {
-    const user = userEvent.setup();
-    const onSignUp = vi.fn();
+  // it('calls onSignUp with validated data', async () => {
+  //   ...
+  // });
 
-    render(
-      <AuthCredentialsFormComponent
-        onSignIn={vi.fn()}
-        onSignUp={onSignUp}
-        onGitHubSignIn={vi.fn()}
-        isSubmitting={false}
-      />,
-    );
+  // it('does not call onSignUp when validation fails', async () => {
+  //   ...
+  // });
 
-    await user.click(screen.getByRole('button', { name: '创建账号' }));
-
-    expect(onSignUp).not.toHaveBeenCalled();
-  });
-
-  it('calls onGitHubSignIn when GitHub button is clicked', async () => {
-    const user = userEvent.setup();
-    const onGitHubSignIn = vi.fn();
-
-    render(
-      <AuthCredentialsFormComponent
-        onSignIn={vi.fn()}
-        onSignUp={vi.fn()}
-        onGitHubSignIn={onGitHubSignIn}
-        isSubmitting={false}
-      />,
-    );
-
-    await user.click(screen.getByRole('button', { name: '使用 GitHub 登录' }));
-    expect(onGitHubSignIn).toHaveBeenCalled();
-  });
+  // it('calls onGitHubSignIn when GitHub button is clicked', async () => {
+  //   ...
+  // });
 });

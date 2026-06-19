@@ -12,8 +12,8 @@ type LoginComponentProps = {
 };
 
 type SignInResult = Awaited<ReturnType<typeof authClient.signIn.email>>;
-type SignUpResult = Awaited<ReturnType<typeof authClient.signUp.email>>;
-type SocialSignInResult = Awaited<ReturnType<typeof authClient.signIn.social>>;
+// type SignUpResult = Awaited<ReturnType<typeof authClient.signUp.email>>;
+// type SocialSignInResult = Awaited<ReturnType<typeof authClient.signIn.social>>;
 
 function authErrorMessage(
   result: { error?: { message?: string | null } | null },
@@ -45,51 +45,50 @@ export function LoginComponent({ redirectTo }: LoginComponentProps) {
     },
   });
 
-  const signUpMutation = useMutation<SignUpResult, Error, AuthCredentials>({
-    mutationFn: (data) =>
-      authClient.signUp.email({ ...data, name: data.email }),
-    onSuccess: async (result) => {
-      const message = authErrorMessage(result, '注册失败');
-      if (message) {
-        toast.error(message);
-        return;
-      }
-      await invalidateCachedSession();
-      router.navigate({ to: destination });
-    },
-    onError: () => {
-      toast.error('注册失败');
-    },
-  });
+  // const signUpMutation = useMutation<SignUpResult, Error, AuthCredentials>({
+  //   mutationFn: (data) =>
+  //     authClient.signUp.email({ ...data, name: data.email }),
+  //   onSuccess: async (result) => {
+  //     const message = authErrorMessage(result, '注册失败');
+  //     if (message) {
+  //       toast.error(message);
+  //       return;
+  //     }
+  //     await invalidateCachedSession();
+  //     router.navigate({ to: destination });
+  //   },
+  //   onError: () => {
+  //     toast.error('注册失败');
+  //   },
+  // });
 
-  const githubMutation = useMutation<SocialSignInResult, Error, void>({
-    mutationFn: () =>
-      authClient.signIn.social({
-        provider: 'github',
-        callbackURL: destination,
-      }),
-    onSuccess: (result) => {
-      const message = authErrorMessage(result, 'GitHub 登录失败');
-      if (message) {
-        toast.error(message);
-      }
-    },
-    onError: () => {
-      toast.error('GitHub 登录失败');
-    },
-  });
+  // const githubMutation = useMutation<SocialSignInResult, Error, void>({
+  //   mutationFn: () =>
+  //     authClient.signIn.social({
+  //       provider: 'github',
+  //       callbackURL: destination,
+  //     }),
+  //   onSuccess: (result) => {
+  //     const message = authErrorMessage(result, 'GitHub 登录失败');
+  //     if (message) {
+  //       toast.error(message);
+  //     }
+  //   },
+  //   onError: () => {
+  //     toast.error('GitHub 登录失败');
+  //   },
+  // });
 
-  const isSubmitting =
-    signInMutation.isPending ||
-    signUpMutation.isPending ||
-    githubMutation.isPending;
+  const isSubmitting = signInMutation.isPending;
+  // signUpMutation.isPending ||
+  // githubMutation.isPending;
 
   return (
     <div className="flex min-h-svh items-center justify-center p-4">
       <AuthCredentialsFormComponent
         onSignIn={signInMutation.mutate}
-        onSignUp={signUpMutation.mutate}
-        onGitHubSignIn={() => githubMutation.mutate()}
+        // onSignUp={signUpMutation.mutate}
+        // onGitHubSignIn={() => githubMutation.mutate()}
         isSubmitting={isSubmitting}
       />
     </div>

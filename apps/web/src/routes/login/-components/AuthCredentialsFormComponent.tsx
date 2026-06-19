@@ -16,7 +16,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
+// import { Separator } from '@/components/ui/separator';
 import {
   type AuthCredentials,
   authCredentialsSchema,
@@ -24,8 +24,8 @@ import {
 
 type AuthCredentialsFormProps = {
   onSignIn: (data: AuthCredentials) => void;
-  onSignUp: (data: AuthCredentials) => void;
-  onGitHubSignIn: () => void;
+  // onSignUp: (data: AuthCredentials) => void;
+  // onGitHubSignIn: () => void;
   isSubmitting: boolean;
 };
 
@@ -44,8 +44,8 @@ function parseFieldErrors(issues: ZodIssue[]): FieldErrors {
 
 export function AuthCredentialsFormComponent({
   onSignIn,
-  onSignUp,
-  onGitHubSignIn,
+  // onSignUp,
+  // onGitHubSignIn,
   isSubmitting,
 }: AuthCredentialsFormProps) {
   const [email, setEmail] = useState('');
@@ -68,16 +68,16 @@ export function AuthCredentialsFormComponent({
     if (data) onSignIn(data);
   }
 
-  function handleSignUp() {
-    const data = validate();
-    if (data) onSignUp(data);
-  }
+  // function handleSignUp() {
+  //   const data = validate();
+  //   if (data) onSignUp(data);
+  // }
 
   return (
     <Card className="mx-auto w-full max-w-sm">
       <CardHeader>
         <CardTitle>登录</CardTitle>
-        <CardDescription>使用邮箱或 GitHub 账号继续。</CardDescription>
+        <CardDescription>使用邮箱账号继续。</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <form
@@ -123,7 +123,7 @@ export function AuthCredentialsFormComponent({
             登录
           </Button>
         </form>
-        <Button
+        {/* <Button
           type="button"
           variant="outline"
           disabled={isSubmitting}
@@ -143,7 +143,7 @@ export function AuthCredentialsFormComponent({
           onClick={onGitHubSignIn}
         >
           使用 GitHub 登录
-        </Button>
+        </Button> */}
       </CardContent>
       <CardFooter className="text-sm text-muted-foreground">
         密码至少需要 8 个字符。
