@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target bun --packages external",
+    "build": "bun build src/index.ts --outdir dist --target bun",
     "lint": "biome lint .",
     "check": "biome check .",
     "typecheck": "tsc --noEmit",
