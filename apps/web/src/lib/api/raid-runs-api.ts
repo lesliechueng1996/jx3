@@ -3,6 +3,39 @@ import { buildQueryString } from '#/lib/api/build-query';
 import { requestJson } from '#/lib/api/request';
 import type { signupDraftSchema } from '#/routes/_app/raids/create/-components/raid-run-form-schema';
 
+export const itemQualitySchema = z.enum([
+  'white',
+  'green',
+  'blue',
+  'purple',
+  'orange',
+]);
+
+export const raidLootItemSchema = z.object({
+  id: z.string(),
+  itemId: z.string(),
+  itemName: z.string(),
+  itemQuality: itemQualitySchema,
+  itemIcon: z.string().nullable(),
+  quantity: z.number().int(),
+  winnerSignupId: z.string().nullable(),
+  winnerCharacterName: z.string().nullable(),
+  winnerServerName: z.string().nullable(),
+  price: z.number().int().nullable(),
+  remark: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type RaidLootItem = z.infer<typeof raidLootItemSchema>;
+
+export const raidRunWageResponseSchema = z.object({
+  totalIncome: z.string().nullable(),
+  wagePerPerson: z.string().nullable(),
+});
+
+export type RaidRunWage = z.infer<typeof raidRunWageResponseSchema>;
+
 export const raidSignupRoleSchema = z.enum([
   'pending',
   'tank',
@@ -60,10 +93,13 @@ export const raidRunResponseSchema = z.object({
   reservedHealer: z.number().int(),
   reservedDps: z.number().int(),
   reservedBoss: z.number().int(),
+  totalIncome: z.string().nullable(),
+  wagePerPerson: z.string().nullable(),
   remark: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
   signups: z.array(raidSignupResponseSchema),
+  loot: z.array(raidLootItemSchema),
 });
 
 export type RaidRunResponse = z.infer<typeof raidRunResponseSchema>;
@@ -157,6 +193,66 @@ export const raidRunsApi = {
     return requestJson(
       `/api/v1/raid-runs/mine?${query}`,
       listMyRaidRunsResponseSchema,
+    );
+  },
+  createLoot(
+    raidRunId: string,
+    body: {
+      itemId: string;
+      quantity?: number;
+      winnerSignupId?: string | null;
+      price?: number | null;
+      remark?: string | null;
+    },
+  ) {
+    return requestJson(
+      `/api/v1/raid-runs/${raidRunId}/loot`,
+      raidLootItemSchema,
+      {
+        method: 'POST',
+        body: JSON.stringify(body),
+      },
+    );
+  },
+  patchLoot(
+    raidRunId: string,
+    lootId: string,
+    body: {
+      quantity?: number;
+      winnerSignupId?: string | null;
+      price?: number | null;
+      remark?: string | null;
+    },
+  ) {
+    return requestJson(
+      `/api/v1/raid-runs/${raidRunId}/loot/${lootId}`,
+      raidLootItemSchema,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      },
+    );
+  },
+  deleteLoot(raidRunId: string, lootId: string) {
+    return requestJson(
+      `/api/v1/raid-runs/${raidRunId}/loot/${lootId}`,
+      z.null(),
+      {
+        method: 'DELETE',
+      },
+    );
+  },
+  patchWage(
+    raidRunId: string,
+    body: { totalIncome: string | null; wagePerPerson: string | null },
+  ) {
+    return requestJson(
+      `/api/v1/raid-runs/${raidRunId}/wage`,
+      raidRunWageResponseSchema,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      },
     );
   },
 };

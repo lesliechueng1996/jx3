@@ -6,6 +6,7 @@ import { authMacro } from './middleware/auth-macro';
 import { loggerPlugin } from './plugins/logger';
 import { dungeonsAdminRoute } from './routes/dungeons-admin';
 import { expansionsAdminRoute } from './routes/expansions-admin';
+import { gameItemsRoute } from './routes/game-items';
 import { gameServersAdminRoute } from './routes/game-servers-admin';
 import { kungfuAdminRoute } from './routes/kungfu-admin';
 import { meRoute } from './routes/me';
@@ -52,6 +53,10 @@ export const createApp = () =>
               name: 'Raids',
               description: 'Raid run creation and management',
             },
+            {
+              name: 'GameItems',
+              description: 'Game item search and creation',
+            },
             { name: 'Uploads', description: 'File upload resources' },
             {
               name: 'Auth',
@@ -72,6 +77,7 @@ export const createApp = () =>
     .use(expansionsAdminRoute)
     .use(seasonsAdminRoute)
     .use(dungeonsAdminRoute)
+    .use(gameItemsRoute)
     .use(raidRunsRoute);
 
 export type App = ReturnType<typeof createApp>;

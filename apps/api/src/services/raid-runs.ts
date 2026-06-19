@@ -8,6 +8,7 @@ import {
   raidSignup,
 } from '@jx3/db/schema';
 import { and, asc, desc, eq, inArray, ne, or } from 'drizzle-orm';
+import type { RaidLootItem } from '../schemas/raid-loot';
 import type {
   CreateRaidRunBody,
   ListMyRaidRunsResponse,
@@ -20,27 +21,18 @@ import type {
   SignupInput,
 } from '../schemas/raid-runs';
 import { getAdminDungeonById } from './dungeons-admin';
+import { listRaidLoot } from './raid-loot';
+import {
+  RaidRunConflictError,
+  RaidRunForbiddenError,
+  RaidRunValidationError,
+} from './raid-run-errors';
 
-export class RaidRunValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'RaidRunValidationError';
-  }
-}
-
-export class RaidRunForbiddenError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'RaidRunForbiddenError';
-  }
-}
-
-export class RaidRunConflictError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'RaidRunConflictError';
-  }
-}
+export {
+  RaidRunConflictError,
+  RaidRunForbiddenError,
+  RaidRunValidationError,
+} from './raid-run-errors';
 
 export const DRAFT_DUNGEON_SENTINEL = '00000000-0000-0000-0000-000000000000';
 const DRAFT_START_TIME_SENTINEL = new Date('1970-01-01T00:00:00.000Z');
@@ -304,6 +296,7 @@ const toSignupResponse = (
 const toRaidRunResponse = (
   run: typeof raidRun.$inferSelect,
   signups: RaidSignupResponse[],
+  loot: RaidLootItem[] = [],
 ): RaidRunResponse => ({
   id: run.id,
   name: run.name,
@@ -317,10 +310,13 @@ const toRaidRunResponse = (
   reservedHealer: run.reservedHealer,
   reservedDps: run.reservedDps,
   reservedBoss: run.reservedBoss,
+  totalIncome: run.totalIncome,
+  wagePerPerson: run.wagePerPerson,
   remark: run.remark,
   createdAt: run.createdAt.toISOString(),
   updatedAt: run.updatedAt.toISOString(),
   signups,
+  loot,
 });
 
 const validateForeignKeys = async (
@@ -807,9 +803,11 @@ export const getRaidRunDraft = async (
   assertOwner(run, userId);
 
   const signupRows = await getSignupsByRaidRunId(raidRunId);
+  const loot = await listRaidLoot(raidRunId);
   return toRaidRunResponse(
     run,
     signupRows.map((row) => toSignupResponse(row)),
+    loot,
   );
 };
 

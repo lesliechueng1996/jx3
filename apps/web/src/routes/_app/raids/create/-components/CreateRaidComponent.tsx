@@ -9,6 +9,7 @@ import {
 import { type RaidRunResponse, raidRunsApi } from '#/lib/api/raid-runs-api';
 import { ApiRequestError } from '#/lib/api/request';
 import { Button } from '@/components/ui/button';
+import { LootPanelComponent } from './LootPanelComponent';
 import { RaidGridComponent } from './RaidGridComponent';
 import { RaidRunFormComponent } from './RaidRunFormComponent';
 import type { RaidRunDraft, SignupDraft } from './raid-run-form-schema';
@@ -76,6 +77,9 @@ export function CreateRaidComponent({
     JSON.stringify(initialData ? toDraftFromResponse(initialData) : draft),
   );
   const [status, setStatus] = useState(initialData?.status ?? 'pending');
+  const [signupResponses, setSignupResponses] = useState(
+    initialData?.signups ?? [],
+  );
   const [selected, setSelected] = useState<{
     groupNumber: number;
     positionNumber: number;
@@ -120,6 +124,7 @@ export function CreateRaidComponent({
   const isEditable =
     status === 'pending' || status === 'recruiting' || status === 'ongoing';
   const isTerminal = status === 'completed' || status === 'cancelled';
+  const isLootEditable = status === 'ongoing' || status === 'completed';
   const isDirty = JSON.stringify(draft) !== savedSnapshot;
   const canSave = isEditable && isReservedTotalValid(draft, playerLimit);
 
@@ -207,6 +212,7 @@ export function CreateRaidComponent({
       setDraft(nextDraft);
       setSavedSnapshot(JSON.stringify(nextDraft));
       setStatus(response.status);
+      setSignupResponses(response.signups);
       toast.success(isDraft ? '已暂存' : '已保存');
 
       if (mode === 'create') {
@@ -239,6 +245,7 @@ export function CreateRaidComponent({
       setDraft(nextDraft);
       setSavedSnapshot(JSON.stringify(nextDraft));
       setStatus(response.status);
+      setSignupResponses(response.signups);
       toast.success('开团已发布');
     },
     onError: (error) => handleError(error, '发布失败'),
@@ -309,22 +316,39 @@ export function CreateRaidComponent({
           />
         </section>
 
-        <section className="rounded-lg border p-4">
-          <h2 className="mb-4 text-sm font-medium text-muted-foreground">
-            团队布局
-          </h2>
-          <RaidGridComponent
-            signups={draft.signups}
-            selected={selected}
-            disabled={!isEditable}
-            playerLimit={playerLimit}
-            serverNameById={serverNameById}
-            kungfuIconById={kungfuIconById}
-            onSelect={(groupNumber, positionNumber) =>
-              setSelected({ groupNumber, positionNumber })
-            }
-            onSwap={handleSwap}
-          />
+        <section className="flex flex-col gap-4">
+          <div className="rounded-lg border p-4">
+            <h2 className="mb-4 text-sm font-medium text-muted-foreground">
+              团队布局
+            </h2>
+            <RaidGridComponent
+              signups={draft.signups}
+              selected={selected}
+              disabled={!isEditable}
+              playerLimit={playerLimit}
+              serverNameById={serverNameById}
+              kungfuIconById={kungfuIconById}
+              onSelect={(groupNumber, positionNumber) =>
+                setSelected({ groupNumber, positionNumber })
+              }
+              onSwap={handleSwap}
+            />
+          </div>
+
+          {raidRunId ? (
+            <div className="rounded-lg border p-4">
+              <LootPanelComponent
+                raidRunId={raidRunId}
+                signups={signupResponses}
+                initialLoot={initialData?.loot ?? []}
+                wage={{
+                  totalIncome: initialData?.totalIncome ?? null,
+                  wagePerPerson: initialData?.wagePerPerson ?? null,
+                }}
+                editable={isLootEditable}
+              />
+            </div>
+          ) : null}
         </section>
 
         <section className="rounded-lg border p-4">

@@ -15,6 +15,8 @@ const raidRunResponse = {
   reservedHealer: 5,
   reservedDps: 15,
   reservedBoss: 1,
+  totalIncome: null,
+  wagePerPerson: null,
   remark: null,
   createdAt: '2026-06-13T00:00:00.000Z',
   updatedAt: '2026-06-13T00:00:00.000Z',
@@ -36,6 +38,7 @@ const raidRunResponse = {
     createdAt: '2026-06-13T00:00:00.000Z',
     updatedAt: '2026-06-13T00:00:00.000Z',
   })),
+  loot: [],
 };
 
 const sessionUser: {

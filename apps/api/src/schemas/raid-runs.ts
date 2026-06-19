@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { raidLootItemSchema } from './raid-loot';
 
 export const RAID_SIGNUP_ROLES = [
   'pending',
@@ -143,10 +144,13 @@ export const raidRunResponseSchema = z.object({
   reservedHealer: z.number().int(),
   reservedDps: z.number().int(),
   reservedBoss: z.number().int(),
+  totalIncome: z.string().nullable(),
+  wagePerPerson: z.string().nullable(),
   remark: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
   signups: z.array(raidSignupResponseSchema),
+  loot: z.array(raidLootItemSchema),
 });
 
 export type RaidRunResponse = z.infer<typeof raidRunResponseSchema>;

@@ -93,5 +93,9 @@ export const requestJson = async <T>(
     }
   }
 
+  if (response.status === 204) {
+    return schema.parse(null);
+  }
+
   return parseJson(response, schema);
 };

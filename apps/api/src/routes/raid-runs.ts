@@ -3,6 +3,13 @@ import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
 import { errorResponse } from '../schemas/common';
 import {
+  createRaidLootBodySchema,
+  patchRaidLootBodySchema,
+  patchRaidRunWageBodySchema,
+  raidLootItemSchema,
+  raidRunWageResponseSchema,
+} from '../schemas/raid-loot';
+import {
   createRaidRunBodySchema,
   listMyRaidRunsQuerySchema,
   listMyRaidRunsResponseSchema,
@@ -10,6 +17,12 @@ import {
   publishRaidRunBodySchema,
   raidRunResponseSchema,
 } from '../schemas/raid-runs';
+import {
+  createRaidLoot,
+  deleteRaidLoot,
+  patchRaidLoot,
+  patchRaidRunWage,
+} from '../services/raid-loot';
 import {
   createRaidRunDraft,
   getRaidRunDraft,
@@ -23,6 +36,11 @@ import {
 
 const raidRunIdParamsSchema = t.Object({
   id: t.String(),
+});
+
+const raidLootParamsSchema = t.Object({
+  id: t.String(),
+  lootId: t.String(),
 });
 
 export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
@@ -215,6 +233,200 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
         summary: 'Publish a raid run',
         description:
           'Validates and publishes a pending raid run to recruiting status.',
+      },
+    },
+  )
+  .post(
+    '/api/v1/raid-runs/:id/loot',
+    async ({ params, body, user, set, log }) => {
+      try {
+        const created = await createRaidLoot(params.id, user.id, body);
+        if (!created) {
+          set.status = 404;
+          return errorResponse('NOT_FOUND', 'Raid run not found');
+        }
+        set.status = 201;
+        return created;
+      } catch (error) {
+        if (error instanceof RaidRunForbiddenError) {
+          set.status = 403;
+          return errorResponse('FORBIDDEN', error.message);
+        }
+        if (error instanceof RaidRunConflictError) {
+          set.status = 409;
+          return errorResponse('CONFLICT', error.message);
+        }
+        log.error(
+          { err: error, raidRunId: params.id },
+          'failed to create raid loot',
+        );
+        set.status = 400;
+        return errorResponse('CREATE_FAILED', 'Failed to create raid loot');
+      }
+    },
+    {
+      auth: true,
+      params: raidRunIdParamsSchema,
+      body: createRaidLootBodySchema,
+      response: {
+        201: raidLootItemSchema,
+        400: t.Any(),
+        401: t.Any(),
+        403: t.Any(),
+        404: t.Any(),
+        409: t.Any(),
+      },
+      detail: {
+        tags: ['Raids'],
+        summary: 'Add raid loot',
+        description:
+          'Records loot for an ongoing or completed raid run. Only the creator can add loot.',
+      },
+    },
+  )
+  .patch(
+    '/api/v1/raid-runs/:id/loot/:lootId',
+    async ({ params, body, user, set, log }) => {
+      try {
+        const updated = await patchRaidLoot(
+          params.id,
+          params.lootId,
+          user.id,
+          body,
+        );
+        if (!updated) {
+          set.status = 404;
+          return errorResponse('NOT_FOUND', 'Raid loot not found');
+        }
+        return updated;
+      } catch (error) {
+        if (error instanceof RaidRunForbiddenError) {
+          set.status = 403;
+          return errorResponse('FORBIDDEN', error.message);
+        }
+        if (error instanceof RaidRunConflictError) {
+          set.status = 409;
+          return errorResponse('CONFLICT', error.message);
+        }
+        log.error(
+          { err: error, raidRunId: params.id, lootId: params.lootId },
+          'failed to patch raid loot',
+        );
+        set.status = 400;
+        return errorResponse('UPDATE_FAILED', 'Failed to update raid loot');
+      }
+    },
+    {
+      auth: true,
+      params: raidLootParamsSchema,
+      body: patchRaidLootBodySchema,
+      response: {
+        200: raidLootItemSchema,
+        400: t.Any(),
+        401: t.Any(),
+        403: t.Any(),
+        404: t.Any(),
+        409: t.Any(),
+      },
+      detail: {
+        tags: ['Raids'],
+        summary: 'Update raid loot',
+        description:
+          'Updates loot details such as winner or price for an ongoing or completed raid run.',
+      },
+    },
+  )
+  .delete(
+    '/api/v1/raid-runs/:id/loot/:lootId',
+    async ({ params, user, set, log }) => {
+      try {
+        const deleted = await deleteRaidLoot(params.id, params.lootId, user.id);
+        if (!deleted) {
+          set.status = 404;
+          return errorResponse('NOT_FOUND', 'Raid loot not found');
+        }
+        set.status = 204;
+        return null;
+      } catch (error) {
+        if (error instanceof RaidRunForbiddenError) {
+          set.status = 403;
+          return errorResponse('FORBIDDEN', error.message);
+        }
+        if (error instanceof RaidRunConflictError) {
+          set.status = 409;
+          return errorResponse('CONFLICT', error.message);
+        }
+        log.error(
+          { err: error, raidRunId: params.id, lootId: params.lootId },
+          'failed to delete raid loot',
+        );
+        set.status = 400;
+        return errorResponse('DELETE_FAILED', 'Failed to delete raid loot');
+      }
+    },
+    {
+      auth: true,
+      params: raidLootParamsSchema,
+      response: {
+        204: t.Null(),
+        400: t.Any(),
+        401: t.Any(),
+        403: t.Any(),
+        404: t.Any(),
+        409: t.Any(),
+      },
+      detail: {
+        tags: ['Raids'],
+        summary: 'Delete raid loot',
+        description:
+          'Removes a loot record from an ongoing or completed raid run.',
+      },
+    },
+  )
+  .patch(
+    '/api/v1/raid-runs/:id/wage',
+    async ({ params, body, user, set, log }) => {
+      try {
+        const updated = await patchRaidRunWage(params.id, user.id, body);
+        if (!updated) {
+          set.status = 404;
+          return errorResponse('NOT_FOUND', 'Raid run not found');
+        }
+        return updated;
+      } catch (error) {
+        if (error instanceof RaidRunForbiddenError) {
+          set.status = 403;
+          return errorResponse('FORBIDDEN', error.message);
+        }
+        if (error instanceof RaidRunConflictError) {
+          set.status = 409;
+          return errorResponse('CONFLICT', error.message);
+        }
+        log.error(
+          { err: error, raidRunId: params.id },
+          'failed to patch raid run wage',
+        );
+        set.status = 400;
+        return errorResponse('UPDATE_FAILED', 'Failed to update raid run wage');
+      }
+    },
+    {
+      auth: true,
+      params: raidRunIdParamsSchema,
+      body: patchRaidRunWageBodySchema,
+      response: {
+        200: raidRunWageResponseSchema,
+        400: t.Any(),
+        401: t.Any(),
+        403: t.Any(),
+        404: t.Any(),
+        409: t.Any(),
+      },
+      detail: {
+        tags: ['Raids'],
+        summary: 'Record raid run wage',
+        description:
+          'Updates total income and wage per person for an ongoing or completed raid run.',
       },
     },
   );
