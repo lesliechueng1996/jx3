@@ -13,6 +13,7 @@ export const kungfuOptionSchema = z.object({
   name: z.string(),
   schoolId: z.string(),
   icon: z.string().nullable(),
+  alias: z.array(z.string()),
 });
 
 export const listKungfuOptionsResponseSchema = z.object({

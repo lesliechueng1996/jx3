@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { buildQueryString } from '#/lib/api/build-query';
 import { requestJson } from '#/lib/api/request';
 import type { signupDraftSchema } from '#/routes/_app/raids/create/-components/raid-run-form-schema';
 
@@ -67,6 +68,45 @@ export const raidRunResponseSchema = z.object({
 
 export type RaidRunResponse = z.infer<typeof raidRunResponseSchema>;
 
+export const raidRunListItemMySignupSchema = z.object({
+  role: raidSignupRoleSchema,
+  status: raidSignupStatusSchema,
+  isLeader: z.boolean(),
+  characterName: z.string().nullable(),
+  serverId: z.string().uuid().nullable(),
+  serverName: z.string().nullable(),
+});
+
+export type RaidRunListItemMySignup = z.infer<
+  typeof raidRunListItemMySignupSchema
+>;
+
+export const raidRunListItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  status: raidRunStatusSchema,
+  dungeonId: z.string().nullable(),
+  dungeonName: z.string().nullable(),
+  gatherTime: z.string().nullable(),
+  startTime: z.string().nullable(),
+  endTime: z.string().nullable(),
+  createdAt: z.string(),
+  isCreator: z.boolean(),
+  mySignup: raidRunListItemMySignupSchema.nullable(),
+});
+
+export type RaidRunListItem = z.infer<typeof raidRunListItemSchema>;
+
+export const listMyRaidRunsResponseSchema = z.object({
+  items: z.array(raidRunListItemSchema),
+});
+
+export type ListMyRaidRunsResponse = z.infer<
+  typeof listMyRaidRunsResponseSchema
+>;
+
+export type RaidHistoryFilter = 'all' | 'created' | 'leader';
+
 export type RaidRunPayload = {
   name?: string;
   description?: string | null;
@@ -112,6 +152,14 @@ export const raidRunsApi = {
       },
     );
   },
+  listMine(filter: RaidHistoryFilter) {
+    const query = buildQueryString({ filter });
+    return requestJson(
+      `/api/v1/raid-runs/mine?${query}`,
+      listMyRaidRunsResponseSchema,
+    );
+  },
 };
 
 export const raidRunsQueryKey = ['raid-runs'] as const;
+export const raidRunsMineQueryKey = ['raid-runs', 'mine'] as const;

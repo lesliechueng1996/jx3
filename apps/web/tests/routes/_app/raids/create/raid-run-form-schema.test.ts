@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  createDraftSaveSchema,
+  createPublishSchema,
   draftSaveSchema,
   publishSchema,
 } from '#/routes/_app/raids/create/-components/raid-run-form-schema';
@@ -11,11 +13,11 @@ describe('raid-run-form-schema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('rejects reserved total above 25', () => {
-    const result = draftSaveSchema.safeParse({
-      ...createInitialRaidRunDraft(),
-      reservedDps: 20,
-      reservedHealer: 10,
+  it('rejects reserved total above player limit', () => {
+    const result = createDraftSaveSchema(10).safeParse({
+      ...createInitialRaidRunDraft(10),
+      reservedDps: 6,
+      reservedHealer: 5,
     });
 
     expect(result.success).toBe(false);
@@ -26,16 +28,16 @@ describe('raid-run-form-schema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('accepts valid publish payload', () => {
-    const result = publishSchema.safeParse({
-      ...createInitialRaidRunDraft(),
+  it('accepts valid publish payload for a 10-player dungeon', () => {
+    const result = createPublishSchema(10).safeParse({
+      ...createInitialRaidRunDraft(10),
       name: '周末团',
       dungeonId: '00000000-0000-4000-8000-000000000001',
       startTime: '2026-06-14T12:00:00.000Z',
-      reservedDps: 10,
-      reservedHealer: 5,
+      reservedDps: 5,
+      reservedHealer: 3,
       reservedTank: 2,
-      reservedBoss: 1,
+      reservedBoss: 0,
     });
 
     expect(result.success).toBe(true);

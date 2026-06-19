@@ -1,14 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { zodValidator } from '@tanstack/zod-adapter';
+import { z } from 'zod';
+import { RaidHistoryComponent } from './-components/RaidHistoryComponent';
+
+const raidHistorySearchSchema = z.object({
+  filter: z.enum(['all', 'created', 'leader']).default('all'),
+});
 
 export const Route = createFileRoute('/_app/raids/history/')({
+  validateSearch: zodValidator(raidHistorySearchSchema),
   component: RaidHistoryPage,
 });
 
 function RaidHistoryPage() {
-  return (
-    <div className="space-y-2">
-      <h1 className="text-2xl font-semibold tracking-tight">参团记录</h1>
-      <p className="text-sm text-muted-foreground">功能开发中，敬请期待。</p>
-    </div>
-  );
+  return <RaidHistoryComponent />;
 }

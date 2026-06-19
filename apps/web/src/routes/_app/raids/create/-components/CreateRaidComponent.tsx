@@ -12,15 +12,19 @@ import { Button } from '@/components/ui/button';
 import { RaidGridComponent } from './RaidGridComponent';
 import { RaidRunFormComponent } from './RaidRunFormComponent';
 import type { RaidRunDraft, SignupDraft } from './raid-run-form-schema';
-import { draftSaveSchema, publishSchema } from './raid-run-form-schema';
+import {
+  createDraftSaveSchema,
+  createPublishSchema,
+} from './raid-run-form-schema';
 import {
   applyReservedRoles,
   applySignupPatch,
   createInitialRaidRunDraft,
   findSignup,
+  resizeDraftForPlayerLimit,
   swapSignupsAt,
 } from './raid-signup-draft';
-import { isReservedTotalValid } from './role-slot-utils';
+import { DEFAULT_PLAYER_LIMIT, isReservedTotalValid } from './role-slot-utils';
 import { SignupPanelComponent } from './SignupPanelComponent';
 
 type CreateRaidComponentProps = {
@@ -76,13 +80,51 @@ export function CreateRaidComponent({
     positionNumber: number;
   } | null>(null);
 
-  const isPublished = status !== 'pending';
+  const dungeonQuery = useQuery({
+    queryKey: [...gameReferenceQueryKey, 'dungeon', draft.dungeonId],
+    queryFn: async () => {
+      const response = await gameReferenceApi.searchDungeons('');
+      return response.items.find((item) => item.id === draft.dungeonId) ?? null;
+    },
+    enabled: Boolean(draft.dungeonId),
+  });
+
+  const playerLimit = dungeonQuery.data?.playerLimit ?? DEFAULT_PLAYER_LIMIT;
+
+  useEffect(() => {
+    const dungeon = dungeonQuery.data;
+    if (!dungeon) {
+      return;
+    }
+
+    if (draft.signups.length === dungeon.playerLimit) {
+      return;
+    }
+
+    setDraft((current) =>
+      resizeDraftForPlayerLimit(current, dungeon.playerLimit),
+    );
+  }, [draft.signups.length, dungeonQuery.data]);
+
+  const draftSaveSchema = useMemo(
+    () => createDraftSaveSchema(playerLimit),
+    [playerLimit],
+  );
+  const publishSchema = useMemo(
+    () => createPublishSchema(playerLimit),
+    [playerLimit],
+  );
+
+  const isDraft = status === 'pending';
+  const isEditable =
+    status === 'pending' || status === 'recruiting' || status === 'ongoing';
+  const isTerminal = status === 'completed' || status === 'cancelled';
   const isDirty = JSON.stringify(draft) !== savedSnapshot;
-  const canSave = !isPublished && isReservedTotalValid(draft);
+  const canSave = isEditable && isReservedTotalValid(draft, playerLimit);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (isDirty && !isPublished) {
+      if (isDirty && isEditable) {
         event.preventDefault();
         event.returnValue = '';
       }
@@ -90,7 +132,7 @@ export function CreateRaidComponent({
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [isDirty, isPublished]);
+  }, [isDirty, isEditable]);
 
   const selectedSignup = useMemo((): SignupDraft | null => {
     if (!selected) {
@@ -147,7 +189,9 @@ export function CreateRaidComponent({
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const parsed = draftSaveSchema.parse(draft);
+      const parsed = isDraft
+        ? draftSaveSchema.parse(draft)
+        : publishSchema.parse(draft);
       if (mode === 'create' && !raidRunId) {
         return raidRunsApi.create(parsed);
       }
@@ -161,7 +205,7 @@ export function CreateRaidComponent({
       setDraft(nextDraft);
       setSavedSnapshot(JSON.stringify(nextDraft));
       setStatus(response.status);
-      toast.success('已暂存');
+      toast.success(isDraft ? '已暂存' : '已保存');
 
       if (mode === 'create') {
         await navigate({
@@ -170,7 +214,7 @@ export function CreateRaidComponent({
         });
       }
     },
-    onError: (error) => handleError(error, '暂存失败'),
+    onError: (error) => handleError(error, isDraft ? '暂存失败' : '保存失败'),
   });
 
   const publishMutation = useMutation({
@@ -199,7 +243,7 @@ export function CreateRaidComponent({
   });
 
   const updateDraft = (next: RaidRunDraft) => {
-    setDraft(applyReservedRoles(next));
+    setDraft(applyReservedRoles(next, playerLimit));
   };
 
   const updateSignup = (patch: Partial<RaidRunDraft['signups'][number]>) => {
@@ -228,17 +272,25 @@ export function CreateRaidComponent({
     setSelected(to);
   };
 
-  const publishDisabled = mode === 'create' || !raidRunId || isPublished;
+  const publishDisabled = mode === 'create' || !raidRunId || !isDraft;
   const publishHint =
-    mode === 'create' ? '请先暂存后再发布' : isPublished ? '已发布' : null;
+    mode === 'create' ? '请先暂存后再发布' : !isDraft ? '已发布' : null;
+  const saveLabel = isDraft ? '暂存' : '保存';
+  const savePendingLabel = isDraft ? '暂存中…' : '保存中…';
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">我要开团</h1>
         <p className="text-sm text-muted-foreground">
-          填写开团信息、布置 25 人团队，并预填部分团员。
+          填写开团信息、布置
+          {draft.dungeonId ? `${playerLimit} 人` : '团队'}布局，并预填部分团员。
         </p>
+        {isTerminal ? (
+          <p className="mt-3 rounded-md border border-dashed px-3 py-2 text-sm text-muted-foreground">
+            该团已结束，不可编辑。
+          </p>
+        ) : null}
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(280px,320px)_1fr_minmax(280px,320px)]">
@@ -248,7 +300,7 @@ export function CreateRaidComponent({
           </h2>
           <RaidRunFormComponent
             value={draft}
-            disabled={isPublished}
+            disabled={!isEditable}
             onChange={updateDraft}
           />
         </section>
@@ -260,7 +312,8 @@ export function CreateRaidComponent({
           <RaidGridComponent
             signups={draft.signups}
             selected={selected}
-            disabled={isPublished}
+            disabled={!isEditable}
+            playerLimit={playerLimit}
             serverNameById={serverNameById}
             kungfuIconById={kungfuIconById}
             onSelect={(groupNumber, positionNumber) =>
@@ -276,7 +329,7 @@ export function CreateRaidComponent({
           </h2>
           <SignupPanelComponent
             signup={selectedSignup}
-            disabled={isPublished}
+            disabled={!isEditable}
             onChange={updateSignup}
             servers={serversQuery.data?.items ?? []}
             schools={schoolsQuery.data?.items ?? []}
@@ -288,10 +341,10 @@ export function CreateRaidComponent({
       <div className="flex flex-wrap items-center gap-3">
         <Button
           variant="secondary"
-          disabled={!canSave || saveMutation.isPending || isPublished}
+          disabled={!canSave || saveMutation.isPending || !isEditable}
           onClick={() => saveMutation.mutate()}
         >
-          {saveMutation.isPending ? '暂存中…' : '暂存'}
+          {saveMutation.isPending ? savePendingLabel : saveLabel}
         </Button>
         <Button
           disabled={publishDisabled || publishMutation.isPending}
@@ -302,7 +355,7 @@ export function CreateRaidComponent({
         {publishHint ? (
           <span className="text-sm text-muted-foreground">{publishHint}</span>
         ) : null}
-        {isDirty && !isPublished ? (
+        {isDirty && isEditable ? (
           <span className="text-sm text-amber-600">有未保存的修改</span>
         ) : null}
       </div>

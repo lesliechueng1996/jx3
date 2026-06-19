@@ -58,6 +58,7 @@ const listAllKungfuOptions = mock(async () => ({
       name: '傲血战意',
       schoolId: '00000000-0000-4000-8000-000000000001',
       icon: 'https://example.com/icon.png',
+      alias: ['傲血'],
     },
   ],
 }));

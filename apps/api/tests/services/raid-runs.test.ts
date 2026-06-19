@@ -37,6 +37,7 @@ const {
   deriveSignupFields,
   DRAFT_DUNGEON_SENTINEL,
   getRaidRunDraft,
+  listMyRaidRuns,
   patchRaidRunDraft,
   publishRaidRun,
   RaidRunConflictError,
@@ -54,13 +55,17 @@ const reserved = {
   reservedBoss: 1,
 };
 
-const buildSignups = () => {
-  const roles = computeSlotRoles(reserved);
+const buildSignups = (playerLimit = 25) => {
+  const roles = computeSlotRoles(reserved, playerLimit);
   const signups = [];
 
   for (let groupNumber = 1; groupNumber <= 5; groupNumber += 1) {
     for (let positionNumber = 1; positionNumber <= 5; positionNumber += 1) {
       const index = (groupNumber - 1) * 5 + (positionNumber - 1);
+      if (roles[index] === undefined) {
+        continue;
+      }
+
       signups.push({
         groupNumber,
         positionNumber,
@@ -197,14 +202,55 @@ describe('raid-runs service', () => {
     expect(created.signups).toHaveLength(25);
   });
 
-  it('rejects reserved totals above 25', async () => {
+  it('rejects reserved totals above dungeon player limit', async () => {
+    getAdminDungeonById.mockImplementation(async (dungeonId: string) => {
+      if (dungeonId === 'dungeon-10') {
+        return {
+          id: 'dungeon-10',
+          name: '五人本',
+          expansionId: 'exp-1',
+          expansionName: '横刀断浪',
+          seasonId: 'season-1',
+          seasonName: '第一赛季',
+          playerLimit: 10,
+          difficulty: 'heroic' as const,
+          levelRequirement: 130,
+          bossCount: 1,
+          resetWeekdays: [1],
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        };
+      }
+
+      if (dungeonId === 'dungeon-1') {
+        return {
+          id: 'dungeon-1',
+          name: '雷域大泽',
+          expansionId: 'exp-1',
+          expansionName: '横刀断浪',
+          seasonId: 'season-1',
+          seasonName: '第一赛季',
+          playerLimit: 25,
+          difficulty: 'heroic' as const,
+          levelRequirement: 130,
+          bossCount: 6,
+          resetWeekdays: [1, 4],
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        };
+      }
+
+      return null;
+    });
+
     await expect(
       createRaidRunDraft('user-1', {
-        reservedDps: 20,
-        reservedHealer: 10,
+        dungeonId: 'dungeon-10',
+        reservedDps: 8,
+        reservedHealer: 5,
         reservedTank: 0,
         reservedBoss: 0,
-        signups: buildSignups(),
+        signups: buildSignups(10),
       }),
     ).rejects.toBeInstanceOf(RaidRunValidationError);
   });
@@ -238,12 +284,161 @@ describe('raid-runs service', () => {
     expect(updated?.name).toBe('周末团');
   });
 
-  it('rejects patching a non-pending raid run', async () => {
-    mockDb.setResults([[{ ...runRow, status: 'recruiting' as const }]]);
+  it('rejects patching a completed raid run', async () => {
+    mockDb.setResults([[{ ...runRow, status: 'completed' as const }]]);
 
     await expect(
       patchRaidRunDraft('run-1', 'user-1', { name: '新名称' }),
     ).rejects.toBeInstanceOf(RaidRunConflictError);
+  });
+
+  it('patches a recruiting raid run', async () => {
+    const recruitingRun = { ...runRow, status: 'recruiting' as const };
+    const signupRows = buildSignupRows();
+    mockDb.setResults([
+      [recruitingRun],
+      signupRows,
+      [recruitingRun],
+      signupRows,
+    ]);
+
+    const updated = await patchRaidRunDraft('run-1', 'user-1', {
+      name: '新名称',
+    });
+
+    expect(updated?.name).toBe('周末团');
+  });
+
+  it('lists created raid runs including drafts', async () => {
+    mockDb.setResults([
+      [
+        {
+          run: runRow,
+          dungeonName: '雷域大泽',
+          signup: null,
+          serverName: null,
+        },
+      ],
+    ]);
+
+    const result = await listMyRaidRuns('user-1', 'created');
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.isCreator).toBe(true);
+    expect(result.items[0]?.status).toBe('pending');
+  });
+
+  it('lists joined raid runs excluding drafts', async () => {
+    const recruitingRun = { ...runRow, status: 'recruiting' as const };
+    const signupRow = {
+      ...buildSignupRows()[0]!,
+      userId: 'user-1',
+      isLeader: true,
+      characterName: '叶修',
+    };
+
+    mockDb.setResults([
+      [
+        {
+          run: recruitingRun,
+          signup: signupRow,
+          dungeonName: '雷域大泽',
+          serverName: '唯满侠',
+        },
+      ],
+    ]);
+
+    const result = await listMyRaidRuns('user-1', 'leader');
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.mySignup?.isLeader).toBe(true);
+    expect(result.items[0]?.mySignup?.characterName).toBe('叶修');
+  });
+
+  it('lists all joined raid runs', async () => {
+    const recruitingRun = { ...runRow, status: 'recruiting' as const };
+    const signupRow = {
+      ...buildSignupRows()[0]!,
+      userId: 'user-2',
+      isLeader: false,
+    };
+
+    mockDb.setResults([
+      [
+        {
+          run: recruitingRun,
+          signup: signupRow,
+          dungeonName: '雷域大泽',
+          serverName: null,
+        },
+      ],
+    ]);
+
+    const result = await listMyRaidRuns('user-2', 'all');
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.isCreator).toBe(false);
+  });
+
+  it('lists created published runs in all even without linked signup', async () => {
+    const recruitingRun = {
+      ...runRow,
+      status: 'recruiting' as const,
+      createdBy: 'user-1',
+    };
+
+    mockDb.setResults([
+      [
+        {
+          run: recruitingRun,
+          signup: null,
+          dungeonName: '雷域大泽',
+          serverName: null,
+        },
+      ],
+    ]);
+
+    const result = await listMyRaidRuns('user-1', 'all');
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.isCreator).toBe(true);
+    expect(result.items[0]?.mySignup).toBeNull();
+  });
+
+  it('prefers leader signup when deduplicating joined runs', async () => {
+    const recruitingRun = { ...runRow, status: 'recruiting' as const };
+    const memberSignup = {
+      ...buildSignupRows()[0]!,
+      userId: 'user-1',
+      isLeader: false,
+    };
+    const leaderSignup = {
+      ...buildSignupRows()[1]!,
+      userId: 'user-1',
+      isLeader: true,
+    };
+
+    mockDb.setResults([
+      [
+        {
+          run: recruitingRun,
+          signup: memberSignup,
+          dungeonName: '雷域大泽',
+          serverName: null,
+        },
+        {
+          run: recruitingRun,
+          signup: leaderSignup,
+          dungeonName: '雷域大泽',
+          serverName: '唯满侠',
+        },
+      ],
+    ]);
+
+    const result = await listMyRaidRuns('user-1', 'all');
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.mySignup?.isLeader).toBe(true);
   });
 
   it('publishes a valid pending raid run', async () => {

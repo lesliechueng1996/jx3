@@ -70,6 +70,7 @@ const publishRaidRun = mock(async () => ({
   ...raidRunResponse,
   status: 'recruiting' as const,
 }));
+const listMyRaidRuns = mock(async () => ({ items: [] }));
 
 mock.module('../../src/lib/auth', () => ({
   auth: {
@@ -92,6 +93,7 @@ const RaidRunConflictError = class RaidRunConflictError extends Error {
 mock.module('../../src/services/raid-runs', () => ({
   createRaidRunDraft,
   getRaidRunDraft,
+  listMyRaidRuns,
   patchRaidRunDraft,
   publishRaidRun,
   RaidRunValidationError,
@@ -125,6 +127,7 @@ describe('raid-runs routes', () => {
     getRaidRunDraft.mockClear();
     patchRaidRunDraft.mockClear();
     publishRaidRun.mockClear();
+    listMyRaidRuns.mockClear();
     createRaidRunDraft.mockImplementation(async () => raidRunResponse);
     getRaidRunDraft.mockImplementation(async (id: string) =>
       id === 'run-1' ? raidRunResponse : null,
@@ -134,6 +137,26 @@ describe('raid-runs routes', () => {
       ...raidRunResponse,
       status: 'recruiting' as const,
     }));
+    listMyRaidRuns.mockImplementation(async () => ({ items: [] }));
+  });
+
+  it('lists mine for authenticated users', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/mine?filter=created'),
+    );
+
+    expect(res.status).toBe(200);
+    expect(listMyRaidRuns).toHaveBeenCalledWith('user-1', 'created');
+  });
+
+  it('returns 401 when listing mine unauthenticated', async () => {
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/mine'),
+    );
+
+    expect(res.status).toBe(401);
   });
 
   it('returns 401 when unauthenticated', async () => {

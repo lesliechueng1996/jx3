@@ -18,6 +18,38 @@ const errorResponseSchema = z.object({
   }),
 });
 
+const DEFAULT_SERVER_ORIGIN = process.env.WEB_URL ?? 'http://localhost:3000';
+
+export const resolveRequestUrl = (
+  path: string,
+  baseUrl: string = typeof window !== 'undefined'
+    ? window.location.origin
+    : DEFAULT_SERVER_ORIGIN,
+): string => {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  return new URL(path, baseUrl).href;
+};
+
+const appendServerCookies = async (headers: Headers): Promise<void> => {
+  if (typeof window !== 'undefined') {
+    return;
+  }
+
+  try {
+    const { getRequestHeaders } = await import('@tanstack/react-start/server');
+    const cookie = getRequestHeaders().get('cookie');
+
+    if (cookie) {
+      headers.set('cookie', cookie);
+    }
+  } catch {
+    // Ignore when request headers are unavailable outside SSR.
+  }
+};
+
 export const parseJson = async <T>(
   response: Response,
   schema: z.ZodType<T>,
@@ -31,13 +63,18 @@ export const requestJson = async <T>(
   schema: z.ZodType<T>,
   init?: RequestInit,
 ): Promise<T> => {
-  const response = await fetch(path, {
+  const headers = new Headers(init?.headers);
+
+  if (!headers.has('content-type')) {
+    headers.set('content-type', 'application/json');
+  }
+
+  await appendServerCookies(headers);
+
+  const response = await fetch(resolveRequestUrl(path), {
     credentials: 'include',
     ...init,
-    headers: {
-      'content-type': 'application/json',
-      ...init?.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {

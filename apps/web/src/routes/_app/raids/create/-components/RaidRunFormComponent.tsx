@@ -10,7 +10,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type { RaidRunDraft } from './raid-run-form-schema';
-import { getReservedTotal, isReservedTotalValid } from './role-slot-utils';
+import { applyDungeonSelection } from './raid-signup-draft';
+import {
+  DEFAULT_PLAYER_LIMIT,
+  getReservedTotal,
+  isReservedTotalValid,
+} from './role-slot-utils';
 
 type RaidRunFormComponentProps = {
   value: RaidRunDraft;
@@ -80,8 +85,9 @@ export function RaidRunFormComponent({
     });
   }, [selectedDungeon?.id, value.dungeonId]);
 
+  const playerLimit = selectedDungeon?.playerLimit ?? DEFAULT_PLAYER_LIMIT;
   const reservedTotal = useMemo(() => getReservedTotal(value), [value]);
-  const reservedInvalid = !isReservedTotalValid(value);
+  const reservedInvalid = !isReservedTotalValid(value, playerLimit);
 
   const updateField = <K extends keyof RaidRunDraft>(
     key: K,
@@ -94,7 +100,12 @@ export function RaidRunFormComponent({
     setSelectedDungeon(dungeon);
     setDungeonSearch(dungeon.name);
     setShowDungeonResults(false);
-    updateField('dungeonId', dungeon.id);
+    onChange(
+      applyDungeonSelection(
+        { ...value, dungeonId: dungeon.id },
+        dungeon.playerLimit,
+      ),
+    );
   };
 
   return (
@@ -155,7 +166,8 @@ export function RaidRunFormComponent({
                 >
                   <span className="font-medium">{dungeon.name}</span>
                   <span className="ml-2 text-muted-foreground">
-                    {dungeon.expansionName} · {dungeon.seasonName}
+                    {dungeon.expansionName} · {dungeon.seasonName} ·{' '}
+                    {dungeon.playerLimit} 人
                   </span>
                 </button>
               ))
@@ -222,7 +234,7 @@ export function RaidRunFormComponent({
               id={`raid-${key}`}
               type="number"
               min={0}
-              max={25}
+              max={playerLimit}
               disabled={disabled}
               value={String(value[key])}
               onChange={(event) =>
@@ -239,7 +251,7 @@ export function RaidRunFormComponent({
           reservedInvalid ? 'text-destructive' : 'text-muted-foreground',
         )}
       >
-        预留合计：{reservedTotal} / 25
+        预留合计：{reservedTotal} / {playerLimit}
         {reservedInvalid ? '（超出上限，请调整）' : ''}
       </p>
 

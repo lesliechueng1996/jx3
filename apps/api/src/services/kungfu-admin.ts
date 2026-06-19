@@ -104,7 +104,13 @@ const selectKungfuWithSchool = () =>
 export const listAllKungfuOptions = async (
   schoolId?: string,
 ): Promise<{
-  items: { id: string; name: string; schoolId: string; icon: string | null }[];
+  items: {
+    id: string;
+    name: string;
+    schoolId: string;
+    icon: string | null;
+    alias: string[];
+  }[];
 }> => {
   const query = db
     .select({
@@ -112,6 +118,7 @@ export const listAllKungfuOptions = async (
       name: gameKungfu.name,
       schoolId: gameKungfu.schoolId,
       icon: gameKungfu.icon,
+      alias: gameKungfu.alias,
     })
     .from(gameKungfu)
     .orderBy(asc(gameKungfu.name));

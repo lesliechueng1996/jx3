@@ -1,11 +1,45 @@
 import type { RaidRunDraft, SignupDraft } from './raid-run-form-schema';
 import {
+  clampReservedCounts,
   computeSlotRoles,
+  DEFAULT_PLAYER_LIMIT,
   deriveReservedCounts,
   getSlotIndex,
+  listActiveSlotCoordinates,
   type RaidSignupRole,
+  type ReservedCounts,
   type SlotCoordinate,
+  slotKey,
 } from './role-slot-utils';
+
+export const getDefaultReservedCountsForPlayerLimit = (
+  playerLimit: number,
+): ReservedCounts => {
+  if (playerLimit === 25) {
+    return {
+      reservedTank: 4,
+      reservedHealer: 5,
+      reservedDps: 16,
+      reservedBoss: 0,
+    };
+  }
+
+  if (playerLimit === 10) {
+    return {
+      reservedTank: 1,
+      reservedHealer: 1,
+      reservedDps: 8,
+      reservedBoss: 0,
+    };
+  }
+
+  return {
+    reservedTank: 0,
+    reservedHealer: 0,
+    reservedDps: 0,
+    reservedBoss: 0,
+  };
+};
 
 export const createEmptySignup = (
   groupNumber: number,
@@ -25,19 +59,17 @@ export const createEmptySignup = (
   remark: null,
 });
 
-export const createInitialSignups = (): SignupDraft[] => {
-  const signups: SignupDraft[] = [];
+export const createInitialSignups = (
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
+): SignupDraft[] =>
+  listActiveSlotCoordinates(playerLimit).map(
+    ({ groupNumber, positionNumber }) =>
+      createEmptySignup(groupNumber, positionNumber),
+  );
 
-  for (let group = 1; group <= 5; group += 1) {
-    for (let position = 1; position <= 5; position += 1) {
-      signups.push(createEmptySignup(group, position));
-    }
-  }
-
-  return signups;
-};
-
-export const createInitialRaidRunDraft = (): RaidRunDraft => ({
+export const createInitialRaidRunDraft = (
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
+): RaidRunDraft => ({
   name: '',
   description: null,
   dungeonId: null,
@@ -49,16 +81,22 @@ export const createInitialRaidRunDraft = (): RaidRunDraft => ({
   reservedDps: 0,
   reservedBoss: 0,
   remark: null,
-  signups: createInitialSignups(),
+  signups: createInitialSignups(playerLimit),
 });
 
-export const applyReservedRoles = (draft: RaidRunDraft): RaidRunDraft => {
-  const roles = computeSlotRoles({
-    reservedDps: draft.reservedDps,
-    reservedHealer: draft.reservedHealer,
-    reservedTank: draft.reservedTank,
-    reservedBoss: draft.reservedBoss,
-  });
+export const applyReservedRoles = (
+  draft: RaidRunDraft,
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
+): RaidRunDraft => {
+  const roles = computeSlotRoles(
+    {
+      reservedDps: draft.reservedDps,
+      reservedHealer: draft.reservedHealer,
+      reservedTank: draft.reservedTank,
+      reservedBoss: draft.reservedBoss,
+    },
+    playerLimit,
+  );
 
   return {
     ...draft,
@@ -69,6 +107,70 @@ export const applyReservedRoles = (draft: RaidRunDraft): RaidRunDraft => {
         'pending',
     })),
   };
+};
+
+export const resizeDraftForPlayerLimit = (
+  draft: RaidRunDraft,
+  playerLimit: number,
+): RaidRunDraft => {
+  const signupByKey = new Map(
+    draft.signups.map((signup) => [
+      slotKey(signup.groupNumber, signup.positionNumber),
+      signup,
+    ]),
+  );
+  const signups = listActiveSlotCoordinates(playerLimit).map(
+    ({ groupNumber, positionNumber }) => {
+      const existing = signupByKey.get(slotKey(groupNumber, positionNumber));
+      return existing ?? createEmptySignup(groupNumber, positionNumber);
+    },
+  );
+  const reserved = clampReservedCounts(
+    {
+      reservedDps: draft.reservedDps,
+      reservedHealer: draft.reservedHealer,
+      reservedTank: draft.reservedTank,
+      reservedBoss: draft.reservedBoss,
+    },
+    playerLimit,
+  );
+
+  return applyReservedRoles(
+    {
+      ...draft,
+      ...reserved,
+      signups,
+    },
+    playerLimit,
+  );
+};
+
+export const applyDungeonSelection = (
+  draft: RaidRunDraft,
+  playerLimit: number,
+): RaidRunDraft => {
+  const signupByKey = new Map(
+    draft.signups.map((signup) => [
+      slotKey(signup.groupNumber, signup.positionNumber),
+      signup,
+    ]),
+  );
+  const signups = listActiveSlotCoordinates(playerLimit).map(
+    ({ groupNumber, positionNumber }) => {
+      const existing = signupByKey.get(slotKey(groupNumber, positionNumber));
+      return existing ?? createEmptySignup(groupNumber, positionNumber);
+    },
+  );
+  const reserved = getDefaultReservedCountsForPlayerLimit(playerLimit);
+
+  return applyReservedRoles(
+    {
+      ...draft,
+      ...reserved,
+      signups,
+    },
+    playerLimit,
+  );
 };
 
 export const updateSignupAt = (

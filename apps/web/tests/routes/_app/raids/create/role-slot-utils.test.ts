@@ -1,21 +1,26 @@
 import { describe, expect, it } from 'vitest';
 import {
+  applyDungeonSelection,
   applyReservedRoles,
   applySignupPatch,
   clearDarkRunExcept,
   clearLeaderExcept,
   createInitialRaidRunDraft,
+  getDefaultReservedCountsForPlayerLimit,
+  resizeDraftForPlayerLimit,
   swapSignupsAt,
   syncReservedCounts,
   updateSignupAt,
 } from '#/routes/_app/raids/create/-components/raid-signup-draft';
 import {
+  clampReservedCounts,
   computeSlotRoles,
   deriveReservedCounts,
   formatSlotDisplayName,
-  getReservedTotal,
   getSlotIndex,
+  isActiveSlot,
   isReservedTotalValid,
+  listActiveSlotCoordinates,
 } from '#/routes/_app/raids/create/-components/role-slot-utils';
 
 const roleAt = (
@@ -55,31 +60,54 @@ describe('role-slot-utils', () => {
     expect(roles.slice(0, 4)).toEqual(['dps', 'dps', 'healer', 'tank']);
   });
 
-  it('validates reserved total', () => {
+  it('validates reserved total against player limit', () => {
     expect(
-      isReservedTotalValid({
-        reservedDps: 10,
-        reservedHealer: 5,
-        reservedTank: 5,
-        reservedBoss: 1,
-      }),
+      isReservedTotalValid(
+        {
+          reservedDps: 5,
+          reservedHealer: 3,
+          reservedTank: 2,
+          reservedBoss: 0,
+        },
+        10,
+      ),
     ).toBe(true);
     expect(
-      getReservedTotal({
-        reservedDps: 10,
-        reservedHealer: 10,
-        reservedTank: 5,
-        reservedBoss: 1,
-      }),
-    ).toBe(26);
-    expect(
-      isReservedTotalValid({
-        reservedDps: 10,
-        reservedHealer: 10,
-        reservedTank: 5,
-        reservedBoss: 1,
-      }),
+      isReservedTotalValid(
+        {
+          reservedDps: 6,
+          reservedHealer: 3,
+          reservedTank: 2,
+          reservedBoss: 0,
+        },
+        10,
+      ),
     ).toBe(false);
+  });
+
+  it('lists active slots for a 10-player raid', () => {
+    expect(listActiveSlotCoordinates(10)).toHaveLength(10);
+    expect(isActiveSlot(5, 2, 10)).toBe(true);
+    expect(isActiveSlot(5, 3, 10)).toBe(false);
+  });
+
+  it('clamps reserved counts when player limit shrinks', () => {
+    expect(
+      clampReservedCounts(
+        {
+          reservedDps: 15,
+          reservedHealer: 5,
+          reservedTank: 3,
+          reservedBoss: 2,
+        },
+        10,
+      ),
+    ).toEqual({
+      reservedDps: 10,
+      reservedHealer: 0,
+      reservedTank: 0,
+      reservedBoss: 0,
+    });
   });
 
   it('derives reserved counts from signup roles', () => {
@@ -210,6 +238,61 @@ describe('raid-signup-draft', () => {
     expect(findUpdated(next, 1, 1)?.role).toBe('healer');
     expect(findUpdated(next, 2, 3)?.characterName).toBe('A');
     expect(findUpdated(next, 2, 3)?.role).toBe('dps');
+  });
+
+  it('provides default reserved counts for 25- and 10-player raids', () => {
+    expect(getDefaultReservedCountsForPlayerLimit(25)).toEqual({
+      reservedTank: 4,
+      reservedHealer: 5,
+      reservedDps: 16,
+      reservedBoss: 0,
+    });
+    expect(getDefaultReservedCountsForPlayerLimit(10)).toEqual({
+      reservedTank: 1,
+      reservedHealer: 1,
+      reservedDps: 8,
+      reservedBoss: 0,
+    });
+    expect(getDefaultReservedCountsForPlayerLimit(5)).toEqual({
+      reservedTank: 0,
+      reservedHealer: 0,
+      reservedDps: 0,
+      reservedBoss: 0,
+    });
+  });
+
+  it('applies default reserved counts when selecting a dungeon', () => {
+    const draft = createInitialRaidRunDraft(25);
+    const next = applyDungeonSelection(
+      { ...draft, dungeonId: 'dungeon-10' },
+      10,
+    );
+
+    expect(next.reservedTank).toBe(1);
+    expect(next.reservedHealer).toBe(1);
+    expect(next.reservedDps).toBe(8);
+    expect(next.reservedBoss).toBe(0);
+    expect(next.signups).toHaveLength(10);
+    expect(next.signups.filter((signup) => signup.role === 'dps')).toHaveLength(
+      8,
+    );
+  });
+
+  it('resizes draft signups when player limit changes', () => {
+    const draft = {
+      ...createInitialRaidRunDraft(25),
+      reservedDps: 12,
+      reservedHealer: 8,
+      reservedTank: 3,
+      reservedBoss: 2,
+    };
+    const resized = resizeDraftForPlayerLimit(draft, 10);
+
+    expect(resized.signups).toHaveLength(10);
+    expect(resized.reservedDps).toBe(10);
+    expect(resized.reservedHealer).toBe(0);
+    expect(resized.reservedTank).toBe(0);
+    expect(resized.reservedBoss).toBe(0);
   });
 
   it('syncs reserved counts from all signups', () => {

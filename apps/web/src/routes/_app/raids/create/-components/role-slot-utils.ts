@@ -15,6 +15,18 @@ export type ReservedCounts = {
   reservedBoss: number;
 };
 
+export const RAID_GROUP_COUNT = 5;
+export const RAID_MAX_POSITIONS_PER_GROUP = 5;
+export const RAID_MAX_PLAYER_LIMIT =
+  RAID_GROUP_COUNT * RAID_MAX_POSITIONS_PER_GROUP;
+export const DEFAULT_PLAYER_LIMIT = RAID_MAX_PLAYER_LIMIT;
+
+export type RaidGridLayout = {
+  playerLimit: number;
+  groupCount: number;
+  positionsPerGroup: number;
+};
+
 export const ROLE_LABELS: Record<RaidSignupRole, string> = {
   pending: '待定',
   tank: '坦克',
@@ -31,16 +43,82 @@ export const ROLE_CELL_CLASSES: Record<RaidSignupRole, string> = {
   pending: 'bg-muted border-border hover:bg-muted/80',
 };
 
+export const normalizePlayerLimit = (
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
+): number =>
+  Math.min(Math.max(1, Math.floor(playerLimit)), RAID_MAX_PLAYER_LIMIT);
+
+export const getRaidGridLayout = (
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
+): RaidGridLayout => {
+  const limit = normalizePlayerLimit(playerLimit);
+
+  return {
+    playerLimit: limit,
+    groupCount: RAID_GROUP_COUNT,
+    positionsPerGroup: Math.ceil(limit / RAID_GROUP_COUNT),
+  };
+};
+
 export const getSlotIndex = (
   groupNumber: number,
   positionNumber: number,
-): number => (groupNumber - 1) * 5 + (positionNumber - 1);
+): number =>
+  (groupNumber - 1) * RAID_MAX_POSITIONS_PER_GROUP + (positionNumber - 1);
 
 export const slotKey = (groupNumber: number, positionNumber: number): string =>
   `${groupNumber}-${positionNumber}`;
 
+export type SlotCoordinate = {
+  groupNumber: number;
+  positionNumber: number;
+};
+
+export const isActiveSlot = (
+  groupNumber: number,
+  positionNumber: number,
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
+): boolean => {
+  const { positionsPerGroup } = getRaidGridLayout(playerLimit);
+
+  if (
+    groupNumber < 1 ||
+    groupNumber > RAID_GROUP_COUNT ||
+    positionNumber < 1 ||
+    positionNumber > positionsPerGroup
+  ) {
+    return false;
+  }
+
+  const ordinal = (groupNumber - 1) * positionsPerGroup + (positionNumber - 1);
+
+  return ordinal < normalizePlayerLimit(playerLimit);
+};
+
+export const listActiveSlotCoordinates = (
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
+): SlotCoordinate[] => {
+  const { positionsPerGroup } = getRaidGridLayout(playerLimit);
+  const coords: SlotCoordinate[] = [];
+
+  for (let groupNumber = 1; groupNumber <= RAID_GROUP_COUNT; groupNumber += 1) {
+    for (
+      let positionNumber = 1;
+      positionNumber <= positionsPerGroup;
+      positionNumber += 1
+    ) {
+      if (isActiveSlot(groupNumber, positionNumber, playerLimit)) {
+        coords.push({ groupNumber, positionNumber });
+      }
+    }
+  }
+
+  return coords;
+};
+
 export const computeSlotRoles = (
   reserved: ReservedCounts,
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
 ): RaidSignupRole[] => {
   const roles: RaidSignupRole[] = [];
   const sequence: RaidSignupRole[] = [
@@ -50,13 +128,12 @@ export const computeSlotRoles = (
     ...Array.from({ length: reserved.reservedBoss }, () => 'boss' as const),
   ];
 
-  let slot = 0;
-  for (let group = 1; group <= 5; group += 1) {
-    for (let position = 1; position <= 5; position += 1) {
-      const index = getSlotIndex(group, position);
-      roles[index] = sequence[slot] ?? 'pending';
-      slot += 1;
-    }
+  const activeCoords = listActiveSlotCoordinates(playerLimit);
+
+  for (let index = 0; index < activeCoords.length; index += 1) {
+    const { groupNumber, positionNumber } = activeCoords[index]!;
+    const slotIndex = getSlotIndex(groupNumber, positionNumber);
+    roles[slotIndex] = sequence[index] ?? 'pending';
   }
 
   return roles;
@@ -68,8 +145,44 @@ export const getReservedTotal = (reserved: ReservedCounts): number =>
   reserved.reservedTank +
   reserved.reservedBoss;
 
-export const isReservedTotalValid = (reserved: ReservedCounts): boolean =>
-  getReservedTotal(reserved) <= 25;
+export const isReservedTotalValid = (
+  reserved: ReservedCounts,
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
+): boolean => getReservedTotal(reserved) <= normalizePlayerLimit(playerLimit);
+
+export const clampReservedCounts = (
+  reserved: ReservedCounts,
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
+): ReservedCounts => {
+  const limit = normalizePlayerLimit(playerLimit);
+  let next: ReservedCounts = {
+    reservedDps: Math.min(reserved.reservedDps, limit),
+    reservedHealer: Math.min(reserved.reservedHealer, limit),
+    reservedTank: Math.min(reserved.reservedTank, limit),
+    reservedBoss: Math.min(reserved.reservedBoss, limit),
+  };
+
+  const reduceOrder: Array<keyof ReservedCounts> = [
+    'reservedBoss',
+    'reservedTank',
+    'reservedHealer',
+    'reservedDps',
+  ];
+
+  while (getReservedTotal(next) > limit) {
+    const key = reduceOrder.find((field) => next[field] > 0);
+    if (!key) {
+      break;
+    }
+
+    next = {
+      ...next,
+      [key]: next[key] - 1,
+    };
+  }
+
+  return next;
+};
 
 export const deriveReservedCounts = (
   roles: RaidSignupRole[],
@@ -79,11 +192,6 @@ export const deriveReservedCounts = (
   reservedTank: roles.filter((role) => role === 'tank').length,
   reservedBoss: roles.filter((role) => role === 'boss').length,
 });
-
-export type SlotCoordinate = {
-  groupNumber: number;
-  positionNumber: number;
-};
 
 export const formatSlotDisplayName = (
   characterName: string | null | undefined,

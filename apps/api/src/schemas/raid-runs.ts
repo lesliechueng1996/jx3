@@ -55,7 +55,8 @@ export type SignupInput = z.infer<typeof signupInputSchema>;
 
 const signupsArraySchema = z
   .array(signupInputSchema)
-  .length(25, 'signups must contain exactly 25 entries');
+  .min(1)
+  .max(25, 'signups must contain at most 25 entries');
 
 export const createRaidRunBodySchema = z.object({
   name: z.string().max(255).optional(),
@@ -153,3 +154,46 @@ export type RaidRunResponse = z.infer<typeof raidRunResponseSchema>;
 export const publishRaidRunBodySchema = z.object({});
 
 export type PublishRaidRunBody = z.infer<typeof publishRaidRunBodySchema>;
+
+export const listMyRaidRunsQuerySchema = z.object({
+  filter: z.enum(['all', 'created', 'leader']).default('all'),
+});
+
+export type ListMyRaidRunsQuery = z.infer<typeof listMyRaidRunsQuerySchema>;
+
+export const raidRunListItemMySignupSchema = z.object({
+  role: raidSignupRoleSchema,
+  status: raidSignupStatusSchema,
+  isLeader: z.boolean(),
+  characterName: z.string().nullable(),
+  serverId: z.string().uuid().nullable(),
+  serverName: z.string().nullable(),
+});
+
+export type RaidRunListItemMySignup = z.infer<
+  typeof raidRunListItemMySignupSchema
+>;
+
+export const raidRunListItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  status: raidRunStatusSchema,
+  dungeonId: z.string().nullable(),
+  dungeonName: z.string().nullable(),
+  gatherTime: z.string().nullable(),
+  startTime: z.string().nullable(),
+  endTime: z.string().nullable(),
+  createdAt: z.string(),
+  isCreator: z.boolean(),
+  mySignup: raidRunListItemMySignupSchema.nullable(),
+});
+
+export type RaidRunListItem = z.infer<typeof raidRunListItemSchema>;
+
+export const listMyRaidRunsResponseSchema = z.object({
+  items: z.array(raidRunListItemSchema),
+});
+
+export type ListMyRaidRunsResponse = z.infer<
+  typeof listMyRaidRunsResponseSchema
+>;

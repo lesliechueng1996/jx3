@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { AdminGameServerListItem } from '#/lib/api/admin/game-servers-admin-api';
 import type { SchoolOption } from '#/lib/api/admin/schools-admin-api';
 import type { KungfuOption } from '#/lib/api/game-reference-api';
@@ -14,6 +14,10 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import type { SignupDraft } from './raid-run-form-schema';
 import { RAID_SIGNUP_ROLES, ROLE_LABELS } from './role-slot-utils';
+import {
+  formatServerLabel,
+  matchesOptionSearch,
+} from './searchable-option-utils';
 
 type SignupPanelComponentProps = {
   signup: SignupDraft | null;
@@ -24,8 +28,6 @@ type SignupPanelComponentProps = {
   kungfus: KungfuOption[];
 };
 
-const NONE_VALUE = '__none__';
-
 export function SignupPanelComponent({
   signup,
   disabled = false,
@@ -34,13 +36,89 @@ export function SignupPanelComponent({
   schools,
   kungfus,
 }: SignupPanelComponentProps) {
-  const kungfusForSchool = useMemo(() => {
-    if (!signup?.schoolId) {
-      return [];
+  const [serverSearch, setServerSearch] = useState('');
+  const [showServerResults, setShowServerResults] = useState(false);
+  const [kungfuSearch, setKungfuSearch] = useState('');
+  const [showKungfuResults, setShowKungfuResults] = useState(false);
+
+  const schoolNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const school of schools) {
+      map.set(school.id, school.name);
+    }
+    return map;
+  }, [schools]);
+
+  useEffect(() => {
+    if (!signup?.serverId) {
+      setServerSearch('');
+      return;
     }
 
-    return kungfus.filter((kungfu) => kungfu.schoolId === signup.schoolId);
-  }, [kungfus, signup?.schoolId]);
+    const match = servers.find((server) => server.id === signup.serverId);
+    if (match) {
+      setServerSearch(formatServerLabel(match));
+    }
+  }, [signup?.serverId, servers]);
+
+  useEffect(() => {
+    if (!signup?.kungfuId) {
+      setKungfuSearch('');
+      return;
+    }
+
+    const match = kungfus.find((kungfu) => kungfu.id === signup.kungfuId);
+    if (match) {
+      setKungfuSearch(match.name);
+    }
+  }, [signup?.kungfuId, kungfus]);
+
+  const filteredServers = useMemo(() => {
+    return servers.filter((server) =>
+      matchesOptionSearch(serverSearch, [
+        server.zone,
+        server.name,
+        ...server.alias,
+      ]),
+    );
+  }, [serverSearch, servers]);
+
+  const filteredKungfus = useMemo(() => {
+    return kungfus.filter((kungfu) => {
+      const schoolName = schoolNameById.get(kungfu.schoolId) ?? '';
+      return matchesOptionSearch(kungfuSearch, [
+        kungfu.name,
+        schoolName,
+        ...kungfu.alias,
+      ]);
+    });
+  }, [kungfuSearch, kungfus, schoolNameById]);
+
+  const selectServer = (server: AdminGameServerListItem | null) => {
+    if (!server) {
+      onChange({ serverId: null });
+      setServerSearch('');
+      setShowServerResults(false);
+      return;
+    }
+
+    onChange({ serverId: server.id });
+    setServerSearch(formatServerLabel(server));
+    setShowServerResults(false);
+  };
+
+  const selectKungfu = (kungfu: KungfuOption | null) => {
+    if (!kungfu) {
+      onChange({ kungfuId: null, schoolId: null });
+      setKungfuSearch('');
+      setShowKungfuResults(false);
+      return;
+    }
+
+    onChange({ kungfuId: kungfu.id, schoolId: kungfu.schoolId });
+    setKungfuSearch(kungfu.name);
+    setShowKungfuResults(false);
+  };
 
   if (!signup) {
     return (
@@ -95,77 +173,113 @@ export function SignupPanelComponent({
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>服务器</Label>
-        <Select
+      <div className="relative space-y-2">
+        <Label htmlFor="signup-server">服务器</Label>
+        <Input
+          id="signup-server"
           disabled={disabled}
-          value={signup.serverId ?? NONE_VALUE}
-          onValueChange={(value) =>
-            onChange({ serverId: value === NONE_VALUE ? null : value })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="选择服务器" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={NONE_VALUE}>未选择</SelectItem>
-            {servers.map((server) => (
-              <SelectItem key={server.id} value={server.id}>
-                {server.zone} · {server.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label>门派</Label>
-        <Select
-          disabled={disabled}
-          value={signup.schoolId ?? NONE_VALUE}
-          onValueChange={(value) => {
-            const schoolId = value === NONE_VALUE ? null : value;
-            onChange({
-              schoolId,
-              kungfuId: null,
-            });
+          value={serverSearch}
+          onChange={(event) => {
+            setServerSearch(event.target.value);
+            setShowServerResults(true);
           }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="选择门派" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={NONE_VALUE}>未选择</SelectItem>
-            {schools.map((school) => (
-              <SelectItem key={school.id} value={school.id}>
-                {school.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onFocus={() => setShowServerResults(true)}
+          onBlur={() => {
+            window.setTimeout(() => setShowServerResults(false), 150);
+          }}
+          placeholder="搜索服务器或别名"
+        />
+        {showServerResults ? (
+          <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-popover shadow-md">
+            <button
+              type="button"
+              className="block w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectServer(null)}
+            >
+              未选择
+            </button>
+            {filteredServers.length > 0 ? (
+              filteredServers.map((server) => (
+                <button
+                  key={server.id}
+                  type="button"
+                  className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => selectServer(server)}
+                >
+                  <span className="font-medium">
+                    {formatServerLabel(server)}
+                  </span>
+                </button>
+              ))
+            ) : (
+              <p className="px-3 py-2 text-sm text-muted-foreground">
+                未找到服务器
+              </p>
+            )}
+          </div>
+        ) : null}
       </div>
 
-      <div className="space-y-2">
-        <Label>心法</Label>
-        <Select
-          disabled={disabled || !signup.schoolId}
-          value={signup.kungfuId ?? NONE_VALUE}
-          onValueChange={(value) =>
-            onChange({ kungfuId: value === NONE_VALUE ? null : value })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="选择心法" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={NONE_VALUE}>未选择</SelectItem>
-            {kungfusForSchool.map((kungfu) => (
-              <SelectItem key={kungfu.id} value={kungfu.id}>
-                {kungfu.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="relative space-y-2">
+        <Label htmlFor="signup-kungfu">心法</Label>
+        <Input
+          id="signup-kungfu"
+          disabled={disabled}
+          value={kungfuSearch}
+          onChange={(event) => {
+            setKungfuSearch(event.target.value);
+            setShowKungfuResults(true);
+          }}
+          onFocus={() => setShowKungfuResults(true)}
+          onBlur={() => {
+            window.setTimeout(() => setShowKungfuResults(false), 150);
+          }}
+          placeholder="搜索心法、门派或别名"
+        />
+        {signup.kungfuId && signup.schoolId ? (
+          <p className="text-xs text-muted-foreground">
+            门派：{schoolNameById.get(signup.schoolId) ?? '—'}
+          </p>
+        ) : null}
+        {showKungfuResults ? (
+          <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-popover shadow-md">
+            <button
+              type="button"
+              className="block w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectKungfu(null)}
+            >
+              未选择
+            </button>
+            {filteredKungfus.length > 0 ? (
+              filteredKungfus.map((kungfu) => {
+                const schoolName = schoolNameById.get(kungfu.schoolId);
+                return (
+                  <button
+                    key={kungfu.id}
+                    type="button"
+                    className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => selectKungfu(kungfu)}
+                  >
+                    <span className="font-medium">{kungfu.name}</span>
+                    {schoolName ? (
+                      <span className="ml-2 text-muted-foreground">
+                        {schoolName}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })
+            ) : (
+              <p className="px-3 py-2 text-sm text-muted-foreground">
+                未找到心法
+              </p>
+            )}
+          </div>
+        ) : null}
       </div>
 
       <div className="space-y-3 rounded-md border p-3">

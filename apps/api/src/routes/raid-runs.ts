@@ -4,6 +4,8 @@ import { loggerPlugin } from '../plugins/logger';
 import { errorResponse } from '../schemas/common';
 import {
   createRaidRunBodySchema,
+  listMyRaidRunsQuerySchema,
+  listMyRaidRunsResponseSchema,
   patchRaidRunBodySchema,
   publishRaidRunBodySchema,
   raidRunResponseSchema,
@@ -11,6 +13,7 @@ import {
 import {
   createRaidRunDraft,
   getRaidRunDraft,
+  listMyRaidRuns,
   patchRaidRunDraft,
   publishRaidRun,
   RaidRunConflictError,
@@ -55,6 +58,26 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
         summary: 'Create a raid run draft',
         description:
           'Creates a pending raid run with 25 signup slots. Requires authentication.',
+      },
+    },
+  )
+  .get(
+    '/api/v1/raid-runs/mine',
+    async ({ query, user }) => {
+      return listMyRaidRuns(user.id, query.filter);
+    },
+    {
+      auth: true,
+      query: listMyRaidRunsQuerySchema,
+      response: {
+        200: listMyRaidRunsResponseSchema,
+        401: t.Any(),
+      },
+      detail: {
+        tags: ['Raids'],
+        summary: 'List my raid runs',
+        description:
+          'Returns raid runs the current user created or joined, filtered by participation role.',
       },
     },
   )
@@ -140,7 +163,7 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
         tags: ['Raids'],
         summary: 'Update a raid run draft',
         description:
-          'Updates a pending raid run draft. Only the creator can modify it.',
+          'Updates a raid run owned by the creator. Pending drafts use draft validation; recruiting and ongoing runs use publish validation.',
       },
     },
   )

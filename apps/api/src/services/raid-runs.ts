@@ -7,10 +7,13 @@ import {
   raidRun,
   raidSignup,
 } from '@jx3/db/schema';
-import { and, asc, eq, inArray } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, ne, or } from 'drizzle-orm';
 import type {
   CreateRaidRunBody,
+  ListMyRaidRunsResponse,
   PatchRaidRunBody,
+  RaidRunListItem,
+  RaidRunListItemMySignup,
   RaidRunResponse,
   RaidSignupResponse,
   RaidSignupRole,
@@ -49,8 +52,69 @@ export type ReservedCounts = {
   reservedBoss: number;
 };
 
+const RAID_GROUP_COUNT = 5;
+const RAID_MAX_POSITIONS_PER_GROUP = 5;
+const RAID_MAX_PLAYER_LIMIT = RAID_GROUP_COUNT * RAID_MAX_POSITIONS_PER_GROUP;
+const DEFAULT_PLAYER_LIMIT = RAID_MAX_PLAYER_LIMIT;
+
+const normalizePlayerLimit = (playerLimit: number = DEFAULT_PLAYER_LIMIT) =>
+  Math.min(Math.max(1, Math.floor(playerLimit)), RAID_MAX_PLAYER_LIMIT);
+
+const getRaidGridLayout = (playerLimit: number = DEFAULT_PLAYER_LIMIT) => {
+  const limit = normalizePlayerLimit(playerLimit);
+
+  return {
+    playerLimit: limit,
+    groupCount: RAID_GROUP_COUNT,
+    positionsPerGroup: Math.ceil(limit / RAID_GROUP_COUNT),
+  };
+};
+
+const isActiveSlot = (
+  groupNumber: number,
+  positionNumber: number,
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
+): boolean => {
+  const { positionsPerGroup } = getRaidGridLayout(playerLimit);
+
+  if (
+    groupNumber < 1 ||
+    groupNumber > RAID_GROUP_COUNT ||
+    positionNumber < 1 ||
+    positionNumber > positionsPerGroup
+  ) {
+    return false;
+  }
+
+  const ordinal = (groupNumber - 1) * positionsPerGroup + (positionNumber - 1);
+
+  return ordinal < normalizePlayerLimit(playerLimit);
+};
+
+const listActiveSlotCoordinates = (
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
+): Array<{ groupNumber: number; positionNumber: number }> => {
+  const { positionsPerGroup } = getRaidGridLayout(playerLimit);
+  const coords: Array<{ groupNumber: number; positionNumber: number }> = [];
+
+  for (let groupNumber = 1; groupNumber <= RAID_GROUP_COUNT; groupNumber += 1) {
+    for (
+      let positionNumber = 1;
+      positionNumber <= positionsPerGroup;
+      positionNumber += 1
+    ) {
+      if (isActiveSlot(groupNumber, positionNumber, playerLimit)) {
+        coords.push({ groupNumber, positionNumber });
+      }
+    }
+  }
+
+  return coords;
+};
+
 export const computeSlotRoles = (
   reserved: ReservedCounts,
+  playerLimit: number = DEFAULT_PLAYER_LIMIT,
 ): RaidSignupRole[] => {
   const roles: RaidSignupRole[] = [];
   const sequence: RaidSignupRole[] = [
@@ -60,13 +124,12 @@ export const computeSlotRoles = (
     ...Array.from({ length: reserved.reservedBoss }, () => 'boss' as const),
   ];
 
-  let slot = 0;
-  for (let group = 1; group <= 5; group += 1) {
-    for (let position = 1; position <= 5; position += 1) {
-      const index = getSlotIndex(group, position);
-      roles[index] = sequence[slot] ?? 'pending';
-      slot += 1;
-    }
+  const activeCoords = listActiveSlotCoordinates(playerLimit);
+
+  for (let index = 0; index < activeCoords.length; index += 1) {
+    const { groupNumber, positionNumber } = activeCoords[index]!;
+    const slotIndex = getSlotIndex(groupNumber, positionNumber);
+    roles[slotIndex] = sequence[index] ?? 'pending';
   }
 
   return roles;
@@ -78,7 +141,8 @@ export const slotKey = (groupNumber: number, positionNumber: number): string =>
 export const getSlotIndex = (
   groupNumber: number,
   positionNumber: number,
-): number => (groupNumber - 1) * 5 + (positionNumber - 1);
+): number =>
+  (groupNumber - 1) * RAID_MAX_POSITIONS_PER_GROUP + (positionNumber - 1);
 
 export const deriveSignupFields = (
   role: RaidSignupRole,
@@ -100,24 +164,37 @@ export const deriveSignupFields = (
   return { status: 'pending', isReserved: false };
 };
 
-const assertReservedTotal = (reserved: ReservedCounts): void => {
+const assertReservedTotal = (
+  reserved: ReservedCounts,
+  playerLimit: number,
+): void => {
   const total =
     reserved.reservedDps +
     reserved.reservedHealer +
     reserved.reservedTank +
     reserved.reservedBoss;
 
-  if (total > 25) {
+  if (total > normalizePlayerLimit(playerLimit)) {
     throw new RaidRunValidationError(
-      'Reserved role counts must not exceed 25 in total',
+      `Reserved role counts must not exceed ${normalizePlayerLimit(playerLimit)} in total`,
     );
   }
 };
 
-const validateSignupCoordinates = (signups: SignupInput[]): void => {
+const validateSignupCoordinates = (
+  signups: SignupInput[],
+  playerLimit: number,
+): void => {
   const keys = new Set<string>();
+  const limit = normalizePlayerLimit(playerLimit);
 
   for (const signup of signups) {
+    if (!isActiveSlot(signup.groupNumber, signup.positionNumber, limit)) {
+      throw new RaidRunValidationError(
+        `Invalid signup slot: group ${signup.groupNumber}, position ${signup.positionNumber}`,
+      );
+    }
+
     const key = slotKey(signup.groupNumber, signup.positionNumber);
     if (keys.has(key)) {
       throw new RaidRunValidationError(
@@ -127,9 +204,9 @@ const validateSignupCoordinates = (signups: SignupInput[]): void => {
     keys.add(key);
   }
 
-  if (keys.size !== 25) {
+  if (keys.size !== limit) {
     throw new RaidRunValidationError(
-      'signups must cover all 25 grid slots exactly once',
+      `signups must cover all ${limit} grid slots exactly once`,
     );
   }
 };
@@ -137,16 +214,13 @@ const validateSignupCoordinates = (signups: SignupInput[]): void => {
 const validateSignupRoles = (
   signups: SignupInput[],
   reserved: ReservedCounts,
+  playerLimit: number,
 ): void => {
-  const expectedRoles = computeSlotRoles(reserved);
-  const sorted = [...signups].sort((a, b) => {
-    const indexA = getSlotIndex(a.groupNumber, a.positionNumber);
-    const indexB = getSlotIndex(b.groupNumber, b.positionNumber);
-    return indexA - indexB;
-  });
+  const expectedRoles = computeSlotRoles(reserved, playerLimit);
 
-  for (let index = 0; index < sorted.length; index += 1) {
-    if (sorted[index]?.role !== expectedRoles[index]) {
+  for (const signup of signups) {
+    const slotIndex = getSlotIndex(signup.groupNumber, signup.positionNumber);
+    if (signup.role !== expectedRoles[slotIndex]) {
       throw new RaidRunValidationError(
         'Signup roles do not match reserved role allocation',
       );
@@ -353,19 +427,35 @@ const validateForeignKeys = async (
   }
 };
 
+const resolvePlayerLimit = async (
+  dungeonId: string | null | undefined,
+): Promise<number> => {
+  if (!dungeonId || dungeonId === DRAFT_DUNGEON_SENTINEL) {
+    return DEFAULT_PLAYER_LIMIT;
+  }
+
+  const dungeon = await getAdminDungeonById(dungeonId);
+  if (!dungeon) {
+    throw new RaidRunValidationError('Dungeon not found');
+  }
+
+  return normalizePlayerLimit(dungeon.playerLimit);
+};
+
 const validateDraftSignups = (
   signups: SignupInput[],
   reserved: ReservedCounts,
+  playerLimit: number,
 ): void => {
-  validateSignupCoordinates(signups);
-  validateSignupRoles(signups, reserved);
+  validateSignupCoordinates(signups, playerLimit);
+  validateSignupRoles(signups, reserved, playerLimit);
   validateFormationCorePerGroup(signups);
 };
 
-const validatePublishRun = (
+const validatePublishRun = async (
   run: typeof raidRun.$inferSelect,
   signups: SignupInput[],
-): void => {
+): Promise<void> => {
   const name = run.name.trim();
   if (!name) {
     throw new RaidRunValidationError('name is required');
@@ -389,6 +479,7 @@ const validatePublishRun = (
     throw new RaidRunValidationError('startTime must be before endTime');
   }
 
+  const playerLimit = await resolvePlayerLimit(run.dungeonId);
   const reserved: ReservedCounts = {
     reservedDps: run.reservedDps,
     reservedHealer: run.reservedHealer,
@@ -396,8 +487,8 @@ const validatePublishRun = (
     reservedBoss: run.reservedBoss,
   };
 
-  assertReservedTotal(reserved);
-  validateDraftSignups(signups, reserved);
+  assertReservedTotal(reserved, playerLimit);
+  validateDraftSignups(signups, reserved, playerLimit);
   validateLeaderCount(signups);
   validateDarkRunCount(signups);
 };
@@ -406,16 +497,24 @@ const buildSignupInsertValues = (
   raidRunId: string,
   createdBy: string,
   signups: SignupInput[],
+  existingBySlot?: Map<string, typeof raidSignup.$inferSelect>,
 ) =>
   signups.map((signup) => {
+    const existing = existingBySlot?.get(
+      slotKey(signup.groupNumber, signup.positionNumber),
+    );
     const derived = deriveSignupFields(signup.role, signup.characterName);
+    const preserveLinkedUser = Boolean(existing?.userId);
+
     return {
       raidRunId,
       groupNumber: signup.groupNumber,
       positionNumber: signup.positionNumber,
       role: signup.role,
-      status: derived.status,
-      isReserved: derived.isReserved,
+      status: preserveLinkedUser ? existing!.status : derived.status,
+      isReserved: preserveLinkedUser
+        ? existing!.isReserved
+        : derived.isReserved,
       isLeader: signup.isLeader,
       isDarkRun: signup.isDarkRun,
       isFormationCore: signup.isFormationCore,
@@ -423,7 +522,7 @@ const buildSignupInsertValues = (
       characterName: signup.characterName?.trim() || null,
       schoolId: signup.schoolId ?? null,
       kungfuId: signup.kungfuId ?? null,
-      userId: null,
+      userId: existing?.userId ?? null,
       createdBy,
       remark: signup.remark ?? null,
     };
@@ -455,10 +554,264 @@ const assertOwner = (
   }
 };
 
+const EDITABLE_RAID_RUN_STATUSES = [
+  'pending',
+  'recruiting',
+  'ongoing',
+] as const;
+
+const assertEditable = (run: typeof raidRun.$inferSelect): void => {
+  if (
+    !EDITABLE_RAID_RUN_STATUSES.includes(
+      run.status as (typeof EDITABLE_RAID_RUN_STATUSES)[number],
+    )
+  ) {
+    throw new RaidRunConflictError('This raid run cannot be modified');
+  }
+};
+
 const assertPending = (run: typeof raidRun.$inferSelect): void => {
   if (run.status !== 'pending') {
-    throw new RaidRunConflictError('Only pending raid runs can be modified');
+    throw new RaidRunConflictError('Only pending raid runs can be published');
   }
+};
+
+const RAID_RUN_STATUS_SORT_WEIGHT: Record<
+  (typeof raidRun.$inferSelect)['status'],
+  number
+> = {
+  ongoing: 0,
+  recruiting: 1,
+  pending: 2,
+  completed: 3,
+  cancelled: 4,
+};
+
+const toMySignupSummary = (
+  signup: typeof raidSignup.$inferSelect,
+  serverName: string | null,
+): RaidRunListItemMySignup => ({
+  role: signup.role,
+  status: signup.status,
+  isLeader: signup.isLeader,
+  characterName: signup.characterName,
+  serverId: signup.serverId,
+  serverName,
+});
+
+const toRaidRunListItem = (
+  run: typeof raidRun.$inferSelect,
+  userId: string,
+  dungeonName: string | null,
+  mySignup: RaidRunListItemMySignup | null,
+): RaidRunListItem => ({
+  id: run.id,
+  name: run.name,
+  status: run.status,
+  dungeonId: fromDbDungeonId(run.dungeonId),
+  dungeonName,
+  gatherTime: toIsoOrNull(run.gatherTime),
+  startTime: fromDbStartTime(run.startTime),
+  endTime: toIsoOrNull(run.endTime),
+  createdAt: run.createdAt.toISOString(),
+  isCreator: run.createdBy === userId,
+  mySignup,
+});
+
+const sortRaidRunListItems = (items: RaidRunListItem[]): RaidRunListItem[] =>
+  [...items].sort((left, right) => {
+    const statusDiff =
+      RAID_RUN_STATUS_SORT_WEIGHT[left.status] -
+      RAID_RUN_STATUS_SORT_WEIGHT[right.status];
+
+    if (statusDiff !== 0) {
+      return statusDiff;
+    }
+
+    const leftTime = left.startTime ?? left.createdAt;
+    const rightTime = right.startTime ?? right.createdAt;
+    return rightTime.localeCompare(leftTime);
+  });
+
+const signupRowsToInputs = (
+  signupRows: Array<typeof raidSignup.$inferSelect>,
+): SignupInput[] =>
+  signupRows.map((row) => ({
+    groupNumber: row.groupNumber ?? 1,
+    positionNumber: row.positionNumber ?? 1,
+    role: row.role,
+    characterName: row.characterName,
+    serverId: row.serverId,
+    schoolId: row.schoolId,
+    kungfuId: row.kungfuId,
+    isLeader: row.isLeader,
+    isDarkRun: row.isDarkRun,
+    isFormationCore: row.isFormationCore,
+    remark: row.remark,
+  }));
+
+const mergeRunForValidation = (
+  existing: typeof raidRun.$inferSelect,
+  runUpdates: Partial<typeof raidRun.$inferInsert>,
+): typeof raidRun.$inferSelect => ({
+  ...existing,
+  ...runUpdates,
+});
+
+export const listMyRaidRuns = async (
+  userId: string,
+  filter: 'all' | 'created' | 'leader',
+): Promise<ListMyRaidRunsResponse> => {
+  if (filter === 'created') {
+    const rows = await db
+      .select({
+        run: raidRun,
+        dungeonName: gameDungeon.name,
+        signup: raidSignup,
+        serverName: gameServer.name,
+      })
+      .from(raidRun)
+      .leftJoin(gameDungeon, eq(raidRun.dungeonId, gameDungeon.id))
+      .leftJoin(
+        raidSignup,
+        and(
+          eq(raidSignup.raidRunId, raidRun.id),
+          eq(raidSignup.userId, userId),
+        ),
+      )
+      .leftJoin(gameServer, eq(raidSignup.serverId, gameServer.id))
+      .where(eq(raidRun.createdBy, userId))
+      .orderBy(desc(raidRun.startTime))
+      .limit(100);
+
+    const itemsById = new Map<string, RaidRunListItem>();
+
+    for (const row of rows) {
+      const existing = itemsById.get(row.run.id);
+      const mySignup = row.signup
+        ? toMySignupSummary(row.signup, row.serverName)
+        : null;
+
+      if (!existing) {
+        itemsById.set(
+          row.run.id,
+          toRaidRunListItem(row.run, userId, row.dungeonName, mySignup),
+        );
+        continue;
+      }
+
+      if (!existing.mySignup && mySignup) {
+        itemsById.set(row.run.id, { ...existing, mySignup });
+      }
+    }
+
+    return { items: sortRaidRunListItems([...itemsById.values()]) };
+  }
+
+  if (filter === 'all') {
+    const rows = await db
+      .select({
+        run: raidRun,
+        signup: raidSignup,
+        dungeonName: gameDungeon.name,
+        serverName: gameServer.name,
+      })
+      .from(raidRun)
+      .leftJoin(gameDungeon, eq(raidRun.dungeonId, gameDungeon.id))
+      .leftJoin(
+        raidSignup,
+        and(
+          eq(raidSignup.raidRunId, raidRun.id),
+          eq(raidSignup.userId, userId),
+        ),
+      )
+      .leftJoin(gameServer, eq(raidSignup.serverId, gameServer.id))
+      .where(
+        and(
+          ne(raidRun.status, 'pending'),
+          or(eq(raidRun.createdBy, userId), eq(raidSignup.userId, userId)),
+        ),
+      )
+      .orderBy(desc(raidRun.startTime))
+      .limit(200);
+
+    const itemsById = new Map<string, RaidRunListItem>();
+
+    for (const row of rows) {
+      const existing = itemsById.get(row.run.id);
+      const mySignup = row.signup
+        ? toMySignupSummary(row.signup, row.serverName)
+        : null;
+
+      if (!existing) {
+        itemsById.set(
+          row.run.id,
+          toRaidRunListItem(row.run, userId, row.dungeonName, mySignup),
+        );
+        continue;
+      }
+
+      if (!existing.mySignup && mySignup) {
+        itemsById.set(row.run.id, { ...existing, mySignup });
+      } else if (
+        mySignup?.isLeader &&
+        existing.mySignup &&
+        !existing.mySignup.isLeader
+      ) {
+        itemsById.set(
+          row.run.id,
+          toRaidRunListItem(row.run, userId, row.dungeonName, mySignup),
+        );
+      }
+    }
+
+    return { items: sortRaidRunListItems([...itemsById.values()]) };
+  }
+
+  const conditions = [
+    eq(raidSignup.userId, userId),
+    ne(raidRun.status, 'pending'),
+    eq(raidSignup.isLeader, true),
+  ];
+
+  const rows = await db
+    .select({
+      run: raidRun,
+      signup: raidSignup,
+      dungeonName: gameDungeon.name,
+      serverName: gameServer.name,
+    })
+    .from(raidSignup)
+    .innerJoin(raidRun, eq(raidSignup.raidRunId, raidRun.id))
+    .leftJoin(gameDungeon, eq(raidRun.dungeonId, gameDungeon.id))
+    .leftJoin(gameServer, eq(raidSignup.serverId, gameServer.id))
+    .where(and(...conditions))
+    .orderBy(desc(raidRun.startTime))
+    .limit(200);
+
+  const itemsById = new Map<string, RaidRunListItem>();
+
+  for (const row of rows) {
+    const mySignup = toMySignupSummary(row.signup, row.serverName);
+    const existing = itemsById.get(row.run.id);
+
+    if (!existing) {
+      itemsById.set(
+        row.run.id,
+        toRaidRunListItem(row.run, userId, row.dungeonName, mySignup),
+      );
+      continue;
+    }
+
+    if (mySignup.isLeader && !existing.mySignup?.isLeader) {
+      itemsById.set(
+        row.run.id,
+        toRaidRunListItem(row.run, userId, row.dungeonName, mySignup),
+      );
+    }
+  }
+
+  return { items: sortRaidRunListItems([...itemsById.values()]) };
 };
 
 export const getRaidRunDraft = async (
@@ -490,8 +843,10 @@ export const createRaidRunDraft = async (
     reservedBoss: body.reservedBoss ?? 0,
   };
 
-  assertReservedTotal(reserved);
-  validateDraftSignups(body.signups, reserved);
+  const playerLimit = await resolvePlayerLimit(body.dungeonId);
+
+  assertReservedTotal(reserved, playerLimit);
+  validateDraftSignups(body.signups, reserved, playerLimit);
   await validateForeignKeys(body, false);
 
   const runValues = {
@@ -545,7 +900,7 @@ export const patchRaidRunDraft = async (
   }
 
   assertOwner(existing, userId);
-  assertPending(existing);
+  assertEditable(existing);
 
   const reserved: ReservedCounts = {
     reservedDps: body.reservedDps ?? existing.reservedDps,
@@ -554,10 +909,14 @@ export const patchRaidRunDraft = async (
     reservedBoss: body.reservedBoss ?? existing.reservedBoss,
   };
 
-  assertReservedTotal(reserved);
+  const playerLimit = await resolvePlayerLimit(
+    body.dungeonId !== undefined ? body.dungeonId : existing.dungeonId,
+  );
+
+  assertReservedTotal(reserved, playerLimit);
 
   if (body.signups) {
-    validateDraftSignups(body.signups, reserved);
+    validateDraftSignups(body.signups, reserved, playerLimit);
   }
 
   await validateForeignKeys(
@@ -605,6 +964,16 @@ export const patchRaidRunDraft = async (
     runUpdates.remark = body.remark;
   }
 
+  const mergedRun = mergeRunForValidation(existing, runUpdates);
+
+  if (existing.status !== 'pending') {
+    const signupRowsForValidation = body.signups
+      ? body.signups
+      : signupRowsToInputs(await getSignupsByRaidRunId(raidRunId));
+
+    await validatePublishRun(mergedRun, signupRowsForValidation);
+  }
+
   return db.transaction(async (tx) => {
     let updatedRun = existing;
 
@@ -625,12 +994,25 @@ export const patchRaidRunDraft = async (
     let signupResponses: RaidSignupResponse[];
 
     if (body.signups) {
+      const existingSignups = await tx
+        .select()
+        .from(raidSignup)
+        .where(eq(raidSignup.raidRunId, raidRunId));
+
+      const existingBySlot = new Map(
+        existingSignups.map((row) => [
+          slotKey(row.groupNumber ?? 1, row.positionNumber ?? 1),
+          row,
+        ]),
+      );
+
       await tx.delete(raidSignup).where(eq(raidSignup.raidRunId, raidRunId));
 
       const signupValues = buildSignupInsertValues(
         raidRunId,
         userId,
         body.signups,
+        existingBySlot,
       );
       const createdSignups = await tx
         .insert(raidSignup)
@@ -689,7 +1071,7 @@ export const publishRaidRun = async (
     remark: row.remark,
   }));
 
-  validatePublishRun(existing, signupInputs);
+  await validatePublishRun(existing, signupInputs);
 
   const [publishedRun] = await db
     .update(raidRun)

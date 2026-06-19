@@ -14,12 +14,20 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { RaidSlotIndicatorsComponent } from './RaidSlotIndicatorsComponent';
 import type { SignupDraft } from './raid-run-form-schema';
-import { ROLE_CELL_CLASSES, ROLE_LABELS, slotKey } from './role-slot-utils';
+import {
+  DEFAULT_PLAYER_LIMIT,
+  getRaidGridLayout,
+  isActiveSlot,
+  ROLE_CELL_CLASSES,
+  ROLE_LABELS,
+  slotKey,
+} from './role-slot-utils';
 
 type RaidGridComponentProps = {
   signups: SignupDraft[];
   selected: { groupNumber: number; positionNumber: number } | null;
   disabled?: boolean;
+  playerLimit?: number;
   serverNameById: Map<string, string>;
   kungfuIconById: Map<string, string | null>;
   onSelect: (groupNumber: number, positionNumber: number) => void;
@@ -150,11 +158,13 @@ export function RaidGridComponent({
   signups,
   selected,
   disabled = false,
+  playerLimit = DEFAULT_PLAYER_LIMIT,
   serverNameById,
   kungfuIconById,
   onSelect,
   onSwap,
 }: RaidGridComponentProps) {
+  const { positionsPerGroup, groupCount } = getRaidGridLayout(playerLimit);
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -202,6 +212,16 @@ export function RaidGridComponent({
   };
 
   const renderSlot = (groupNumber: number, positionNumber: number) => {
+    if (!isActiveSlot(groupNumber, positionNumber, playerLimit)) {
+      return (
+        <div
+          key={slotKey(groupNumber, positionNumber)}
+          className="min-h-16 rounded-md border border-dashed border-border/40 bg-muted/20"
+          aria-hidden
+        />
+      );
+    }
+
     const signup = signupMap.get(slotKey(groupNumber, positionNumber));
 
     if (!signup) {
@@ -242,16 +262,16 @@ export function RaidGridComponent({
     >
       <div className="space-y-3">
         <div className="grid grid-cols-[repeat(5,1fr)] gap-2 text-center text-xs font-medium text-muted-foreground">
-          {[1, 2, 3, 4, 5].map((groupNumber) => (
+          {[1, 2, 3, 4, 5].slice(0, groupCount).map((groupNumber) => (
             <div key={`group-header-${groupNumber}`}>{groupNumber} 队</div>
           ))}
         </div>
 
         <div className="grid grid-cols-5 gap-2">
-          {Array.from({ length: 5 }, (_, positionIndex) => {
+          {Array.from({ length: positionsPerGroup }, (_, positionIndex) => {
             const positionNumber = positionIndex + 1;
 
-            return Array.from({ length: 5 }, (_, groupIndex) => {
+            return Array.from({ length: groupCount }, (_, groupIndex) => {
               const groupNumber = groupIndex + 1;
               return renderSlot(groupNumber, positionNumber);
             });
