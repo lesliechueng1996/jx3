@@ -2,8 +2,18 @@ import { createAuthClient } from 'better-auth/client';
 import { adminClient } from 'better-auth/client/plugins';
 import { ac, authRoles } from './permissions';
 
+const DEFAULT_AUTH_BASE_URL = 'http://localhost:3000';
+
+function resolveAuthBaseURL(): string {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+
+  return process.env.BETTER_AUTH_URL ?? DEFAULT_AUTH_BASE_URL;
+}
+
 export const authClient = createAuthClient({
-  baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
+  baseURL: resolveAuthBaseURL(),
   basePath: '/api/auth',
   plugins: [
     adminClient({
