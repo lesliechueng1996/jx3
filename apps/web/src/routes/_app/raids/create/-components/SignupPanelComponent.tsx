@@ -174,55 +174,6 @@ export function SignupPanelComponent({
       </div>
 
       <div className="relative space-y-2">
-        <Label htmlFor="signup-server">服务器</Label>
-        <Input
-          id="signup-server"
-          disabled={disabled}
-          value={serverSearch}
-          onChange={(event) => {
-            setServerSearch(event.target.value);
-            setShowServerResults(true);
-          }}
-          onFocus={() => setShowServerResults(true)}
-          onBlur={() => {
-            window.setTimeout(() => setShowServerResults(false), 150);
-          }}
-          placeholder="搜索服务器或别名"
-        />
-        {showServerResults ? (
-          <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-popover shadow-md">
-            <button
-              type="button"
-              className="block w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => selectServer(null)}
-            >
-              未选择
-            </button>
-            {filteredServers.length > 0 ? (
-              filteredServers.map((server) => (
-                <button
-                  key={server.id}
-                  type="button"
-                  className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => selectServer(server)}
-                >
-                  <span className="font-medium">
-                    {formatServerLabel(server)}
-                  </span>
-                </button>
-              ))
-            ) : (
-              <p className="px-3 py-2 text-sm text-muted-foreground">
-                未找到服务器
-              </p>
-            )}
-          </div>
-        ) : null}
-      </div>
-
-      <div className="relative space-y-2">
         <Label htmlFor="signup-kungfu">心法</Label>
         <Input
           id="signup-kungfu"
@@ -276,6 +227,55 @@ export function SignupPanelComponent({
             ) : (
               <p className="px-3 py-2 text-sm text-muted-foreground">
                 未找到心法
+              </p>
+            )}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="relative space-y-2">
+        <Label htmlFor="signup-server">服务器</Label>
+        <Input
+          id="signup-server"
+          disabled={disabled}
+          value={serverSearch}
+          onChange={(event) => {
+            setServerSearch(event.target.value);
+            setShowServerResults(true);
+          }}
+          onFocus={() => setShowServerResults(true)}
+          onBlur={() => {
+            window.setTimeout(() => setShowServerResults(false), 150);
+          }}
+          placeholder="搜索服务器或别名"
+        />
+        {showServerResults ? (
+          <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-popover shadow-md">
+            <button
+              type="button"
+              className="block w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectServer(null)}
+            >
+              未选择
+            </button>
+            {filteredServers.length > 0 ? (
+              filteredServers.map((server) => (
+                <button
+                  key={server.id}
+                  type="button"
+                  className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => selectServer(server)}
+                >
+                  <span className="font-medium">
+                    {formatServerLabel(server)}
+                  </span>
+                </button>
+              ))
+            ) : (
+              <p className="px-3 py-2 text-sm text-muted-foreground">
+                未找到服务器
               </p>
             )}
           </div>

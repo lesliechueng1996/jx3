@@ -569,16 +569,19 @@ describe('raid-runs service', () => {
     ).rejects.toBeInstanceOf(RaidRunValidationError);
   });
 
-  it('rejects mismatched signup roles on create', async () => {
+  it('allows signup roles that differ from reserved allocation order', async () => {
     const signups = buildSignups();
     signups[0] = { ...signups[0]!, role: 'tank' };
+    const signupRows = buildSignupRows();
+    signupRows[0] = { ...signupRows[0]!, role: 'tank' };
+    mockDb.setResults([[runRow], signupRows]);
 
-    await expect(
-      createRaidRunDraft('user-1', {
-        ...reserved,
-        signups,
-      }),
-    ).rejects.toBeInstanceOf(RaidRunValidationError);
+    const created = await createRaidRunDraft('user-1', {
+      ...reserved,
+      signups,
+    });
+
+    expect(created.signups[0]?.role).toBe('tank');
   });
 
   it('rejects publish when required fields are missing', async () => {

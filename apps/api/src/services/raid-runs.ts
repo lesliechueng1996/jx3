@@ -211,23 +211,6 @@ const validateSignupCoordinates = (
   }
 };
 
-const validateSignupRoles = (
-  signups: SignupInput[],
-  reserved: ReservedCounts,
-  playerLimit: number,
-): void => {
-  const expectedRoles = computeSlotRoles(reserved, playerLimit);
-
-  for (const signup of signups) {
-    const slotIndex = getSlotIndex(signup.groupNumber, signup.positionNumber);
-    if (signup.role !== expectedRoles[slotIndex]) {
-      throw new RaidRunValidationError(
-        'Signup roles do not match reserved role allocation',
-      );
-    }
-  }
-};
-
 const validateFormationCorePerGroup = (signups: SignupInput[]): void => {
   const counts = new Map<number, number>();
 
@@ -444,11 +427,9 @@ const resolvePlayerLimit = async (
 
 const validateDraftSignups = (
   signups: SignupInput[],
-  reserved: ReservedCounts,
   playerLimit: number,
 ): void => {
   validateSignupCoordinates(signups, playerLimit);
-  validateSignupRoles(signups, reserved, playerLimit);
   validateFormationCorePerGroup(signups);
 };
 
@@ -488,7 +469,7 @@ const validatePublishRun = async (
   };
 
   assertReservedTotal(reserved, playerLimit);
-  validateDraftSignups(signups, reserved, playerLimit);
+  validateDraftSignups(signups, playerLimit);
   validateLeaderCount(signups);
   validateDarkRunCount(signups);
 };
@@ -846,7 +827,7 @@ export const createRaidRunDraft = async (
   const playerLimit = await resolvePlayerLimit(body.dungeonId);
 
   assertReservedTotal(reserved, playerLimit);
-  validateDraftSignups(body.signups, reserved, playerLimit);
+  validateDraftSignups(body.signups, playerLimit);
   await validateForeignKeys(body, false);
 
   const runValues = {
@@ -916,7 +897,7 @@ export const patchRaidRunDraft = async (
   assertReservedTotal(reserved, playerLimit);
 
   if (body.signups) {
-    validateDraftSignups(body.signups, reserved, playerLimit);
+    validateDraftSignups(body.signups, playerLimit);
   }
 
   await validateForeignKeys(

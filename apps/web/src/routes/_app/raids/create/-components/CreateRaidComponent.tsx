@@ -23,6 +23,7 @@ import {
   findSignup,
   resizeDraftForPlayerLimit,
   swapSignupsAt,
+  syncReservedCounts,
 } from './raid-signup-draft';
 import { DEFAULT_PLAYER_LIMIT, isReservedTotalValid } from './role-slot-utils';
 import { SignupPanelComponent } from './SignupPanelComponent';
@@ -192,13 +193,14 @@ export function CreateRaidComponent({
       const parsed = isDraft
         ? draftSaveSchema.parse(draft)
         : publishSchema.parse(draft);
+      const payload = syncReservedCounts(parsed);
       if (mode === 'create' && !raidRunId) {
-        return raidRunsApi.create(parsed);
+        return raidRunsApi.create(payload);
       }
       if (!raidRunId) {
         throw new Error('缺少草稿 ID');
       }
-      return raidRunsApi.patch(raidRunId, parsed);
+      return raidRunsApi.patch(raidRunId, payload);
     },
     onSuccess: async (response) => {
       const nextDraft = toDraftFromResponse(response);
@@ -227,7 +229,7 @@ export function CreateRaidComponent({
 
       if (isDirty) {
         const parsed = draftSaveSchema.parse(draft);
-        await raidRunsApi.patch(raidRunId, parsed);
+        await raidRunsApi.patch(raidRunId, syncReservedCounts(parsed));
       }
 
       return raidRunsApi.publish(raidRunId);
@@ -265,10 +267,12 @@ export function CreateRaidComponent({
     from: { groupNumber: number; positionNumber: number },
     to: { groupNumber: number; positionNumber: number },
   ) => {
-    setDraft({
-      ...draft,
-      signups: swapSignupsAt(draft.signups, from, to),
-    });
+    setDraft(
+      syncReservedCounts({
+        ...draft,
+        signups: swapSignupsAt(draft.signups, from, to),
+      }),
+    );
     setSelected(to);
   };
 
