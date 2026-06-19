@@ -13,6 +13,7 @@ const {
   getAdminKungfuById,
   isKungfuReferenced,
   listAdminKungfu,
+  listAllKungfuOptions,
   updateAdminKungfu,
 } = await import('../../src/services/kungfu-admin');
 
@@ -41,6 +42,50 @@ const kungfuRow = {
 describe('kungfu-admin service', () => {
   beforeEach(() => {
     mockDb.setResults([]);
+  });
+
+  it('lists all kungfu options', async () => {
+    mockDb.setResults([
+      [
+        {
+          id: 'kungfu-1',
+          name: '傲血战意',
+          schoolId: 'school-1',
+          icon: 'icon.png',
+          alias: ['傲血'],
+        },
+      ],
+    ]);
+
+    const result = await listAllKungfuOptions();
+
+    expect(result.items).toEqual([
+      {
+        id: 'kungfu-1',
+        name: '傲血战意',
+        schoolId: 'school-1',
+        icon: 'icon.png',
+        alias: ['傲血'],
+      },
+    ]);
+  });
+
+  it('filters kungfu options by school', async () => {
+    mockDb.setResults([
+      [
+        {
+          id: 'kungfu-1',
+          name: '傲血战意',
+          schoolId: 'school-1',
+          icon: null,
+          alias: [],
+        },
+      ],
+    ]);
+
+    const result = await listAllKungfuOptions('school-1');
+
+    expect(result.items[0]?.schoolId).toBe('school-1');
   });
 
   it('lists kungfu joined with school name', async () => {

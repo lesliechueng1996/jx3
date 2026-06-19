@@ -93,6 +93,16 @@ describe('raid loot routes', () => {
     deleteRaidLoot.mockClear();
     patchRaidRunWage.mockClear();
     patchRaidRunGameRaidId.mockClear();
+    createRaidLoot.mockImplementation(async () => lootItem);
+    patchRaidLoot.mockImplementation(async () => lootItem);
+    deleteRaidLoot.mockImplementation(async () => true);
+    patchRaidRunWage.mockImplementation(async () => ({
+      totalIncome: '50000',
+      wagePerPerson: '2000',
+    }));
+    patchRaidRunGameRaidId.mockImplementation(async () => ({
+      gameRaidId: 'raid-team-123',
+    }));
   });
 
   it('returns 401 when creating loot unauthenticated', async () => {
@@ -335,5 +345,199 @@ describe('raid loot routes', () => {
     expect(patchRaidRunGameRaidId).toHaveBeenCalledWith('run-1', 'user-1', {
       gameRaidId: 'raid-team-123',
     });
+  });
+
+  it('returns 403 when patching loot is forbidden', async () => {
+    const { RaidRunForbiddenError } = await import(
+      '../../src/services/raid-run-errors'
+    );
+    patchRaidLoot.mockImplementation(async () => {
+      throw new RaidRunForbiddenError('forbidden');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/loot/loot-1', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ price: 10000 }),
+      }),
+    );
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 409 when patching loot conflicts', async () => {
+    const { RaidRunConflictError } = await import(
+      '../../src/services/raid-run-errors'
+    );
+    patchRaidLoot.mockImplementation(async () => {
+      throw new RaidRunConflictError('conflict');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/loot/loot-1', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ price: 10000 }),
+      }),
+    );
+
+    expect(res.status).toBe(409);
+  });
+
+  it('returns 400 when patching loot fails unexpectedly', async () => {
+    patchRaidLoot.mockImplementation(async () => {
+      throw new Error('db failed');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/loot/loot-1', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ price: 10000 }),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 409 when deleting loot conflicts', async () => {
+    const { RaidRunConflictError } = await import(
+      '../../src/services/raid-run-errors'
+    );
+    deleteRaidLoot.mockImplementation(async () => {
+      throw new RaidRunConflictError('conflict');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/loot/loot-1', {
+        method: 'DELETE',
+      }),
+    );
+
+    expect(res.status).toBe(409);
+  });
+
+  it('returns 400 when deleting loot fails unexpectedly', async () => {
+    deleteRaidLoot.mockImplementation(async () => {
+      throw new Error('db failed');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/loot/loot-1', {
+        method: 'DELETE',
+      }),
+    );
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 403 when patching wage is forbidden', async () => {
+    const { RaidRunForbiddenError } = await import(
+      '../../src/services/raid-run-errors'
+    );
+    patchRaidRunWage.mockImplementation(async () => {
+      throw new RaidRunForbiddenError('forbidden');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/wage', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          totalIncome: '50000',
+          wagePerPerson: '2000',
+        }),
+      }),
+    );
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 400 when patching wage fails unexpectedly', async () => {
+    patchRaidRunWage.mockImplementation(async () => {
+      throw new Error('db failed');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/wage', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          totalIncome: '50000',
+          wagePerPerson: '2000',
+        }),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 404 when game raid id target is missing', async () => {
+    patchRaidRunGameRaidId.mockImplementation(async () => null);
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/game-raid-id', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ gameRaidId: 'raid-team-123' }),
+      }),
+    );
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 403 when patching game raid id is forbidden', async () => {
+    const { RaidRunForbiddenError } = await import(
+      '../../src/services/raid-run-errors'
+    );
+    patchRaidRunGameRaidId.mockImplementation(async () => {
+      throw new RaidRunForbiddenError('forbidden');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/game-raid-id', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ gameRaidId: 'raid-team-123' }),
+      }),
+    );
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 409 when patching game raid id conflicts', async () => {
+    const { RaidRunConflictError } = await import(
+      '../../src/services/raid-run-errors'
+    );
+    patchRaidRunGameRaidId.mockImplementation(async () => {
+      throw new RaidRunConflictError('conflict');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/game-raid-id', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ gameRaidId: 'raid-team-123' }),
+      }),
+    );
+
+    expect(res.status).toBe(409);
+  });
+
+  it('returns 400 when patching game raid id fails unexpectedly', async () => {
+    patchRaidRunGameRaidId.mockImplementation(async () => {
+      throw new Error('db failed');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/game-raid-id', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ gameRaidId: 'raid-team-123' }),
+      }),
+    );
+
+    expect(res.status).toBe(400);
   });
 });

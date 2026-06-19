@@ -149,6 +149,13 @@ describe('raid-runs routes', () => {
       status: 'recruiting' as const,
     }));
     listMyRaidRuns.mockImplementation(async () => ({ items: [] }));
+    updateRaidRunStatus.mockClear();
+    updateRaidRunStatus.mockImplementation(
+      async (_id: string, _userId: string, status: string) => ({
+        ...raidRunResponse,
+        status,
+      }),
+    );
   });
 
   it('lists mine for authenticated users', async () => {
@@ -490,5 +497,84 @@ describe('raid-runs routes', () => {
     );
 
     expect(res.status).toBe(409);
+  });
+
+  it('returns 404 when status target is missing', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+    updateRaidRunStatus.mockImplementation(async () => null as never);
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/missing/status', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ status: 'ongoing' }),
+      }),
+    );
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 403 when status update is forbidden', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+    updateRaidRunStatus.mockImplementation(async () => {
+      throw new RaidRunForbiddenError('forbidden');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/status', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ status: 'ongoing' }),
+      }),
+    );
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 400 when status validation fails', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+    updateRaidRunStatus.mockImplementation(async () => {
+      throw new RaidRunValidationError('missing fields');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/status', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ status: 'recruiting' }),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when status update fails unexpectedly', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+    updateRaidRunStatus.mockImplementation(async () => {
+      throw new Error('db failed');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/status', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ status: 'ongoing' }),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 500 when fetching draft fails unexpectedly', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+    getRaidRunDraft.mockImplementation(async () => {
+      throw new Error('db failed');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1'),
+    );
+
+    expect(res.status).toBe(500);
   });
 });
