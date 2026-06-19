@@ -40,6 +40,7 @@ const {
   listMyRaidRuns,
   patchRaidRunDraft,
   publishRaidRun,
+  updateRaidRunStatus,
   RaidRunConflictError,
   RaidRunForbiddenError,
   RaidRunValidationError,
@@ -445,14 +446,65 @@ describe('raid-runs service', () => {
     const signupRows = buildSignupRows();
     mockDb.setResults([
       [runRow],
-      [{ id: 'dungeon-1' }],
+      [runRow],
       signupRows,
+      [{ id: 'dungeon-1' }],
       [{ ...runRow, status: 'recruiting' as const }],
     ]);
 
     const published = await publishRaidRun('run-1', 'user-1');
 
     expect(published?.status).toBe('recruiting');
+  });
+
+  it('transitions recruiting raid run to ongoing', async () => {
+    const recruitingRun = { ...runRow, status: 'recruiting' as const };
+    const signupRows = buildSignupRows();
+    mockDb.setResults([
+      [recruitingRun],
+      signupRows,
+      [{ ...recruitingRun, status: 'ongoing' as const }],
+    ]);
+
+    const updated = await updateRaidRunStatus('run-1', 'user-1', 'ongoing');
+
+    expect(updated?.status).toBe('ongoing');
+  });
+
+  it('transitions ongoing raid run to completed and sets endTime', async () => {
+    const ongoingRun = { ...runRow, status: 'ongoing' as const, endTime: null };
+    const signupRows = buildSignupRows();
+    mockDb.setResults([
+      [ongoingRun],
+      signupRows,
+      [{ ...ongoingRun, status: 'completed' as const, endTime: new Date() }],
+    ]);
+
+    const updated = await updateRaidRunStatus('run-1', 'user-1', 'completed');
+
+    expect(updated?.status).toBe('completed');
+  });
+
+  it('cancels a recruiting raid run', async () => {
+    const recruitingRun = { ...runRow, status: 'recruiting' as const };
+    const signupRows = buildSignupRows();
+    mockDb.setResults([
+      [recruitingRun],
+      signupRows,
+      [{ ...recruitingRun, status: 'cancelled' as const }],
+    ]);
+
+    const updated = await updateRaidRunStatus('run-1', 'user-1', 'cancelled');
+
+    expect(updated?.status).toBe('cancelled');
+  });
+
+  it('rejects invalid status transitions', async () => {
+    mockDb.setResults([[{ ...runRow, status: 'completed' as const }]]);
+
+    await expect(
+      updateRaidRunStatus('run-1', 'user-1', 'ongoing'),
+    ).rejects.toBeInstanceOf(RaidRunConflictError);
   });
 
   it('rejects duplicate formation cores in the same group', async () => {
@@ -473,7 +525,7 @@ describe('raid-runs service', () => {
     signupRows[0] = { ...signupRows[0]!, isLeader: true };
     signupRows[1] = { ...signupRows[1]!, isLeader: true };
 
-    mockDb.setResults([[runRow], [{ id: 'dungeon-1' }], signupRows]);
+    mockDb.setResults([[runRow], [runRow], signupRows, [{ id: 'dungeon-1' }]]);
 
     await expect(publishRaidRun('run-1', 'user-1')).rejects.toBeInstanceOf(
       RaidRunValidationError,
@@ -485,7 +537,7 @@ describe('raid-runs service', () => {
     signupRows[0] = { ...signupRows[0]!, isDarkRun: true };
     signupRows[1] = { ...signupRows[1]!, isDarkRun: true };
 
-    mockDb.setResults([[runRow], [{ id: 'dungeon-1' }], signupRows]);
+    mockDb.setResults([[runRow], [runRow], signupRows, [{ id: 'dungeon-1' }]]);
 
     await expect(publishRaidRun('run-1', 'user-1')).rejects.toBeInstanceOf(
       RaidRunValidationError,
@@ -529,15 +581,15 @@ describe('raid-runs service', () => {
 
   it('rejects publish when gather time is after start time', async () => {
     const signupRows = buildSignupRows();
+    const invalidRun = {
+      ...runRow,
+      gatherTime: new Date('2026-06-15T12:00:00.000Z'),
+    };
     mockDb.setResults([
-      [
-        {
-          ...runRow,
-          gatherTime: new Date('2026-06-15T12:00:00.000Z'),
-        },
-      ],
-      [{ id: 'dungeon-1' }],
+      [invalidRun],
+      [invalidRun],
       signupRows,
+      [{ id: 'dungeon-1' }],
     ]);
 
     await expect(publishRaidRun('run-1', 'user-1')).rejects.toBeInstanceOf(
@@ -547,7 +599,7 @@ describe('raid-runs service', () => {
 
   it('rejects publish when dungeon no longer exists', async () => {
     const signupRows = buildSignupRows();
-    mockDb.setResults([[runRow], [], signupRows]);
+    mockDb.setResults([[runRow], [runRow], signupRows, []]);
 
     await expect(publishRaidRun('run-1', 'user-1')).rejects.toBeInstanceOf(
       RaidRunValidationError,

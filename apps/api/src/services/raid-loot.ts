@@ -10,8 +10,10 @@ import { and, asc, eq } from 'drizzle-orm';
 import type {
   CreateRaidLootBody,
   PatchRaidLootBody,
+  PatchRaidRunGameRaidIdBody,
   PatchRaidRunWageBody,
   RaidLootItem,
+  RaidRunGameRaidIdResponse,
   RaidRunWageResponse,
 } from '../schemas/raid-loot';
 import { getGameItemById } from './game-items';
@@ -272,5 +274,35 @@ export const patchRaidRunWage = async (
   return {
     totalIncome: toNumericString(updated.totalIncome),
     wagePerPerson: toNumericString(updated.wagePerPerson),
+  };
+};
+
+export const patchRaidRunGameRaidId = async (
+  raidRunId: string,
+  userId: string,
+  body: PatchRaidRunGameRaidIdBody,
+): Promise<RaidRunGameRaidIdResponse | null> => {
+  const run = await getRaidRunById(raidRunId);
+  if (!run) {
+    return null;
+  }
+
+  assertOwner(run, userId);
+  assertLootEditable(run);
+
+  const gameRaidId = body.gameRaidId?.trim() ? body.gameRaidId.trim() : null;
+
+  const [updated] = await db
+    .update(raidRun)
+    .set({ gameRaidId })
+    .where(eq(raidRun.id, raidRunId))
+    .returning({ gameRaidId: raidRun.gameRaidId });
+
+  if (!updated) {
+    return null;
+  }
+
+  return {
+    gameRaidId: updated.gameRaidId,
   };
 };

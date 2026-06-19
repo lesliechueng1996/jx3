@@ -7,6 +7,7 @@ const raidRunResponse = {
   name: '周末团',
   description: null,
   dungeonId: 'd1',
+  gameRaidId: null,
   status: 'pending' as const,
   gatherTime: null,
   startTime: '2026-06-14T12:00:00.000Z',
@@ -73,6 +74,12 @@ const publishRaidRun = mock(async () => ({
   ...raidRunResponse,
   status: 'recruiting' as const,
 }));
+const updateRaidRunStatus = mock(
+  async (_id: string, _userId: string, status: string) => ({
+    ...raidRunResponse,
+    status,
+  }),
+);
 const listMyRaidRuns = mock(async () => ({ items: [] }));
 
 mock.module('../../src/lib/auth', () => ({
@@ -99,6 +106,7 @@ mock.module('../../src/services/raid-runs', () => ({
   listMyRaidRuns,
   patchRaidRunDraft,
   publishRaidRun,
+  updateRaidRunStatus,
   RaidRunValidationError,
   RaidRunForbiddenError,
   RaidRunConflictError,
@@ -444,5 +452,43 @@ describe('raid-runs routes', () => {
     const body = await res.json();
     expect(body.status).toBe('recruiting');
     expect(publishRaidRun).toHaveBeenCalledTimes(1);
+  });
+
+  it('updates raid run status for authenticated creators', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/status', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ status: 'ongoing' }),
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.status).toBe('ongoing');
+    expect(updateRaidRunStatus).toHaveBeenCalledWith(
+      'run-1',
+      'user-1',
+      'ongoing',
+    );
+  });
+
+  it('returns 409 when status transition is invalid', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+    updateRaidRunStatus.mockImplementation(async () => {
+      throw new RaidRunConflictError('Cannot transition raid run');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/status', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ status: 'completed' }),
+      }),
+    );
+
+    expect(res.status).toBe(409);
   });
 });

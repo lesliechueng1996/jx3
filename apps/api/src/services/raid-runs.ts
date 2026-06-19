@@ -302,6 +302,7 @@ const toRaidRunResponse = (
   name: run.name,
   description: run.description,
   dungeonId: fromDbDungeonId(run.dungeonId),
+  gameRaidId: run.gameRaidId,
   status: run.status,
   gatherTime: toIsoOrNull(run.gatherTime),
   startTime: fromDbStartTime(run.startTime),
@@ -551,6 +552,46 @@ const assertPending = (run: typeof raidRun.$inferSelect): void => {
   if (run.status !== 'pending') {
     throw new RaidRunConflictError('Only pending raid runs can be published');
   }
+};
+
+const RAID_RUN_STATUS_TRANSITIONS: Record<
+  (typeof raidRun.$inferSelect)['status'],
+  ReadonlyArray<(typeof raidRun.$inferSelect)['status']>
+> = {
+  pending: ['recruiting', 'cancelled'],
+  recruiting: ['ongoing', 'cancelled'],
+  ongoing: ['completed', 'cancelled'],
+  completed: [],
+  cancelled: [],
+};
+
+const assertValidStatusTransition = (
+  currentStatus: (typeof raidRun.$inferSelect)['status'],
+  targetStatus: (typeof raidRun.$inferSelect)['status'],
+): void => {
+  const allowed = RAID_RUN_STATUS_TRANSITIONS[currentStatus];
+  if (!allowed.includes(targetStatus)) {
+    throw new RaidRunConflictError(
+      `Cannot transition raid run from ${currentStatus} to ${targetStatus}`,
+    );
+  }
+};
+
+const validateRecruitingTransition = async (
+  run: typeof raidRun.$inferSelect,
+  signupRows: Array<typeof raidSignup.$inferSelect>,
+): Promise<void> => {
+  const dungeon = await db
+    .select({ id: gameDungeon.id })
+    .from(gameDungeon)
+    .where(eq(gameDungeon.id, run.dungeonId))
+    .limit(1);
+
+  if (run.dungeonId !== DRAFT_DUNGEON_SENTINEL && dungeon.length === 0) {
+    throw new RaidRunValidationError('Dungeon not found');
+  }
+
+  await validatePublishRun(run, signupRowsToInputs(signupRows));
 };
 
 const RAID_RUN_STATUS_SORT_WEIGHT: Record<
@@ -1013,6 +1054,49 @@ export const patchRaidRunDraft = async (
   });
 };
 
+export const updateRaidRunStatus = async (
+  raidRunId: string,
+  userId: string,
+  targetStatus: (typeof raidRun.$inferSelect)['status'],
+): Promise<RaidRunResponse | null> => {
+  const existing = await getRaidRunById(raidRunId);
+  if (!existing) {
+    return null;
+  }
+
+  assertOwner(existing, userId);
+  assertValidStatusTransition(existing.status, targetStatus);
+
+  const signupRows = await getSignupsByRaidRunId(raidRunId);
+
+  if (existing.status === 'pending' && targetStatus === 'recruiting') {
+    await validateRecruitingTransition(existing, signupRows);
+  }
+
+  const runUpdates: Partial<typeof raidRun.$inferInsert> = {
+    status: targetStatus,
+  };
+
+  if (targetStatus === 'completed' && !existing.endTime) {
+    runUpdates.endTime = new Date();
+  }
+
+  const [updatedRun] = await db
+    .update(raidRun)
+    .set(runUpdates)
+    .where(and(eq(raidRun.id, raidRunId), eq(raidRun.status, existing.status)))
+    .returning();
+
+  if (!updatedRun) {
+    return null;
+  }
+
+  return toRaidRunResponse(
+    updatedRun,
+    signupRows.map((row) => toSignupResponse(row)),
+  );
+};
+
 export const publishRaidRun = async (
   raidRunId: string,
   userId: string,
@@ -1022,48 +1106,7 @@ export const publishRaidRun = async (
     return null;
   }
 
-  assertOwner(existing, userId);
   assertPending(existing);
 
-  const dungeon = await db
-    .select({ id: gameDungeon.id })
-    .from(gameDungeon)
-    .where(eq(gameDungeon.id, existing.dungeonId))
-    .limit(1);
-
-  if (existing.dungeonId !== DRAFT_DUNGEON_SENTINEL && dungeon.length === 0) {
-    throw new RaidRunValidationError('Dungeon not found');
-  }
-
-  const signupRows = await getSignupsByRaidRunId(raidRunId);
-  const signupInputs: SignupInput[] = signupRows.map((row) => ({
-    groupNumber: row.groupNumber ?? 1,
-    positionNumber: row.positionNumber ?? 1,
-    role: row.role,
-    characterName: row.characterName,
-    serverId: row.serverId,
-    schoolId: row.schoolId,
-    kungfuId: row.kungfuId,
-    isLeader: row.isLeader,
-    isDarkRun: row.isDarkRun,
-    isFormationCore: row.isFormationCore,
-    remark: row.remark,
-  }));
-
-  await validatePublishRun(existing, signupInputs);
-
-  const [publishedRun] = await db
-    .update(raidRun)
-    .set({ status: 'recruiting' })
-    .where(and(eq(raidRun.id, raidRunId), eq(raidRun.status, 'pending')))
-    .returning();
-
-  if (!publishedRun) {
-    return null;
-  }
-
-  return toRaidRunResponse(
-    publishedRun,
-    signupRows.map((row) => toSignupResponse(row)),
-  );
+  return updateRaidRunStatus(raidRunId, userId, 'recruiting');
 };

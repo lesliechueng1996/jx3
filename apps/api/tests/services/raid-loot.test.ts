@@ -28,8 +28,13 @@ mock.module('../../src/services/game-items', () => ({
   getGameItemById,
 }));
 
-const { createRaidLoot, deleteRaidLoot, patchRaidLoot, patchRaidRunWage } =
-  await import('../../src/services/raid-loot');
+const {
+  createRaidLoot,
+  deleteRaidLoot,
+  patchRaidLoot,
+  patchRaidRunGameRaidId,
+  patchRaidRunWage,
+} = await import('../../src/services/raid-loot');
 
 const {
   RaidRunConflictError: RunConflictError,
@@ -138,6 +143,29 @@ describe('raid-loot service', () => {
       totalIncome: '50000',
       wagePerPerson: '2000',
     });
+  });
+
+  it('patches raid run game raid id', async () => {
+    mockDb.setResults([[ongoingRun], [{ gameRaidId: 'raid-team-123' }]]);
+
+    const updated = await patchRaidRunGameRaidId('run-1', 'user-1', {
+      gameRaidId: 'raid-team-123',
+    });
+
+    expect(updated).toEqual({ gameRaidId: 'raid-team-123' });
+  });
+
+  it('clears raid run game raid id when empty string is submitted', async () => {
+    mockDb.setResults([
+      [{ ...ongoingRun, gameRaidId: 'raid-team-123' }],
+      [{ gameRaidId: null }],
+    ]);
+
+    const updated = await patchRaidRunGameRaidId('run-1', 'user-1', {
+      gameRaidId: '   ',
+    });
+
+    expect(updated).toEqual({ gameRaidId: null });
   });
 
   it('deletes loot for owner', async () => {

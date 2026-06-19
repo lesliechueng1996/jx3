@@ -95,3 +95,49 @@ export const getEmptyStateMessage = (filter: RaidHistoryFilter): string => {
       return '暂无参团记录';
   }
 };
+
+export type RaidRunStatusAction = {
+  target: RaidRunListItem['status'];
+  label: string;
+  destructive?: boolean;
+  confirmMessage?: string;
+};
+
+export const getRaidRunStatusActions = (
+  status: RaidRunListItem['status'],
+): RaidRunStatusAction[] => {
+  switch (status) {
+    case 'pending':
+      return [
+        { target: 'recruiting', label: '发布招募' },
+        {
+          target: 'cancelled',
+          label: '取消团队',
+          destructive: true,
+          confirmMessage: '确定要取消这个团队吗？取消后无法恢复。',
+        },
+      ];
+    case 'recruiting':
+      return [
+        { target: 'ongoing', label: '开始团本' },
+        {
+          target: 'cancelled',
+          label: '取消团队',
+          destructive: true,
+          confirmMessage: '确定要取消这个团队吗？取消后无法恢复。',
+        },
+      ];
+    case 'ongoing':
+      return [
+        { target: 'completed', label: '标记完成' },
+        {
+          target: 'cancelled',
+          label: '取消团队',
+          destructive: true,
+          confirmMessage: '确定要取消这个团队吗？取消后无法恢复。',
+        },
+      ];
+    default:
+      return [];
+  }
+};

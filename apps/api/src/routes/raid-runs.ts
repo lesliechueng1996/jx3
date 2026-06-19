@@ -5,8 +5,10 @@ import { errorResponse } from '../schemas/common';
 import {
   createRaidLootBodySchema,
   patchRaidLootBodySchema,
+  patchRaidRunGameRaidIdBodySchema,
   patchRaidRunWageBodySchema,
   raidLootItemSchema,
+  raidRunGameRaidIdResponseSchema,
   raidRunWageResponseSchema,
 } from '../schemas/raid-loot';
 import {
@@ -14,6 +16,7 @@ import {
   listMyRaidRunsQuerySchema,
   listMyRaidRunsResponseSchema,
   patchRaidRunBodySchema,
+  patchRaidRunStatusBodySchema,
   publishRaidRunBodySchema,
   raidRunResponseSchema,
 } from '../schemas/raid-runs';
@@ -21,6 +24,7 @@ import {
   createRaidLoot,
   deleteRaidLoot,
   patchRaidLoot,
+  patchRaidRunGameRaidId,
   patchRaidRunWage,
 } from '../services/raid-loot';
 import {
@@ -32,6 +36,7 @@ import {
   RaidRunConflictError,
   RaidRunForbiddenError,
   RaidRunValidationError,
+  updateRaidRunStatus,
 } from '../services/raid-runs';
 
 const raidRunIdParamsSchema = t.Object({
@@ -182,6 +187,64 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
         summary: 'Update a raid run draft',
         description:
           'Updates a raid run owned by the creator. Pending drafts use draft validation; recruiting and ongoing runs use publish validation.',
+      },
+    },
+  )
+  .patch(
+    '/api/v1/raid-runs/:id/status',
+    async ({ params, body, user, set, log }) => {
+      try {
+        const updated = await updateRaidRunStatus(
+          params.id,
+          user.id,
+          body.status,
+        );
+        if (!updated) {
+          set.status = 404;
+          return errorResponse('NOT_FOUND', 'Raid run not found');
+        }
+        return updated;
+      } catch (error) {
+        if (error instanceof RaidRunForbiddenError) {
+          set.status = 403;
+          return errorResponse('FORBIDDEN', error.message);
+        }
+        if (error instanceof RaidRunConflictError) {
+          set.status = 409;
+          return errorResponse('CONFLICT', error.message);
+        }
+        if (error instanceof RaidRunValidationError) {
+          set.status = 400;
+          return errorResponse('VALIDATION_FAILED', error.message);
+        }
+        log.error(
+          { err: error, raidRunId: params.id, status: body.status },
+          'failed to update raid run status',
+        );
+        set.status = 400;
+        return errorResponse(
+          'UPDATE_FAILED',
+          'Failed to update raid run status',
+        );
+      }
+    },
+    {
+      auth: true,
+      params: raidRunIdParamsSchema,
+      body: patchRaidRunStatusBodySchema,
+      response: {
+        200: raidRunResponseSchema,
+        400: t.Any(),
+        401: t.Any(),
+        403: t.Any(),
+        404: t.Any(),
+        409: t.Any(),
+      },
+      detail: {
+        tags: ['Raids'],
+        summary: 'Update raid run status',
+        description:
+          'Transitions a raid run through pending → recruiting → ongoing → completed, or cancels it from any non-terminal state. Only the creator can update status.',
       },
     },
   )
@@ -427,6 +490,56 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
         summary: 'Record raid run wage',
         description:
           'Updates total income and wage per person for an ongoing or completed raid run.',
+      },
+    },
+  )
+  .patch(
+    '/api/v1/raid-runs/:id/game-raid-id',
+    async ({ params, body, user, set, log }) => {
+      try {
+        const updated = await patchRaidRunGameRaidId(params.id, user.id, body);
+        if (!updated) {
+          set.status = 404;
+          return errorResponse('NOT_FOUND', 'Raid run not found');
+        }
+        return updated;
+      } catch (error) {
+        if (error instanceof RaidRunForbiddenError) {
+          set.status = 403;
+          return errorResponse('FORBIDDEN', error.message);
+        }
+        if (error instanceof RaidRunConflictError) {
+          set.status = 409;
+          return errorResponse('CONFLICT', error.message);
+        }
+        log.error(
+          { err: error, raidRunId: params.id },
+          'failed to patch raid run game raid id',
+        );
+        set.status = 400;
+        return errorResponse(
+          'UPDATE_FAILED',
+          'Failed to update raid run game raid id',
+        );
+      }
+    },
+    {
+      auth: true,
+      params: raidRunIdParamsSchema,
+      body: patchRaidRunGameRaidIdBodySchema,
+      response: {
+        200: raidRunGameRaidIdResponseSchema,
+        400: t.Any(),
+        401: t.Any(),
+        403: t.Any(),
+        404: t.Any(),
+        409: t.Any(),
+      },
+      detail: {
+        tags: ['Raids'],
+        summary: 'Record in-game raid id',
+        description:
+          'Updates the in-game raid team id for an ongoing or completed raid run.',
       },
     },
   );

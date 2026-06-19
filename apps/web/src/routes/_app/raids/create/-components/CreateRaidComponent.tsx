@@ -345,6 +345,7 @@ export function CreateRaidComponent({
                   totalIncome: initialData?.totalIncome ?? null,
                   wagePerPerson: initialData?.wagePerPerson ?? null,
                 }}
+                gameRaidId={initialData?.gameRaidId ?? null}
                 editable={isLootEditable}
               />
             </div>

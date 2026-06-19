@@ -136,6 +136,7 @@ export const raidRunResponseSchema = z.object({
   name: z.string(),
   description: z.string().nullable(),
   dungeonId: z.string().nullable(),
+  gameRaidId: z.string().nullable(),
   status: raidRunStatusSchema,
   gatherTime: z.string().nullable(),
   startTime: z.string().nullable(),
@@ -158,6 +159,14 @@ export type RaidRunResponse = z.infer<typeof raidRunResponseSchema>;
 export const publishRaidRunBodySchema = z.object({});
 
 export type PublishRaidRunBody = z.infer<typeof publishRaidRunBodySchema>;
+
+export const patchRaidRunStatusBodySchema = z.object({
+  status: z.enum(['recruiting', 'ongoing', 'completed', 'cancelled']),
+});
+
+export type PatchRaidRunStatusBody = z.infer<
+  typeof patchRaidRunStatusBodySchema
+>;
 
 export const listMyRaidRunsQuerySchema = z.object({
   filter: z.enum(['all', 'created', 'leader']).default('all'),

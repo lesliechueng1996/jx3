@@ -65,3 +65,19 @@ export const raidRunWageResponseSchema = z.object({
 });
 
 export type RaidRunWageResponse = z.infer<typeof raidRunWageResponseSchema>;
+
+export const patchRaidRunGameRaidIdBodySchema = z.object({
+  gameRaidId: z.string().max(255).nullable(),
+});
+
+export type PatchRaidRunGameRaidIdBody = z.infer<
+  typeof patchRaidRunGameRaidIdBodySchema
+>;
+
+export const raidRunGameRaidIdResponseSchema = z.object({
+  gameRaidId: z.string().nullable(),
+});
+
+export type RaidRunGameRaidIdResponse = z.infer<
+  typeof raidRunGameRaidIdResponseSchema
+>;

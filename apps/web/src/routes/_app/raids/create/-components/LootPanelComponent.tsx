@@ -16,6 +16,7 @@ import {
   ITEM_QUALITY_CLASS,
   ITEM_QUALITY_LABELS,
 } from './item-utils';
+import { RecordDungeonIdDialogComponent } from './RecordDungeonIdDialogComponent';
 import { RecordWageDialogComponent } from './RecordWageDialogComponent';
 
 type LootPanelComponentProps = {
@@ -23,6 +24,7 @@ type LootPanelComponentProps = {
   signups: RaidSignupResponse[];
   initialLoot: RaidLootItem[];
   wage: RaidRunWage;
+  gameRaidId: string | null;
   editable: boolean;
 };
 
@@ -31,13 +33,16 @@ export function LootPanelComponent({
   signups,
   initialLoot,
   wage,
+  gameRaidId,
   editable,
 }: LootPanelComponentProps) {
   const [loot, setLoot] = useState(initialLoot);
   const [currentWage, setCurrentWage] = useState(wage);
+  const [currentGameRaidId, setCurrentGameRaidId] = useState(gameRaidId);
   const [addOpen, setAddOpen] = useState(false);
   const [editLoot, setEditLoot] = useState<RaidLootItem | null>(null);
   const [wageOpen, setWageOpen] = useState(false);
+  const [gameRaidIdOpen, setGameRaidIdOpen] = useState(false);
 
   useEffect(() => {
     setLoot(initialLoot);
@@ -46,6 +51,10 @@ export function LootPanelComponent({
   useEffect(() => {
     setCurrentWage(wage);
   }, [wage]);
+
+  useEffect(() => {
+    setCurrentGameRaidId(gameRaidId);
+  }, [gameRaidId]);
 
   const handleError = (error: unknown, fallbackMessage: string) => {
     if (error instanceof ApiRequestError) {
@@ -114,6 +123,17 @@ export function LootPanelComponent({
     onError: (error) => handleError(error, '保存工资失败'),
   });
 
+  const gameRaidIdMutation = useMutation({
+    mutationFn: (nextGameRaidId: string | null) =>
+      raidRunsApi.patchGameRaidId(raidRunId, { gameRaidId: nextGameRaidId }),
+    onSuccess: (updated) => {
+      setCurrentGameRaidId(updated.gameRaidId);
+      setGameRaidIdOpen(false);
+      toast.success('副本 ID 已保存');
+    },
+    onError: (error) => handleError(error, '保存副本 ID 失败'),
+  });
+
   const lootPending =
     createLootMutation.isPending || patchLootMutation.isPending;
 
@@ -125,6 +145,12 @@ export function LootPanelComponent({
       </p>
     ) : null;
 
+  const gameRaidIdSummary = currentGameRaidId ? (
+    <p className="text-sm text-muted-foreground">
+      副本 ID：{currentGameRaidId}
+    </p>
+  ) : null;
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -132,10 +158,18 @@ export function LootPanelComponent({
           <h2 className="text-sm font-medium text-muted-foreground">
             重要掉落
           </h2>
+          {gameRaidIdSummary}
           {wageSummary}
         </div>
         {editable ? (
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setGameRaidIdOpen(true)}
+            >
+              记录副本ID
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -264,6 +298,14 @@ export function LootPanelComponent({
         pending={wageMutation.isPending}
         onOpenChange={setWageOpen}
         onSubmit={(payload) => wageMutation.mutate(payload)}
+      />
+
+      <RecordDungeonIdDialogComponent
+        open={gameRaidIdOpen}
+        gameRaidId={currentGameRaidId}
+        pending={gameRaidIdMutation.isPending}
+        onOpenChange={setGameRaidIdOpen}
+        onSubmit={(nextGameRaidId) => gameRaidIdMutation.mutate(nextGameRaidId)}
       />
     </div>
   );

@@ -36,6 +36,12 @@ export const raidRunWageResponseSchema = z.object({
 
 export type RaidRunWage = z.infer<typeof raidRunWageResponseSchema>;
 
+export const raidRunGameRaidIdResponseSchema = z.object({
+  gameRaidId: z.string().nullable(),
+});
+
+export type RaidRunGameRaidId = z.infer<typeof raidRunGameRaidIdResponseSchema>;
+
 export const raidSignupRoleSchema = z.enum([
   'pending',
   'tank',
@@ -85,6 +91,7 @@ export const raidRunResponseSchema = z.object({
   name: z.string(),
   description: z.string().nullable(),
   dungeonId: z.string().nullable(),
+  gameRaidId: z.string().nullable(),
   status: raidRunStatusSchema,
   gatherTime: z.string().nullable(),
   startTime: z.string().nullable(),
@@ -188,6 +195,19 @@ export const raidRunsApi = {
       },
     );
   },
+  updateStatus(
+    raidRunId: string,
+    status: Exclude<z.infer<typeof raidRunStatusSchema>, 'pending'>,
+  ) {
+    return requestJson(
+      `/api/v1/raid-runs/${raidRunId}/status`,
+      raidRunResponseSchema,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      },
+    );
+  },
   listMine(filter: RaidHistoryFilter) {
     const query = buildQueryString({ filter });
     return requestJson(
@@ -249,6 +269,16 @@ export const raidRunsApi = {
     return requestJson(
       `/api/v1/raid-runs/${raidRunId}/wage`,
       raidRunWageResponseSchema,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      },
+    );
+  },
+  patchGameRaidId(raidRunId: string, body: { gameRaidId: string | null }) {
+    return requestJson(
+      `/api/v1/raid-runs/${raidRunId}/game-raid-id`,
+      raidRunGameRaidIdResponseSchema,
       {
         method: 'PATCH',
         body: JSON.stringify(body),

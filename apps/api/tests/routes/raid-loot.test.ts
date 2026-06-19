@@ -54,6 +54,11 @@ const patchRaidRunWage = mock(
     wagePerPerson: '2000',
   }),
 );
+const patchRaidRunGameRaidId = mock(
+  async (): Promise<{ gameRaidId: string | null } | null> => ({
+    gameRaidId: 'raid-team-123',
+  }),
+);
 const listRaidLoot = mock(async () => []);
 
 mock.module('../../src/lib/auth', () => ({
@@ -69,6 +74,7 @@ mock.module('../../src/services/raid-loot', () => ({
   patchRaidLoot,
   deleteRaidLoot,
   patchRaidRunWage,
+  patchRaidRunGameRaidId,
   listRaidLoot,
 }));
 
@@ -86,6 +92,7 @@ describe('raid loot routes', () => {
     patchRaidLoot.mockClear();
     deleteRaidLoot.mockClear();
     patchRaidRunWage.mockClear();
+    patchRaidRunGameRaidId.mockClear();
   });
 
   it('returns 401 when creating loot unauthenticated', async () => {
@@ -311,5 +318,22 @@ describe('raid loot routes', () => {
     );
 
     expect(res.status).toBe(409);
+  });
+
+  it('patches raid run game raid id for authenticated creators', async () => {
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/game-raid-id', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ gameRaidId: 'raid-team-123' }),
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.gameRaidId).toBe('raid-team-123');
+    expect(patchRaidRunGameRaidId).toHaveBeenCalledWith('run-1', 'user-1', {
+      gameRaidId: 'raid-team-123',
+    });
   });
 });

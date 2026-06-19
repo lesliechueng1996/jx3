@@ -92,7 +92,11 @@ export function RaidHistoryComponent() {
       {historyQuery.isSuccess && historyQuery.data.items.length > 0 ? (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {historyQuery.data.items.map((item) => (
-            <RaidHistoryCardComponent key={item.id} item={item} />
+            <RaidHistoryCardComponent
+              key={item.id}
+              item={item}
+              filter={filter}
+            />
           ))}
         </div>
       ) : null}
