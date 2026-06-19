@@ -19,6 +19,7 @@ export const gameItemResponseSchema = z.object({
   gameItemId: z.string().nullable(),
   description: z.string().nullable(),
   icon: z.string().nullable(),
+  alias: z.array(z.string()),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

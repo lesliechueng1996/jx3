@@ -7,6 +7,7 @@ import { loggerPlugin } from './plugins/logger';
 import { dungeonsAdminRoute } from './routes/dungeons-admin';
 import { expansionsAdminRoute } from './routes/expansions-admin';
 import { gameItemsRoute } from './routes/game-items';
+import { gameItemsAdminRoute } from './routes/game-items-admin';
 import { gameServersAdminRoute } from './routes/game-servers-admin';
 import { kungfuAdminRoute } from './routes/kungfu-admin';
 import { meRoute } from './routes/me';
@@ -55,7 +56,7 @@ export const createApp = () =>
             },
             {
               name: 'GameItems',
-              description: 'Game item search and creation',
+              description: 'Game item search, creation, and admin management',
             },
             { name: 'Uploads', description: 'File upload resources' },
             {
@@ -78,6 +79,7 @@ export const createApp = () =>
     .use(seasonsAdminRoute)
     .use(dungeonsAdminRoute)
     .use(gameItemsRoute)
+    .use(gameItemsAdminRoute)
     .use(raidRunsRoute);
 
 export type App = ReturnType<typeof createApp>;

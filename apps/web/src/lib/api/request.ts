@@ -1,3 +1,4 @@
+import { createIsomorphicFn } from '@tanstack/react-start';
 import { z } from 'zod';
 
 export class ApiRequestError extends Error {
@@ -33,22 +34,16 @@ export const resolveRequestUrl = (
   return new URL(path, baseUrl).href;
 };
 
-const appendServerCookies = async (headers: Headers): Promise<void> => {
-  if (typeof window !== 'undefined') {
-    return;
-  }
-
-  try {
-    const { getRequestHeaders } = await import('@tanstack/react-start/server');
-    const cookie = getRequestHeaders().get('cookie');
-
-    if (cookie) {
-      headers.set('cookie', cookie);
-    }
-  } catch {
-    // Ignore when request headers are unavailable outside SSR.
-  }
-};
+const appendServerCookies = createIsomorphicFn()
+  .client(async (_headers: Headers): Promise<void> => {
+    // Browser fetch sends cookies via credentials: 'include'.
+  })
+  .server(async (headers: Headers): Promise<void> => {
+    const { appendServerCookies: append } = await import(
+      '#/lib/api/append-server-cookies.server'
+    );
+    await append(headers);
+  });
 
 export const parseJson = async <T>(
   response: Response,

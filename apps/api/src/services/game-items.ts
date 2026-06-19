@@ -17,6 +17,7 @@ const toGameItemResponse = (
   gameItemId: row.gameItemId,
   description: row.description,
   icon: row.icon,
+  alias: row.alias,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
 });

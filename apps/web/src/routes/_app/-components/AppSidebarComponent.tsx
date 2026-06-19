@@ -5,6 +5,7 @@ import {
   CalendarRange,
   Castle,
   ClipboardList,
+  Gem,
   Landmark,
   Server,
   Shield,
@@ -61,6 +62,11 @@ const ADMIN_NAV_ITEMS = [
     to: '/admin/dungeons' as const,
     label: '副本管理',
     icon: Castle,
+  },
+  {
+    to: '/admin/items' as const,
+    label: '物品管理',
+    icon: Gem,
   },
 ] as const;
 

@@ -99,6 +99,7 @@ export function AddLootDialogComponent({
         gameItemId: null,
         description: null,
         icon: loot.itemIcon,
+        alias: [],
         createdAt: loot.createdAt,
         updatedAt: loot.updatedAt,
       });

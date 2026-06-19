@@ -10,6 +10,7 @@ const gameItem = {
   gameItemId: null,
   description: null,
   icon: null,
+  alias: [] as string[],
   createdAt: '2026-06-19T00:00:00.000Z',
   updatedAt: '2026-06-19T00:00:00.000Z',
 };
