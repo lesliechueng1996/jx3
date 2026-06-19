@@ -38,3 +38,4 @@ import { getServerStates } from '@jx3/jx3api/jx3box';
 | Provider | Method | Endpoint | Auth |
 |----------|--------|----------|------|
 | jx3box | `getServerStates()` | `GET /api/spider/server/server_state` | None |
+| jx3box | `getItemIconByName(name)` | `GET /icon/name/{name}?client=std` | None |

@@ -48,7 +48,7 @@ export const gameItemsAdminRoute = new Elysia({
     '/api/v1/game-items/admin',
     async ({ body, set, log }) => {
       try {
-        const created = await createAdminGameItem(body);
+        const created = await createAdminGameItem(body, { logger: log });
         set.status = 201;
         return created;
       } catch (error) {

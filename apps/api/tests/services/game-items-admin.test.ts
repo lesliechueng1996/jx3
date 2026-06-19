@@ -1,10 +1,21 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { Jx3ApiError } from '@jx3/jx3api';
 import { createMockDb } from '../helpers/mock-db';
 
 const mockDb = createMockDb();
+const getItemIconByName = mock(async (name: string) => ({
+  iconId: 22889,
+  name,
+  iconUrl: 'https://icon.jx3box.com/icon/22889.png',
+}));
 
 mock.module('@jx3/db', () => ({
   db: mockDb,
+}));
+
+mock.module('@jx3/jx3api', () => ({
+  getItemIconByName,
+  Jx3ApiError,
 }));
 
 const {
@@ -13,6 +24,7 @@ const {
   getAdminGameItemById,
   isGameItemReferenced,
   listAdminGameItems,
+  resolveGameItemIcon,
   updateAdminGameItem,
 } = await import('../../src/services/game-items-admin');
 
@@ -35,6 +47,12 @@ const itemRow = {
 describe('game-items-admin service', () => {
   beforeEach(() => {
     mockDb.setResults([]);
+    getItemIconByName.mockClear();
+    getItemIconByName.mockImplementation(async (name: string) => ({
+      iconId: 22889,
+      name,
+      iconUrl: 'https://icon.jx3box.com/icon/22889.png',
+    }));
   });
 
   it('lists game items with pagination metadata', async () => {
@@ -116,6 +134,51 @@ describe('game-items-admin service', () => {
 
     expect(created.name).toBe('玄晶');
     expect(updated?.name).toBe('玄晶');
+    expect(getItemIconByName).not.toHaveBeenCalled();
+  });
+
+  it('resolves icon from jx3box when icon is omitted on create', async () => {
+    const rowWithResolvedIcon = {
+      ...itemRow,
+      icon: 'https://icon.jx3box.com/icon/22889.png',
+    };
+    mockDb.setResults([[rowWithResolvedIcon]]);
+
+    const created = await createAdminGameItem({
+      name: '第一尊',
+      type: 'equipment',
+      quality: 'purple',
+      alias: [],
+    });
+
+    expect(getItemIconByName).toHaveBeenCalledWith('第一尊', {
+      logger: undefined,
+    });
+    expect(created.icon).toBe('https://icon.jx3box.com/icon/22889.png');
+  });
+
+  it('stores null icon when jx3box lookup returns NOT_FOUND', async () => {
+    getItemIconByName.mockImplementation(async () => {
+      throw new Jx3ApiError('No icon found for item "不存在"', {
+        code: 'NOT_FOUND',
+      });
+    });
+    const rowWithoutIcon = { ...itemRow, icon: null };
+    mockDb.setResults([[rowWithoutIcon]]);
+
+    const created = await createAdminGameItem({
+      name: '不存在',
+      type: 'special',
+      quality: 'white',
+      alias: [],
+    });
+
+    expect(created.icon).toBeNull();
+  });
+
+  it('resolveGameItemIcon keeps explicit null without lookup', async () => {
+    await expect(resolveGameItemIcon('第一尊', null)).resolves.toBeNull();
+    expect(getItemIconByName).not.toHaveBeenCalled();
   });
 
   it('throws when create returning is empty', async () => {

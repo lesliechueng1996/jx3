@@ -1,11 +1,13 @@
 import { db } from '@jx3/db';
 import { gameItem } from '@jx3/db/schema';
+import type { Logger } from '@jx3/logger';
 import { eq, ilike, or, sql } from 'drizzle-orm';
 import type {
   CreateGameItemBody,
   GameItemResponse,
   SearchGameItemsResponse,
 } from '../schemas/game-items';
+import { resolveGameItemIcon } from './resolve-game-item-icon';
 
 const toGameItemResponse = (
   row: typeof gameItem.$inferSelect,
@@ -47,7 +49,10 @@ export const searchGameItems = async (
 
 export const createGameItem = async (
   body: CreateGameItemBody,
+  options: { logger?: Logger } = {},
 ): Promise<GameItemResponse> => {
+  const icon = await resolveGameItemIcon(body.name.trim(), body.icon, options);
+
   const [created] = await db
     .insert(gameItem)
     .values({
@@ -56,7 +61,7 @@ export const createGameItem = async (
       quality: body.quality,
       gameItemId: body.gameItemId ?? null,
       description: body.description ?? null,
-      icon: body.icon ?? null,
+      icon,
     })
     .returning();
 

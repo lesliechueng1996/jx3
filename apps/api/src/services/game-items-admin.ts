@@ -1,5 +1,6 @@
 import { db } from '@jx3/db';
 import { gameItem, raidLoot } from '@jx3/db/schema';
+import type { Logger } from '@jx3/logger';
 import { and, count, desc, eq, ilike, type SQL, sql } from 'drizzle-orm';
 import type {
   AdminGameItemListItem,
@@ -7,6 +8,9 @@ import type {
   ListGameItemsQuery,
   UpdateGameItemBody,
 } from '../schemas/game-items-admin';
+import { resolveGameItemIcon } from './resolve-game-item-icon';
+
+export { resolveGameItemIcon } from './resolve-game-item-icon';
 
 const toListItem = (
   row: typeof gameItem.$inferSelect,
@@ -100,7 +104,10 @@ export const getAdminGameItemById = async (
 
 export const createAdminGameItem = async (
   body: CreateGameItemAdminBody,
+  options: { logger?: Logger } = {},
 ): Promise<AdminGameItemListItem> => {
+  const icon = await resolveGameItemIcon(body.name, body.icon, options);
+
   const rows = await db
     .insert(gameItem)
     .values({
@@ -109,7 +116,7 @@ export const createAdminGameItem = async (
       quality: body.quality,
       gameItemId: body.gameItemId ?? null,
       description: body.description ?? null,
-      icon: body.icon ?? null,
+      icon,
       alias: body.alias,
     })
     .returning();

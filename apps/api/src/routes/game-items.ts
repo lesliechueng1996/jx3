@@ -35,7 +35,7 @@ export const gameItemsRoute = new Elysia({ name: 'game-items-routes' })
     '/api/v1/game-items',
     async ({ body, set, log }) => {
       try {
-        const created = await createGameItem(body);
+        const created = await createGameItem(body, { logger: log });
         set.status = 201;
         return created;
       } catch (error) {
