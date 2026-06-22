@@ -4,6 +4,8 @@ export * from './dungeon';
 export * from './expansion';
 export * from './item';
 export * from './kungfu';
+export * from './player-blocklist';
+export * from './raid-brand-blocklist';
 export * from './raid-loot';
 export * from './raid-run';
 export * from './raid-signup';
