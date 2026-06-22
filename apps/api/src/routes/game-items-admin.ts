@@ -2,7 +2,7 @@ import { SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
 import { Elysia, t } from 'elysia';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
-import { errorResponse } from '../schemas/common';
+import { errorResponse, errorSchema } from '../schemas/common';
 import {
   createGameItemAdminBodySchema,
   listGameItemsQuerySchema,
@@ -34,8 +34,8 @@ export const gameItemsAdminRoute = new Elysia({
     query: listGameItemsQuerySchema,
     response: {
       200: listGameItemsResponseSchema,
-      401: t.Any(),
-      403: t.Any(),
+      401: errorSchema,
+      403: errorSchema,
     },
     detail: {
       tags: ['GameItems'],
@@ -62,9 +62,9 @@ export const gameItemsAdminRoute = new Elysia({
       body: createGameItemAdminBodySchema,
       response: {
         201: updateGameItemResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
       },
       detail: {
         tags: ['GameItems'],
@@ -105,10 +105,10 @@ export const gameItemsAdminRoute = new Elysia({
       body: updateGameItemBodySchema,
       response: {
         200: updateGameItemResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['GameItems'],
@@ -155,11 +155,11 @@ export const gameItemsAdminRoute = new Elysia({
       params: gameItemIdParamsSchema,
       response: {
         200: successResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['GameItems'],

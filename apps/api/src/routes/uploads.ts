@@ -7,7 +7,7 @@ import {
 } from '../lib/storage';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
-import { errorResponse } from '../schemas/common';
+import { errorResponse, errorSchema } from '../schemas/common';
 import { uploadResponseSchema } from '../schemas/upload';
 
 export const uploadsRoute = new Elysia({ name: 'uploads-routes' })
@@ -46,10 +46,10 @@ export const uploadsRoute = new Elysia({ name: 'uploads-routes' })
       }),
       response: {
         200: uploadResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        500: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        500: errorSchema,
       },
       detail: {
         tags: ['Uploads'],

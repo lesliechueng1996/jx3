@@ -2,7 +2,7 @@ import { SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
 import { Elysia, t } from 'elysia';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
-import { errorResponse } from '../schemas/common';
+import { errorResponse, errorSchema } from '../schemas/common';
 import {
   createKungfuBodySchema,
   listKungfuOptionsQuerySchema,
@@ -35,8 +35,8 @@ export const kungfuAdminRoute = new Elysia({ name: 'kungfu-admin-routes' })
     query: listKungfuQuerySchema,
     response: {
       200: listKungfuResponseSchema,
-      401: t.Any(),
-      403: t.Any(),
+      401: errorSchema,
+      403: errorSchema,
     },
     detail: {
       tags: ['Kungfu'],
@@ -53,7 +53,7 @@ export const kungfuAdminRoute = new Elysia({ name: 'kungfu-admin-routes' })
       query: listKungfuOptionsQuerySchema,
       response: {
         200: listKungfuOptionsResponseSchema,
-        401: t.Any(),
+        401: errorSchema,
       },
       detail: {
         tags: ['Kungfu'],
@@ -81,9 +81,9 @@ export const kungfuAdminRoute = new Elysia({ name: 'kungfu-admin-routes' })
       body: createKungfuBodySchema,
       response: {
         201: updateKungfuResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
       },
       detail: {
         tags: ['Kungfu'],
@@ -123,10 +123,10 @@ export const kungfuAdminRoute = new Elysia({ name: 'kungfu-admin-routes' })
       body: updateKungfuBodySchema,
       response: {
         200: updateKungfuResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Kungfu'],
@@ -173,11 +173,11 @@ export const kungfuAdminRoute = new Elysia({ name: 'kungfu-admin-routes' })
       params: kungfuIdParamsSchema,
       response: {
         200: successResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Kungfu'],

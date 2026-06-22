@@ -2,7 +2,7 @@ import { SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
 import { Elysia, t } from 'elysia';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
-import { errorResponse } from '../schemas/common';
+import { errorResponse, errorSchema } from '../schemas/common';
 import {
   createSeasonBodySchema,
   listSeasonsResponseSchema,
@@ -51,9 +51,9 @@ export const seasonsAdminRoute = new Elysia({
       params: expansionIdParamsSchema,
       response: {
         200: listSeasonsResponseSchema,
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Expansions'],
@@ -95,10 +95,10 @@ export const seasonsAdminRoute = new Elysia({
       body: createSeasonBodySchema,
       response: {
         201: updateSeasonResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Expansions'],
@@ -147,10 +147,10 @@ export const seasonsAdminRoute = new Elysia({
       body: updateSeasonBodySchema,
       response: {
         200: updateSeasonResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Expansions'],
@@ -197,11 +197,11 @@ export const seasonsAdminRoute = new Elysia({
       params: expansionSeasonIdParamsSchema,
       response: {
         200: successResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Expansions'],

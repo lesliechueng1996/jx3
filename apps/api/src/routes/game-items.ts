@@ -1,7 +1,7 @@
-import { Elysia, t } from 'elysia';
+import { Elysia } from 'elysia';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
-import { errorResponse } from '../schemas/common';
+import { errorResponse, errorSchema } from '../schemas/common';
 import {
   createGameItemBodySchema,
   gameItemResponseSchema,
@@ -21,7 +21,7 @@ export const gameItemsRoute = new Elysia({ name: 'game-items-routes' })
       query: searchGameItemsQuerySchema,
       response: {
         200: searchGameItemsResponseSchema,
-        401: t.Any(),
+        401: errorSchema,
       },
       detail: {
         tags: ['GameItems'],
@@ -49,8 +49,8 @@ export const gameItemsRoute = new Elysia({ name: 'game-items-routes' })
       body: createGameItemBodySchema,
       response: {
         201: gameItemResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
       },
       detail: {
         tags: ['GameItems'],

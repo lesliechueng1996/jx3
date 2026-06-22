@@ -1,11 +1,16 @@
 import { Elysia } from 'elysia';
 import { authMacro } from '../middleware/auth-macro';
-import { toMeResponse } from '../schemas/user';
+import { errorSchema } from '../schemas/common';
+import { meResponseSchema, toMeResponse } from '../schemas/user';
 
 export const meRoute = new Elysia({ name: 'me-routes' })
   .use(authMacro)
   .get('/api/v1/me', ({ user }) => toMeResponse(user), {
     auth: true,
+    response: {
+      200: meResponseSchema,
+      401: errorSchema,
+    },
     detail: {
       tags: ['User'],
       summary: 'Get current authenticated user',

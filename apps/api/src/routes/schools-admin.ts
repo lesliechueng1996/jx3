@@ -2,7 +2,7 @@ import { SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
 import { Elysia, t } from 'elysia';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
-import { errorResponse } from '../schemas/common';
+import { errorResponse, errorSchema } from '../schemas/common';
 import {
   createSchoolBodySchema,
   listSchoolOptionsResponseSchema,
@@ -34,8 +34,8 @@ export const schoolsAdminRoute = new Elysia({ name: 'schools-admin-routes' })
     query: listSchoolsQuerySchema,
     response: {
       200: listSchoolsResponseSchema,
-      401: t.Any(),
-      403: t.Any(),
+      401: errorSchema,
+      403: errorSchema,
     },
     detail: {
       tags: ['Schools'],
@@ -48,7 +48,7 @@ export const schoolsAdminRoute = new Elysia({ name: 'schools-admin-routes' })
     auth: true,
     response: {
       200: listSchoolOptionsResponseSchema,
-      401: t.Any(),
+      401: errorSchema,
     },
     detail: {
       tags: ['Schools'],
@@ -75,9 +75,9 @@ export const schoolsAdminRoute = new Elysia({ name: 'schools-admin-routes' })
       body: createSchoolBodySchema,
       response: {
         201: updateSchoolResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
       },
       detail: {
         tags: ['Schools'],
@@ -117,10 +117,10 @@ export const schoolsAdminRoute = new Elysia({ name: 'schools-admin-routes' })
       body: updateSchoolBodySchema,
       response: {
         200: updateSchoolResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Schools'],
@@ -167,11 +167,11 @@ export const schoolsAdminRoute = new Elysia({ name: 'schools-admin-routes' })
       params: schoolIdParamsSchema,
       response: {
         200: successResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Schools'],

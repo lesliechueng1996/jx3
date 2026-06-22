@@ -2,7 +2,7 @@ import { SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
 import { Elysia, t } from 'elysia';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
-import { errorResponse } from '../schemas/common';
+import { errorResponse, errorSchema } from '../schemas/common';
 import {
   createDungeonBodySchema,
   listDungeonsQuerySchema,
@@ -33,7 +33,7 @@ export const dungeonsAdminRoute = new Elysia({ name: 'dungeons-admin-routes' })
     query: listDungeonsQuerySchema,
     response: {
       200: listDungeonsResponseSchema,
-      401: t.Any(),
+      401: errorSchema,
     },
     detail: {
       tags: ['Dungeons'],
@@ -64,9 +64,9 @@ export const dungeonsAdminRoute = new Elysia({ name: 'dungeons-admin-routes' })
       body: createDungeonBodySchema,
       response: {
         201: updateDungeonResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
       },
       detail: {
         tags: ['Dungeons'],
@@ -110,10 +110,10 @@ export const dungeonsAdminRoute = new Elysia({ name: 'dungeons-admin-routes' })
       body: updateDungeonBodySchema,
       response: {
         200: updateDungeonResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Dungeons'],
@@ -160,11 +160,11 @@ export const dungeonsAdminRoute = new Elysia({ name: 'dungeons-admin-routes' })
       params: dungeonIdParamsSchema,
       response: {
         200: successResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Dungeons'],

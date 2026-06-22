@@ -3,7 +3,7 @@ import { Elysia, t } from 'elysia';
 import { auth } from '../lib/auth';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
-import { errorResponse } from '../schemas/common';
+import { errorResponse, errorSchema } from '../schemas/common';
 import {
   banUserBodySchema,
   listUsersQuerySchema,
@@ -26,8 +26,8 @@ export const usersAdminRoute = new Elysia({ name: 'users-admin-routes' })
     query: listUsersQuerySchema,
     response: {
       200: listUsersResponseSchema,
-      401: t.Any(),
-      403: t.Any(),
+      401: errorSchema,
+      403: errorSchema,
     },
     detail: {
       tags: ['Users'],
@@ -85,10 +85,10 @@ export const usersAdminRoute = new Elysia({ name: 'users-admin-routes' })
       body: updateUserBodySchema,
       response: {
         200: updateUserResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Users'],
@@ -124,10 +124,10 @@ export const usersAdminRoute = new Elysia({ name: 'users-admin-routes' })
       params: userIdParamsSchema,
       response: {
         200: successResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Users'],
@@ -178,10 +178,10 @@ export const usersAdminRoute = new Elysia({ name: 'users-admin-routes' })
       body: banUserBodySchema,
       response: {
         200: updateUserResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Users'],
@@ -224,10 +224,10 @@ export const usersAdminRoute = new Elysia({ name: 'users-admin-routes' })
       params: userIdParamsSchema,
       response: {
         200: updateUserResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Users'],
@@ -266,10 +266,10 @@ export const usersAdminRoute = new Elysia({ name: 'users-admin-routes' })
       params: userIdParamsSchema,
       response: {
         200: successResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Users'],

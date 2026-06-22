@@ -2,7 +2,7 @@ import { SUPER_ADMIN_ROLE } from '@jx3/auth/roles';
 import { Elysia, t } from 'elysia';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
-import { errorResponse } from '../schemas/common';
+import { errorResponse, errorSchema } from '../schemas/common';
 import {
   createExpansionBodySchema,
   listExpansionFilterOptionsResponseSchema,
@@ -34,8 +34,8 @@ export const expansionsAdminRoute = new Elysia({
     auth: SUPER_ADMIN_ROLE,
     response: {
       200: listExpansionsResponseSchema,
-      401: t.Any(),
-      403: t.Any(),
+      401: errorSchema,
+      403: errorSchema,
     },
     detail: {
       tags: ['Expansions'],
@@ -51,8 +51,8 @@ export const expansionsAdminRoute = new Elysia({
       auth: SUPER_ADMIN_ROLE,
       response: {
         200: listExpansionFilterOptionsResponseSchema,
-        401: t.Any(),
-        403: t.Any(),
+        401: errorSchema,
+        403: errorSchema,
       },
       detail: {
         tags: ['Expansions'],
@@ -80,9 +80,9 @@ export const expansionsAdminRoute = new Elysia({
       body: createExpansionBodySchema,
       response: {
         201: updateExpansionResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
       },
       detail: {
         tags: ['Expansions'],
@@ -122,10 +122,10 @@ export const expansionsAdminRoute = new Elysia({
       body: updateExpansionBodySchema,
       response: {
         200: updateExpansionResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Expansions'],
@@ -172,11 +172,11 @@ export const expansionsAdminRoute = new Elysia({
       params: expansionIdParamsSchema,
       response: {
         200: successResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Expansions'],

@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
-import { errorResponse } from '../schemas/common';
+import { errorResponse, errorSchema } from '../schemas/common';
 import {
   createRaidLootBodySchema,
   patchRaidLootBodySchema,
@@ -75,8 +75,8 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       body: createRaidRunBodySchema,
       response: {
         201: raidRunResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
       },
       detail: {
         tags: ['Raids'],
@@ -96,7 +96,7 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       query: listMyRaidRunsQuerySchema,
       response: {
         200: listMyRaidRunsResponseSchema,
-        401: t.Any(),
+        401: errorSchema,
       },
       detail: {
         tags: ['Raids'],
@@ -129,9 +129,9 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       params: raidRunIdParamsSchema,
       response: {
         200: raidRunResponseSchema,
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Raids'],
@@ -178,11 +178,11 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       body: patchRaidRunBodySchema,
       response: {
         200: raidRunResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Raids'],
@@ -236,11 +236,11 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       body: patchRaidRunStatusBodySchema,
       response: {
         200: raidRunResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Raids'],
@@ -287,10 +287,10 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       body: duplicateRaidRunBodySchema,
       response: {
         201: raidRunResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
       },
       detail: {
         tags: ['Raids'],
@@ -337,11 +337,11 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       body: publishRaidRunBodySchema,
       response: {
         200: raidRunResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Raids'],
@@ -385,11 +385,11 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       body: createRaidLootBodySchema,
       response: {
         201: raidLootItemSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Raids'],
@@ -437,11 +437,11 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       body: patchRaidLootBodySchema,
       response: {
         200: raidLootItemSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Raids'],
@@ -484,11 +484,11 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       params: raidLootParamsSchema,
       response: {
         204: t.Null(),
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Raids'],
@@ -531,11 +531,11 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       body: patchRaidRunWageBodySchema,
       response: {
         200: raidRunWageResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Raids'],
@@ -581,11 +581,11 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
       body: patchRaidRunGameRaidIdBodySchema,
       response: {
         200: raidRunGameRaidIdResponseSchema,
-        400: t.Any(),
-        401: t.Any(),
-        403: t.Any(),
-        404: t.Any(),
-        409: t.Any(),
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+        404: errorSchema,
+        409: errorSchema,
       },
       detail: {
         tags: ['Raids'],

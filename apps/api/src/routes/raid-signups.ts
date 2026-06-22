@@ -1,6 +1,7 @@
-import { Elysia, t } from 'elysia';
+import { Elysia } from 'elysia';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
+import { errorSchema } from '../schemas/common';
 import {
   searchRaidSignupsQuerySchema,
   searchRaidSignupsResponseSchema,
@@ -18,7 +19,7 @@ export const raidSignupsRoute = new Elysia({ name: 'raid-signups-routes' })
       query: searchRaidSignupsQuerySchema,
       response: {
         200: searchRaidSignupsResponseSchema,
-        401: t.Any(),
+        401: errorSchema,
       },
       detail: {
         tags: ['Raids'],

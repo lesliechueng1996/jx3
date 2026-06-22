@@ -1,6 +1,7 @@
 import { cors } from '@elysiajs/cors';
-import { swagger } from '@elysiajs/swagger';
+import { openapi } from '@elysiajs/openapi';
 import { Elysia } from 'elysia';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import { auth } from './lib/auth';
 import { authMacro } from './middleware/auth-macro';
 import { loggerPlugin } from './plugins/logger';
@@ -30,8 +31,11 @@ export const createApp = () =>
       }),
     )
     .use(
-      swagger({
+      openapi({
         path: '/swagger',
+        mapJsonSchema: {
+          zod: zodToJsonSchema,
+        },
         documentation: {
           info: { title: 'JX3 API', version: '1.0.0' },
           tags: [
