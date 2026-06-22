@@ -9,6 +9,7 @@ import {
   Landmark,
   Server,
   Shield,
+  ShieldAlert,
   Swords,
   Users,
 } from 'lucide-react';
@@ -29,6 +30,11 @@ const BASE_NAV_ITEMS = [
     to: '/raids/history' as const,
     label: '参团记录',
     icon: ClipboardList,
+  },
+  {
+    to: '/blocklist' as const,
+    label: '避雷名单',
+    icon: ShieldAlert,
   },
 ] as const;
 

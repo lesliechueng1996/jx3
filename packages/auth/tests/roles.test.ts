@@ -5,6 +5,7 @@ import {
   APP_ROLES,
   AUTH_PROVIDER_LABELS,
   hasRole,
+  hasStaffRole,
   SUPER_ADMIN_ROLE,
   USER_ROLE,
 } from '../src/roles';
@@ -29,5 +30,17 @@ describe('hasRole', () => {
 
   it('rejects mismatched role', () => {
     expect(hasRole('user', SUPER_ADMIN_ROLE)).toBe(false);
+  });
+});
+
+describe('hasStaffRole', () => {
+  it('accepts admin and super_admin', () => {
+    expect(hasStaffRole(ADMIN_ROLE)).toBe(true);
+    expect(hasStaffRole(SUPER_ADMIN_ROLE)).toBe(true);
+  });
+
+  it('rejects regular users and missing role', () => {
+    expect(hasStaffRole(USER_ROLE)).toBe(false);
+    expect(hasStaffRole(null)).toBe(false);
   });
 });

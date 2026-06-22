@@ -25,3 +25,6 @@ export const hasRole = (
   userRole: string | null | undefined,
   requiredRole: string,
 ): boolean => (userRole ?? null) === requiredRole;
+
+export const hasStaffRole = (userRole: string | null | undefined): boolean =>
+  hasRole(userRole, ADMIN_ROLE) || hasRole(userRole, SUPER_ADMIN_ROLE);

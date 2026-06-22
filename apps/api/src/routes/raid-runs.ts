@@ -1,6 +1,7 @@
 import { Elysia, t } from 'elysia';
 import { authMacro } from '../middleware/auth-macro';
 import { loggerPlugin } from '../plugins/logger';
+import { raidRunBlocklistCheckResponseSchema } from '../schemas/blocklist';
 import { errorResponse, errorSchema } from '../schemas/common';
 import {
   createRaidLootBodySchema,
@@ -21,6 +22,7 @@ import {
   publishRaidRunBodySchema,
   raidRunResponseSchema,
 } from '../schemas/raid-runs';
+import { checkRaidRunBlocklist } from '../services/blocklist';
 import {
   createRaidLoot,
   deleteRaidLoot,
@@ -592,6 +594,44 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
         summary: 'Record in-game raid id',
         description:
           'Updates the in-game raid team id for an ongoing or completed raid run.',
+      },
+    },
+  )
+  .post(
+    '/api/v1/raid-runs/:id/blocklist-check',
+    async ({ params, user, set, log }) => {
+      try {
+        return await checkRaidRunBlocklist(params.id, user.id);
+      } catch (error) {
+        if (error instanceof RaidRunForbiddenError) {
+          set.status = 403;
+          return errorResponse('FORBIDDEN', error.message);
+        }
+        log.error(
+          { err: error, raidRunId: params.id },
+          'failed to check raid run blocklist',
+        );
+        set.status = 400;
+        return errorResponse(
+          'CHECK_FAILED',
+          'Failed to check raid run blocklist',
+        );
+      }
+    },
+    {
+      auth: true,
+      params: raidRunIdParamsSchema,
+      response: {
+        200: raidRunBlocklistCheckResponseSchema,
+        400: errorSchema,
+        401: errorSchema,
+        403: errorSchema,
+      },
+      detail: {
+        tags: ['Raids'],
+        summary: 'Check raid run signups against player blocklist',
+        description:
+          'Checks all signups in a raid run against the public player blocklist. Returns confirmed matches (same server and character name) and possible matches (character name only). Requires the caller to be the creator or a participant.',
       },
     },
   );

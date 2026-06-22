@@ -14,6 +14,7 @@ import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppProfileIndexRouteImport } from './routes/_app/profile/index'
 import { Route as AppCharactersIndexRouteImport } from './routes/_app/characters/index'
+import { Route as AppBlocklistIndexRouteImport } from './routes/_app/blocklist/index'
 import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppRaidsHistoryIndexRouteImport } from './routes/_app/raids/history/index'
@@ -49,6 +50,11 @@ const AppProfileIndexRoute = AppProfileIndexRouteImport.update({
 const AppCharactersIndexRoute = AppCharactersIndexRouteImport.update({
   id: '/characters/',
   path: '/characters/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppBlocklistIndexRoute = AppBlocklistIndexRouteImport.update({
+  id: '/blocklist/',
+  path: '/blocklist/',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const ApiV1SplatRoute = ApiV1SplatRouteImport.update({
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/login/': typeof LoginIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
+  '/blocklist/': typeof AppBlocklistIndexRoute
   '/characters/': typeof AppCharactersIndexRoute
   '/profile/': typeof AppProfileIndexRoute
   '/admin/dungeons/': typeof AppAdminDungeonsIndexRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
+  '/blocklist': typeof AppBlocklistIndexRoute
   '/characters': typeof AppCharactersIndexRoute
   '/profile': typeof AppProfileIndexRoute
   '/admin/dungeons': typeof AppAdminDungeonsIndexRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/login/': typeof LoginIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
+  '/_app/blocklist/': typeof AppBlocklistIndexRoute
   '/_app/characters/': typeof AppCharactersIndexRoute
   '/_app/profile/': typeof AppProfileIndexRoute
   '/_app/admin/dungeons/': typeof AppAdminDungeonsIndexRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/login/'
     | '/api/auth/$'
     | '/api/v1/$'
+    | '/blocklist/'
     | '/characters/'
     | '/profile/'
     | '/admin/dungeons/'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/api/auth/$'
     | '/api/v1/$'
+    | '/blocklist'
     | '/characters'
     | '/profile'
     | '/admin/dungeons'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/login/'
     | '/api/auth/$'
     | '/api/v1/$'
+    | '/_app/blocklist/'
     | '/_app/characters/'
     | '/_app/profile/'
     | '/_app/admin/dungeons/'
@@ -269,6 +281,13 @@ declare module '@tanstack/react-router' {
       path: '/characters'
       fullPath: '/characters/'
       preLoaderRoute: typeof AppCharactersIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/blocklist/': {
+      id: '/_app/blocklist/'
+      path: '/blocklist'
+      fullPath: '/blocklist/'
+      preLoaderRoute: typeof AppBlocklistIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/api/v1/$': {
@@ -360,6 +379,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
+  AppBlocklistIndexRoute: typeof AppBlocklistIndexRoute
   AppCharactersIndexRoute: typeof AppCharactersIndexRoute
   AppProfileIndexRoute: typeof AppProfileIndexRoute
   AppAdminDungeonsIndexRoute: typeof AppAdminDungeonsIndexRoute
@@ -376,6 +396,7 @@ interface AppRouteRouteChildren {
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
+  AppBlocklistIndexRoute: AppBlocklistIndexRoute,
   AppCharactersIndexRoute: AppCharactersIndexRoute,
   AppProfileIndexRoute: AppProfileIndexRoute,
   AppAdminDungeonsIndexRoute: AppAdminDungeonsIndexRoute,

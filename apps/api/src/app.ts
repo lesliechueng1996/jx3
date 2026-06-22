@@ -5,6 +5,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { auth } from './lib/auth';
 import { authMacro } from './middleware/auth-macro';
 import { loggerPlugin } from './plugins/logger';
+import { blocklistRoute } from './routes/blocklist';
 import { dungeonsAdminRoute } from './routes/dungeons-admin';
 import { expansionsAdminRoute } from './routes/expansions-admin';
 import { gameItemsRoute } from './routes/game-items';
@@ -60,6 +61,10 @@ export const createApp = () =>
               description: 'Raid run creation and management',
             },
             {
+              name: 'Blocklist',
+              description: 'Public raid brand and player blocklist',
+            },
+            {
               name: 'GameItems',
               description: 'Game item search, creation, and admin management',
             },
@@ -86,6 +91,7 @@ export const createApp = () =>
     .use(gameItemsRoute)
     .use(gameItemsAdminRoute)
     .use(raidRunsRoute)
-    .use(raidSignupsRoute);
+    .use(raidSignupsRoute)
+    .use(blocklistRoute);
 
 export type App = ReturnType<typeof createApp>;
