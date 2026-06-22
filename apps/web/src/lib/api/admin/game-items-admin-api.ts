@@ -2,7 +2,12 @@ import { z } from 'zod';
 import { buildQueryString } from '#/lib/api/build-query';
 import { requestJson } from '#/lib/api/request';
 
-export const ITEM_TYPES = ['equipment', 'special'] as const;
+export const ITEM_TYPES = [
+  'equipment',
+  'special',
+  'small_iron',
+  'enchantment',
+] as const;
 export const ITEM_QUALITIES = [
   'white',
   'green',
@@ -17,6 +22,8 @@ export type ItemQuality = (typeof ITEM_QUALITIES)[number];
 export const ITEM_TYPE_LABELS: Record<ItemType, string> = {
   equipment: '装备',
   special: '特殊',
+  small_iron: '小铁',
+  enchantment: '附魔',
 };
 
 export const ITEM_QUALITY_LABELS: Record<ItemQuality, string> = {

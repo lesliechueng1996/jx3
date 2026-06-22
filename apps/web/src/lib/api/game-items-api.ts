@@ -2,7 +2,12 @@ import { z } from 'zod';
 import { buildQueryString } from '#/lib/api/build-query';
 import { requestJson } from '#/lib/api/request';
 
-export const itemTypeSchema = z.enum(['equipment', 'special']);
+export const itemTypeSchema = z.enum([
+  'equipment',
+  'special',
+  'small_iron',
+  'enchantment',
+]);
 export const itemQualitySchema = z.enum([
   'white',
   'green',

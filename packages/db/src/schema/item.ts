@@ -1,8 +1,13 @@
 import * as t from 'drizzle-orm/pg-core';
 import { pgEnum, pgTable } from 'drizzle-orm/pg-core';
 
-// 物品类型: 装备、特殊
-export const itemTypeEnum = pgEnum('item_type', ['equipment', 'special']);
+// 物品类型: 装备、特殊、小铁、附魔
+export const itemTypeEnum = pgEnum('item_type', [
+  'equipment',
+  'special',
+  'small_iron',
+  'enchantment',
+]);
 // 物品品质: 白、绿、蓝、紫、橙
 export const itemQualityEnum = pgEnum('item_quality', [
   'white',

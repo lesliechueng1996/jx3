@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-export const ITEM_TYPES = ['equipment', 'special'] as const;
+export const ITEM_TYPES = [
+  'equipment',
+  'special',
+  'small_iron',
+  'enchantment',
+] as const;
 export const ITEM_QUALITIES = [
   'white',
   'green',

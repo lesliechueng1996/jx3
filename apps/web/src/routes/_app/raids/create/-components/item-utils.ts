@@ -10,6 +10,8 @@ export type ItemType = z.infer<typeof itemTypeSchema>;
 export const ITEM_TYPE_LABELS: Record<ItemType, string> = {
   equipment: '装备',
   special: '特殊',
+  small_iron: '小铁',
+  enchantment: '附魔',
 };
 
 export const ITEM_QUALITY_LABELS: Record<ItemQuality, string> = {
