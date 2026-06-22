@@ -195,6 +195,16 @@ export const raidRunsApi = {
       },
     );
   },
+  duplicate(raidRunId: string) {
+    return requestJson(
+      `/api/v1/raid-runs/${raidRunId}/duplicate`,
+      raidRunResponseSchema,
+      {
+        method: 'POST',
+        body: JSON.stringify({}),
+      },
+    );
+  },
   updateStatus(
     raidRunId: string,
     status: Exclude<z.infer<typeof raidRunStatusSchema>, 'pending'>,

@@ -13,6 +13,7 @@ import {
 } from '../schemas/raid-loot';
 import {
   createRaidRunBodySchema,
+  duplicateRaidRunBodySchema,
   listMyRaidRunsQuerySchema,
   listMyRaidRunsResponseSchema,
   patchRaidRunBodySchema,
@@ -29,6 +30,7 @@ import {
 } from '../services/raid-loot';
 import {
   createRaidRunDraft,
+  duplicateRaidRun,
   getRaidRunDraft,
   listMyRaidRuns,
   patchRaidRunDraft,
@@ -245,6 +247,56 @@ export const raidRunsRoute = new Elysia({ name: 'raid-runs-routes' })
         summary: 'Update raid run status',
         description:
           'Transitions a raid run through pending → recruiting → ongoing → completed, or cancels it from any non-terminal state. Only the creator can update status.',
+      },
+    },
+  )
+  .post(
+    '/api/v1/raid-runs/:id/duplicate',
+    async ({ params, user, set, log }) => {
+      try {
+        const duplicated = await duplicateRaidRun(params.id, user.id);
+        if (!duplicated) {
+          set.status = 404;
+          return errorResponse('NOT_FOUND', 'Raid run not found');
+        }
+        set.status = 201;
+        return duplicated;
+      } catch (error) {
+        if (error instanceof RaidRunForbiddenError) {
+          set.status = 403;
+          return errorResponse('FORBIDDEN', error.message);
+        }
+        if (error instanceof RaidRunValidationError) {
+          set.status = 400;
+          return errorResponse('VALIDATION_FAILED', error.message);
+        }
+        log.error(
+          { err: error, raidRunId: params.id },
+          'failed to duplicate raid run',
+        );
+        set.status = 400;
+        return errorResponse(
+          'DUPLICATE_FAILED',
+          'Failed to duplicate raid run',
+        );
+      }
+    },
+    {
+      auth: true,
+      params: raidRunIdParamsSchema,
+      body: duplicateRaidRunBodySchema,
+      response: {
+        201: raidRunResponseSchema,
+        400: t.Any(),
+        401: t.Any(),
+        403: t.Any(),
+        404: t.Any(),
+      },
+      detail: {
+        tags: ['Raids'],
+        summary: 'Duplicate a raid run',
+        description:
+          'Creates a pending copy of a raid run and its signups. Only the creator can duplicate. gameRaidId, totalIncome, and wagePerPerson are not copied.',
       },
     },
   )

@@ -160,6 +160,10 @@ export const publishRaidRunBodySchema = z.object({});
 
 export type PublishRaidRunBody = z.infer<typeof publishRaidRunBodySchema>;
 
+export const duplicateRaidRunBodySchema = z.object({});
+
+export type DuplicateRaidRunBody = z.infer<typeof duplicateRaidRunBodySchema>;
+
 export const patchRaidRunStatusBodySchema = z.object({
   status: z.enum(['recruiting', 'ongoing', 'completed', 'cancelled']),
 });

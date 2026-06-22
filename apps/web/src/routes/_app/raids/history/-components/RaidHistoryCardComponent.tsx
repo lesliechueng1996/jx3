@@ -7,6 +7,7 @@ import type {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { RaidHistoryDuplicateButtonComponent } from './RaidHistoryDuplicateButtonComponent';
 import { RaidHistoryStatusMenuComponent } from './RaidHistoryStatusMenuComponent';
 import {
   formatRaidSchedule,
@@ -102,16 +103,19 @@ export function RaidHistoryCardComponent({
             ) : null}
           </div>
 
-          {item.isCreator ? (
-            <Link
-              to="/raids/create/$raidRunId"
-              params={{ raidRunId: item.id }}
-              className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground"
-            >
-              编辑
-              <ChevronRight className="size-3.5" />
-            </Link>
-          ) : null}
+          <div className="flex flex-col items-end gap-1">
+            <RaidHistoryDuplicateButtonComponent item={item} filter={filter} />
+            {item.isCreator ? (
+              <Link
+                to="/raids/create/$raidRunId"
+                params={{ raidRunId: item.id }}
+                className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground"
+              >
+                编辑
+                <ChevronRight className="size-3.5" />
+              </Link>
+            ) : null}
+          </div>
         </div>
       </CardContent>
     </Card>

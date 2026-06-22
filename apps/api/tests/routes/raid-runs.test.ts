@@ -80,6 +80,14 @@ const updateRaidRunStatus = mock(
     status,
   }),
 );
+const duplicateRaidRun = mock(async () => ({
+  ...raidRunResponse,
+  id: 'run-2',
+  status: 'pending' as const,
+  gameRaidId: null,
+  totalIncome: null,
+  wagePerPerson: null,
+}));
 const listMyRaidRuns = mock(async () => ({ items: [] }));
 
 mock.module('../../src/lib/auth', () => ({
@@ -102,6 +110,7 @@ const RaidRunConflictError = class RaidRunConflictError extends Error {
 
 mock.module('../../src/services/raid-runs', () => ({
   createRaidRunDraft,
+  duplicateRaidRun,
   getRaidRunDraft,
   listMyRaidRuns,
   patchRaidRunDraft,
@@ -156,6 +165,15 @@ describe('raid-runs routes', () => {
         status,
       }),
     );
+    duplicateRaidRun.mockClear();
+    duplicateRaidRun.mockImplementation(async () => ({
+      ...raidRunResponse,
+      id: 'run-2',
+      status: 'pending' as const,
+      gameRaidId: null,
+      totalIncome: null,
+      wagePerPerson: null,
+    }));
   });
 
   it('lists mine for authenticated users', async () => {
@@ -459,6 +477,76 @@ describe('raid-runs routes', () => {
     const body = await res.json();
     expect(body.status).toBe('recruiting');
     expect(publishRaidRun).toHaveBeenCalledTimes(1);
+  });
+
+  it('duplicates a raid run for authenticated creators', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/duplicate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}),
+      }),
+    );
+
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.id).toBe('run-2');
+    expect(body.status).toBe('pending');
+    expect(body.gameRaidId).toBeNull();
+    expect(body.totalIncome).toBeNull();
+    expect(body.wagePerPerson).toBeNull();
+    expect(duplicateRaidRun).toHaveBeenCalledWith('run-1', 'user-1');
+  });
+
+  it('returns 404 when duplicate target is missing', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+    duplicateRaidRun.mockImplementation(async () => null as never);
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/missing/duplicate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}),
+      }),
+    );
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 403 when duplicate is forbidden', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+    duplicateRaidRun.mockImplementation(async () => {
+      throw new RaidRunForbiddenError('forbidden');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/duplicate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}),
+      }),
+    );
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 400 when duplicate fails unexpectedly', async () => {
+    mockSession = { user: sessionUser, session: { id: 'session-1' } };
+    duplicateRaidRun.mockImplementation(async () => {
+      throw new Error('db failed');
+    });
+
+    const res = await app().handle(
+      new Request('http://localhost/api/v1/raid-runs/run-1/duplicate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}),
+      }),
+    );
+
+    expect(res.status).toBe(400);
   });
 
   it('updates raid run status for authenticated creators', async () => {

@@ -471,6 +471,30 @@ const validatePublishRun = async (
   validateDarkRunCount(signups);
 };
 
+const buildSignupCopyValues = (
+  raidRunId: string,
+  createdBy: string,
+  sourceSignups: Array<typeof raidSignup.$inferSelect>,
+) =>
+  sourceSignups.map((signup) => ({
+    raidRunId,
+    groupNumber: signup.groupNumber,
+    positionNumber: signup.positionNumber,
+    role: signup.role,
+    status: signup.status,
+    isReserved: signup.isReserved,
+    isLeader: signup.isLeader,
+    isDarkRun: signup.isDarkRun,
+    isFormationCore: signup.isFormationCore,
+    serverId: signup.serverId,
+    characterName: signup.characterName,
+    schoolId: signup.schoolId,
+    kungfuId: signup.kungfuId,
+    userId: signup.userId,
+    createdBy,
+    remark: signup.remark,
+  }));
+
 const buildSignupInsertValues = (
   raidRunId: string,
   createdBy: string,
@@ -1109,4 +1133,68 @@ export const publishRaidRun = async (
   assertPending(existing);
 
   return updateRaidRunStatus(raidRunId, userId, 'recruiting');
+};
+
+export const duplicateRaidRun = async (
+  raidRunId: string,
+  userId: string,
+): Promise<RaidRunResponse | null> => {
+  const source = await getRaidRunById(raidRunId);
+  if (!source) {
+    return null;
+  }
+
+  assertOwner(source, userId);
+
+  const sourceSignups = await getSignupsByRaidRunId(raidRunId);
+  const signupInputs = signupRowsToInputs(sourceSignups);
+  const playerLimit = await resolvePlayerLimit(source.dungeonId);
+
+  validateDraftSignups(signupInputs, playerLimit);
+  await validateForeignKeys(
+    {
+      dungeonId: fromDbDungeonId(source.dungeonId),
+      signups: signupInputs,
+    },
+    false,
+  );
+
+  const runValues = {
+    name: source.name,
+    description: source.description,
+    dungeonId: source.dungeonId,
+    createdBy: userId,
+    status: 'pending' as const,
+    gatherTime: source.gatherTime,
+    startTime: source.startTime,
+    endTime: source.endTime,
+    reservedTank: source.reservedTank,
+    reservedHealer: source.reservedHealer,
+    reservedDps: source.reservedDps,
+    reservedBoss: source.reservedBoss,
+    remark: source.remark,
+  };
+
+  return db.transaction(async (tx) => {
+    const [createdRun] = await tx.insert(raidRun).values(runValues).returning();
+
+    if (!createdRun) {
+      throw new RaidRunValidationError('Failed to duplicate raid run');
+    }
+
+    const signupValues = buildSignupCopyValues(
+      createdRun.id,
+      userId,
+      sourceSignups,
+    );
+    const createdSignups = await tx
+      .insert(raidSignup)
+      .values(signupValues)
+      .returning();
+
+    return toRaidRunResponse(
+      createdRun,
+      createdSignups.map((row) => toSignupResponse(row)),
+    );
+  });
 };
