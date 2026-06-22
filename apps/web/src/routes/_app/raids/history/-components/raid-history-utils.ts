@@ -96,6 +96,94 @@ export const getEmptyStateMessage = (filter: RaidHistoryFilter): string => {
   }
 };
 
+const getWeekStart = (date: Date): Date => {
+  const weekStart = new Date(date);
+  const weekday = weekStart.getDay();
+  const diff = weekday === 0 ? -6 : 1 - weekday;
+  weekStart.setDate(weekStart.getDate() + diff);
+  weekStart.setHours(0, 0, 0, 0);
+  return weekStart;
+};
+
+const getWeekEnd = (weekStart: Date): Date => {
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+  return weekEnd;
+};
+
+export const getRaidHistorySortTime = (item: RaidRunListItem): number => {
+  const time = item.startTime ?? item.gatherTime ?? item.createdAt;
+  return new Date(time).getTime();
+};
+
+export const formatWeekGroupLabel = (
+  weekStart: Date,
+  now: Date = new Date(),
+): string => {
+  const thisWeekStart = getWeekStart(now);
+  const lastWeekStart = new Date(thisWeekStart);
+  lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+
+  if (weekStart.getTime() === thisWeekStart.getTime()) {
+    return '本周';
+  }
+
+  if (weekStart.getTime() === lastWeekStart.getTime()) {
+    return '上周';
+  }
+
+  const weekEnd = getWeekEnd(weekStart);
+  const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
+    month: 'numeric',
+    day: 'numeric',
+  });
+  const startLabel = dateFormatter.format(weekStart);
+  const endLabel = dateFormatter.format(weekEnd);
+
+  if (weekStart.getFullYear() !== now.getFullYear()) {
+    return `${weekStart.getFullYear()}年${startLabel} - ${endLabel}`;
+  }
+
+  return `${startLabel} - ${endLabel}`;
+};
+
+export type RaidHistoryWeekGroup = {
+  weekStart: Date;
+  label: string;
+  items: RaidRunListItem[];
+};
+
+export const groupRaidHistoryByWeek = (
+  items: RaidRunListItem[],
+  now: Date = new Date(),
+): RaidHistoryWeekGroup[] => {
+  const groups = new Map<
+    string,
+    { weekStart: Date; items: RaidRunListItem[] }
+  >();
+
+  for (const item of items) {
+    const weekStart = getWeekStart(new Date(getRaidHistorySortTime(item)));
+    const key = weekStart.toISOString();
+    const existing = groups.get(key);
+
+    if (existing) {
+      existing.items.push(item);
+      continue;
+    }
+
+    groups.set(key, { weekStart, items: [item] });
+  }
+
+  return [...groups.values()]
+    .sort((left, right) => right.weekStart.getTime() - left.weekStart.getTime())
+    .map((group) => ({
+      ...group,
+      label: formatWeekGroupLabel(group.weekStart, now),
+    }));
+};
+
 export type RaidRunStatusAction = {
   target: RaidRunListItem['status'];
   label: string;

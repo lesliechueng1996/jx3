@@ -67,15 +67,24 @@ export const createInitialSignups = (
       createEmptySignup(groupNumber, positionNumber),
   );
 
+export const createDefaultTimeToday = (
+  hours: number,
+  minutes: number,
+): string => {
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date.toISOString();
+};
+
 export const createInitialRaidRunDraft = (
   playerLimit: number = DEFAULT_PLAYER_LIMIT,
 ): RaidRunDraft => ({
   name: '',
   description: null,
   dungeonId: null,
-  gatherTime: null,
-  startTime: null,
-  endTime: null,
+  gatherTime: createDefaultTimeToday(20, 0),
+  startTime: createDefaultTimeToday(20, 30),
+  endTime: createDefaultTimeToday(21, 30),
   reservedTank: 0,
   reservedHealer: 0,
   reservedDps: 0,

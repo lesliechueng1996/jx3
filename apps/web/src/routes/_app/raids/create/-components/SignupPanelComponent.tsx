@@ -7,6 +7,7 @@ import {
   raidSignupsApi,
   raidSignupsQueryKey,
 } from '#/lib/api/raid-signups-api';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -178,6 +179,22 @@ export function SignupPanelComponent({
     setShowKungfuResults(false);
   };
 
+  const clearCharacterInfo = () => {
+    onChange({
+      characterName: null,
+      serverId: null,
+      schoolId: null,
+      kungfuId: null,
+    });
+    setCharacterSearch('');
+    setDebouncedCharacterSearch('');
+    setServerSearch('');
+    setKungfuSearch('');
+    setShowCharacterResults(false);
+    setShowServerResults(false);
+    setShowKungfuResults(false);
+  };
+
   if (!signup) {
     return (
       <div className="flex h-full min-h-80 items-center justify-center rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
@@ -187,13 +204,27 @@ export function SignupPanelComponent({
   }
 
   const historyResults = historyQuery.data?.items ?? [];
+  const hasCharacterInfo =
+    Boolean(signup.characterName?.trim()) ||
+    signup.serverId !== null ||
+    signup.schoolId !== null ||
+    signup.kungfuId !== null;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h3 className="font-medium">
           {signup.groupNumber} 队 · 第 {signup.positionNumber} 位
         </h3>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={disabled || !hasCharacterInfo}
+          onClick={clearCharacterInfo}
+        >
+          清空
+        </Button>
       </div>
 
       <div className="space-y-2">

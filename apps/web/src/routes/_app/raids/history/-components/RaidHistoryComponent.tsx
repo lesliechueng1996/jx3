@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { useMemo } from 'react';
 import {
   type RaidHistoryFilter,
   raidRunsApi,
@@ -11,6 +12,7 @@ import { Route } from '../index';
 import { RaidHistoryCardComponent } from './RaidHistoryCardComponent';
 import {
   getEmptyStateMessage,
+  groupRaidHistoryByWeek,
   RAID_HISTORY_FILTERS,
 } from './raid-history-utils';
 
@@ -28,6 +30,14 @@ export function RaidHistoryComponent() {
       search: { filter: nextFilter },
     });
   };
+
+  const groupedItems = useMemo(() => {
+    if (!historyQuery.data?.items.length) {
+      return [];
+    }
+
+    return groupRaidHistoryByWeek(historyQuery.data.items);
+  }, [historyQuery.data?.items]);
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
@@ -90,13 +100,22 @@ export function RaidHistoryComponent() {
       ) : null}
 
       {historyQuery.isSuccess && historyQuery.data.items.length > 0 ? (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {historyQuery.data.items.map((item) => (
-            <RaidHistoryCardComponent
-              key={item.id}
-              item={item}
-              filter={filter}
-            />
+        <div className="flex flex-col gap-8">
+          {groupedItems.map((group) => (
+            <section key={group.weekStart.toISOString()} className="space-y-3">
+              <h2 className="text-sm font-medium text-muted-foreground">
+                {group.label}
+              </h2>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {group.items.map((item) => (
+                  <RaidHistoryCardComponent
+                    key={item.id}
+                    item={item}
+                    filter={filter}
+                  />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       ) : null}
