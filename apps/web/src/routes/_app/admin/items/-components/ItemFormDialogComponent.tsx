@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import {
   type AdminGameItemListItem,
   formatAliasInput,
@@ -210,6 +211,23 @@ export function ItemFormDialogComponent({
               rows={3}
               onChange={(event) => setDescriptionInput(event.target.value)}
             />
+            <p className="text-xs text-muted-foreground">
+              常用间隔号：
+              <button
+                type="button"
+                disabled={pending}
+                className="mx-0.5 rounded border bg-muted px-1.5 py-0.5 font-mono hover:bg-muted/80 disabled:opacity-50"
+                onClick={() => {
+                  void navigator.clipboard
+                    .writeText('·')
+                    .then(() => toast.success('已复制'))
+                    .catch(() => toast.error('复制失败'));
+                }}
+              >
+                ·
+              </button>
+              点击复制，或手动选中后复制
+            </p>
           </div>
 
           <div className="space-y-2">

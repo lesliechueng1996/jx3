@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { AdminGameServerListItem } from '#/lib/api/admin/game-servers-admin-api';
 import type { SchoolOption } from '#/lib/api/admin/schools-admin-api';
 import type { KungfuOption } from '#/lib/api/game-reference-api';
+import {
+  raidSignupsApi,
+  raidSignupsQueryKey,
+} from '#/lib/api/raid-signups-api';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -36,10 +41,21 @@ export function SignupPanelComponent({
   schools,
   kungfus,
 }: SignupPanelComponentProps) {
+  const [characterSearch, setCharacterSearch] = useState('');
+  const [debouncedCharacterSearch, setDebouncedCharacterSearch] = useState('');
+  const [showCharacterResults, setShowCharacterResults] = useState(false);
   const [serverSearch, setServerSearch] = useState('');
   const [showServerResults, setShowServerResults] = useState(false);
   const [kungfuSearch, setKungfuSearch] = useState('');
   const [showKungfuResults, setShowKungfuResults] = useState(false);
+  const lastSignupSlotKeyRef = useRef<string | null>(null);
+  const signupSlotKey =
+    signup === null ? null : `${signup.groupNumber}-${signup.positionNumber}`;
+
+  if (lastSignupSlotKeyRef.current !== signupSlotKey) {
+    lastSignupSlotKeyRef.current = signupSlotKey;
+    setShowCharacterResults(false);
+  }
 
   const schoolNameById = useMemo(() => {
     const map = new Map<string, string>();
@@ -48,6 +64,32 @@ export function SignupPanelComponent({
     }
     return map;
   }, [schools]);
+
+  const trimmedCharacterSearch = characterSearch.trim();
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedCharacterSearch(trimmedCharacterSearch);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [trimmedCharacterSearch]);
+
+  const historyQuery = useQuery({
+    queryKey: [...raidSignupsQueryKey, 'search', debouncedCharacterSearch],
+    queryFn: () => raidSignupsApi.search(debouncedCharacterSearch),
+    enabled:
+      showCharacterResults && debouncedCharacterSearch.length > 0 && !disabled,
+  });
+
+  const isCharacterSearchPending =
+    trimmedCharacterSearch !== debouncedCharacterSearch;
+
+  useEffect(() => {
+    const nextCharacterSearch = signup?.characterName ?? '';
+    setCharacterSearch(nextCharacterSearch);
+    setDebouncedCharacterSearch(nextCharacterSearch.trim());
+  }, [signup]);
 
   useEffect(() => {
     if (!signup?.serverId) {
@@ -107,6 +149,22 @@ export function SignupPanelComponent({
     setShowServerResults(false);
   };
 
+  const selectHistoryCharacter = (item: {
+    characterName: string;
+    serverId: string | null;
+    schoolId: string | null;
+    kungfuId: string | null;
+  }) => {
+    onChange({
+      characterName: item.characterName,
+      serverId: item.serverId,
+      schoolId: item.schoolId,
+      kungfuId: item.kungfuId,
+    });
+    setCharacterSearch(item.characterName);
+    setShowCharacterResults(false);
+  };
+
   const selectKungfu = (kungfu: KungfuOption | null) => {
     if (!kungfu) {
       onChange({ kungfuId: null, schoolId: null });
@@ -127,6 +185,8 @@ export function SignupPanelComponent({
       </div>
     );
   }
+
+  const historyResults = historyQuery.data?.items ?? [];
 
   return (
     <div className="space-y-4">
@@ -160,17 +220,59 @@ export function SignupPanelComponent({
         </Select>
       </div>
 
-      <div className="space-y-2">
+      <div className="relative space-y-2">
         <Label htmlFor="signup-character-name">角色名</Label>
         <Input
           id="signup-character-name"
           disabled={disabled}
-          value={signup.characterName ?? ''}
-          onChange={(event) =>
-            onChange({ characterName: event.target.value || null })
-          }
-          placeholder="游戏内角色名"
+          value={characterSearch}
+          onChange={(event) => {
+            setCharacterSearch(event.target.value);
+            onChange({ characterName: event.target.value || null });
+            setShowCharacterResults(true);
+          }}
+          onFocus={() => setShowCharacterResults(true)}
+          onBlur={() => {
+            window.setTimeout(() => setShowCharacterResults(false), 150);
+          }}
+          placeholder="搜索历史角色名，或手动输入"
         />
+        {showCharacterResults && trimmedCharacterSearch ? (
+          <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-popover shadow-md">
+            {isCharacterSearchPending || historyQuery.isLoading ? (
+              <p className="px-3 py-2 text-sm text-muted-foreground">搜索中…</p>
+            ) : null}
+            {!isCharacterSearchPending &&
+            !historyQuery.isLoading &&
+            historyResults.length > 0
+              ? historyResults.map((item) => (
+                  <button
+                    key={`${item.characterName}-${item.serverId ?? 'none'}-${item.kungfuId ?? 'none'}`}
+                    type="button"
+                    className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => selectHistoryCharacter(item)}
+                  >
+                    <span className="font-medium">{item.characterName}</span>
+                    {item.serverLabel || item.kungfuName ? (
+                      <span className="ml-2 text-muted-foreground">
+                        {[item.serverLabel, item.kungfuName]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                    ) : null}
+                  </button>
+                ))
+              : null}
+            {!isCharacterSearchPending &&
+            !historyQuery.isLoading &&
+            historyResults.length === 0 ? (
+              <p className="px-3 py-2 text-sm text-muted-foreground">
+                未找到历史记录，可继续手动填写
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="relative space-y-2">

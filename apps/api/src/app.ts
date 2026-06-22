@@ -12,6 +12,7 @@ import { gameServersAdminRoute } from './routes/game-servers-admin';
 import { kungfuAdminRoute } from './routes/kungfu-admin';
 import { meRoute } from './routes/me';
 import { raidRunsRoute } from './routes/raid-runs';
+import { raidSignupsRoute } from './routes/raid-signups';
 import { schoolsAdminRoute } from './routes/schools-admin';
 import { seasonsAdminRoute } from './routes/seasons-admin';
 import { uploadsRoute } from './routes/uploads';
@@ -80,6 +81,7 @@ export const createApp = () =>
     .use(dungeonsAdminRoute)
     .use(gameItemsRoute)
     .use(gameItemsAdminRoute)
-    .use(raidRunsRoute);
+    .use(raidRunsRoute)
+    .use(raidSignupsRoute);
 
 export type App = ReturnType<typeof createApp>;
