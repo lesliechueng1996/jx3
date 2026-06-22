@@ -269,6 +269,23 @@ const toOptionalDate = (value: string | null | undefined): Date | null => {
   return new Date(value);
 };
 
+export const shiftScheduleDateToToday = (
+  value: Date | null,
+  now: Date = new Date(),
+): Date | null => {
+  if (!value) {
+    return null;
+  }
+
+  if (value.getTime() === DRAFT_START_TIME_SENTINEL.getTime()) {
+    return value;
+  }
+
+  const shifted = new Date(value);
+  shifted.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+  return shifted;
+};
+
 const toIsoOrNull = (value: Date | null): string | null =>
   value ? value.toISOString() : null;
 
@@ -1165,9 +1182,9 @@ export const duplicateRaidRun = async (
     dungeonId: source.dungeonId,
     createdBy: userId,
     status: 'pending' as const,
-    gatherTime: source.gatherTime,
-    startTime: source.startTime,
-    endTime: source.endTime,
+    gatherTime: shiftScheduleDateToToday(source.gatherTime),
+    startTime: shiftScheduleDateToToday(source.startTime)!,
+    endTime: shiftScheduleDateToToday(source.endTime),
     reservedTank: source.reservedTank,
     reservedHealer: source.reservedHealer,
     reservedDps: source.reservedDps,

@@ -18,11 +18,9 @@ import {
   createPublishSchema,
 } from './raid-run-form-schema';
 import {
-  applyReservedRoles,
   applySignupPatch,
   createInitialRaidRunDraft,
   findSignup,
-  resizeDraftForPlayerLimit,
   swapSignupsAt,
   syncReservedCounts,
 } from './raid-signup-draft';
@@ -95,21 +93,9 @@ export function CreateRaidComponent({
   });
 
   const playerLimit = dungeonQuery.data?.playerLimit ?? DEFAULT_PLAYER_LIMIT;
-
-  useEffect(() => {
-    const dungeon = dungeonQuery.data;
-    if (!dungeon) {
-      return;
-    }
-
-    if (draft.signups.length === dungeon.playerLimit) {
-      return;
-    }
-
-    setDraft((current) =>
-      resizeDraftForPlayerLimit(current, dungeon.playerLimit),
-    );
-  }, [draft.signups.length, dungeonQuery.data]);
+  const dungeonPlayerLimit = draft.dungeonId
+    ? (dungeonQuery.data?.playerLimit ?? null)
+    : null;
 
   const draftSaveSchema = useMemo(
     () => createDraftSaveSchema(playerLimit),
@@ -252,7 +238,7 @@ export function CreateRaidComponent({
   });
 
   const updateDraft = (next: RaidRunDraft) => {
-    setDraft(applyReservedRoles(next, playerLimit));
+    setDraft(next);
   };
 
   const updateSignup = (patch: Partial<RaidRunDraft['signups'][number]>) => {
@@ -313,6 +299,7 @@ export function CreateRaidComponent({
             value={draft}
             disabled={!isEditable}
             onChange={updateDraft}
+            dungeonPlayerLimit={dungeonPlayerLimit}
           />
         </section>
 

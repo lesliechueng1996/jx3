@@ -13,6 +13,7 @@ function EditRaidDraftPage() {
 
   return (
     <CreateRaidComponent
+      key={raidRunId}
       mode="draft"
       raidRunId={raidRunId}
       initialData={initialData}

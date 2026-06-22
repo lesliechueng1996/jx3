@@ -273,9 +273,29 @@ describe('raid-signup-draft', () => {
     expect(next.reservedDps).toBe(8);
     expect(next.reservedBoss).toBe(0);
     expect(next.signups).toHaveLength(10);
-    expect(next.signups.filter((signup) => signup.role === 'dps')).toHaveLength(
-      8,
+    expect(next.signups.every((signup) => signup.role === 'pending')).toBe(
+      true,
     );
+  });
+
+  it('preserves signup roles when selecting a dungeon', () => {
+    const signups = createInitialRaidRunDraft(25).signups.map((signup) => {
+      if (signup.groupNumber === 1 && signup.positionNumber === 1) {
+        return { ...signup, characterName: 'A', role: 'healer' as const };
+      }
+      if (signup.groupNumber === 2 && signup.positionNumber === 3) {
+        return { ...signup, characterName: 'B', role: 'tank' as const };
+      }
+      return signup;
+    });
+
+    const next = applyDungeonSelection(
+      { ...createInitialRaidRunDraft(25), signups, dungeonId: 'dungeon-25' },
+      25,
+    );
+
+    expect(findUpdated(next.signups, 1, 1)?.role).toBe('healer');
+    expect(findUpdated(next.signups, 2, 3)?.role).toBe('tank');
   });
 
   it('resizes draft signups when player limit changes', () => {
@@ -293,6 +313,31 @@ describe('raid-signup-draft', () => {
     expect(resized.reservedHealer).toBe(0);
     expect(resized.reservedTank).toBe(0);
     expect(resized.reservedBoss).toBe(0);
+  });
+
+  it('preserves signup roles when resizing for player limit', () => {
+    const signups = createInitialRaidRunDraft(25).signups.map((signup) => {
+      if (signup.groupNumber === 1 && signup.positionNumber === 1) {
+        return { ...signup, characterName: 'A', role: 'healer' as const };
+      }
+      if (signup.groupNumber === 2 && signup.positionNumber === 3) {
+        return { ...signup, characterName: 'B', role: 'tank' as const };
+      }
+      return signup;
+    });
+    const draft = {
+      ...createInitialRaidRunDraft(25),
+      signups,
+      reservedDps: 8,
+      reservedHealer: 1,
+      reservedTank: 1,
+      reservedBoss: 0,
+    };
+
+    const resized = resizeDraftForPlayerLimit(draft, 25);
+
+    expect(findUpdated(resized.signups, 1, 1)?.role).toBe('healer');
+    expect(findUpdated(resized.signups, 2, 3)?.role).toBe('tank');
   });
 
   it('syncs reserved counts from all signups', () => {

@@ -144,14 +144,11 @@ export const resizeDraftForPlayerLimit = (
     playerLimit,
   );
 
-  return applyReservedRoles(
-    {
-      ...draft,
-      ...reserved,
-      signups,
-    },
-    playerLimit,
-  );
+  return {
+    ...draft,
+    ...reserved,
+    signups,
+  };
 };
 
 export const applyDungeonSelection = (
@@ -172,14 +169,11 @@ export const applyDungeonSelection = (
   );
   const reserved = getDefaultReservedCountsForPlayerLimit(playerLimit);
 
-  return applyReservedRoles(
-    {
-      ...draft,
-      ...reserved,
-      signups,
-    },
-    playerLimit,
-  );
+  return {
+    ...draft,
+    ...reserved,
+    signups,
+  };
 };
 
 export const updateSignupAt = (

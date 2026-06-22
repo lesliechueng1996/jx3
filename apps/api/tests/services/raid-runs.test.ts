@@ -40,6 +40,7 @@ const {
   listMyRaidRuns,
   patchRaidRunDraft,
   publishRaidRun,
+  shiftScheduleDateToToday,
   updateRaidRunStatus,
   RaidRunConflictError,
   RaidRunForbiddenError,
@@ -652,5 +653,22 @@ describe('raid-runs service', () => {
     await expect(publishRaidRun('run-1', 'user-1')).rejects.toBeInstanceOf(
       RaidRunValidationError,
     );
+  });
+
+  it('shifts schedule dates to today while preserving time of day', () => {
+    const source = new Date('2026-01-15T12:30:45.000Z');
+    const now = new Date('2026-06-22T08:00:00.000Z');
+    const shifted = shiftScheduleDateToToday(source, now);
+
+    expect(shifted?.getFullYear()).toBe(now.getFullYear());
+    expect(shifted?.getMonth()).toBe(now.getMonth());
+    expect(shifted?.getDate()).toBe(now.getDate());
+    expect(shifted?.getHours()).toBe(source.getHours());
+    expect(shifted?.getMinutes()).toBe(source.getMinutes());
+    expect(shifted?.getSeconds()).toBe(source.getSeconds());
+  });
+
+  it('returns null when shifting a null schedule date', () => {
+    expect(shiftScheduleDateToToday(null)).toBeNull();
   });
 });

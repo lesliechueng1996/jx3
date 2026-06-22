@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type { RaidRunDraft } from './raid-run-form-schema';
-import { applyDungeonSelection } from './raid-signup-draft';
+import { applyDungeonSelection, applyReservedRoles } from './raid-signup-draft';
 import {
   DEFAULT_PLAYER_LIMIT,
   getReservedTotal,
@@ -21,6 +21,7 @@ type RaidRunFormComponentProps = {
   value: RaidRunDraft;
   disabled?: boolean;
   onChange: (next: RaidRunDraft) => void;
+  dungeonPlayerLimit?: number | null;
 };
 
 const toDateTimeLocal = (iso: string | null): string => {
@@ -54,6 +55,7 @@ export function RaidRunFormComponent({
   value,
   disabled = false,
   onChange,
+  dungeonPlayerLimit = null,
 }: RaidRunFormComponentProps) {
   const [dungeonSearch, setDungeonSearch] = useState('');
   const [selectedDungeon, setSelectedDungeon] =
@@ -85,7 +87,19 @@ export function RaidRunFormComponent({
     });
   }, [selectedDungeon?.id, value.dungeonId]);
 
-  const playerLimit = selectedDungeon?.playerLimit ?? DEFAULT_PLAYER_LIMIT;
+  const playerLimit =
+    dungeonPlayerLimit ?? selectedDungeon?.playerLimit ?? DEFAULT_PLAYER_LIMIT;
+
+  const resolvePlayerLimitForRoleApply = (): number | null => {
+    if (dungeonPlayerLimit != null) {
+      return dungeonPlayerLimit;
+    }
+    if (selectedDungeon != null) {
+      return selectedDungeon.playerLimit;
+    }
+    return null;
+  };
+
   const reservedTotal = useMemo(() => getReservedTotal(value), [value]);
   const reservedInvalid = !isReservedTotalValid(value, playerLimit);
 
@@ -237,9 +251,18 @@ export function RaidRunFormComponent({
               max={playerLimit}
               disabled={disabled}
               value={String(value[key])}
-              onChange={(event) =>
-                updateField(key, parseReservedInput(event.target.value))
-              }
+              onChange={(event) => {
+                const next = {
+                  ...value,
+                  [key]: parseReservedInput(event.target.value),
+                };
+                const roleApplyLimit = resolvePlayerLimitForRoleApply();
+                onChange(
+                  roleApplyLimit == null
+                    ? next
+                    : applyReservedRoles(next, roleApplyLimit),
+                );
+              }}
             />
           </div>
         ))}
