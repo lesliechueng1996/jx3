@@ -80,7 +80,7 @@ export function AppSidebarComponent({ userRole }: AppSidebarComponentProps) {
     : BASE_NAV_ITEMS;
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col border-r border-border bg-sidebar text-sidebar-foreground">
+    <aside className="flex w-52 shrink-0 flex-col border-r border-border bg-sidebar text-sidebar-foreground">
       <nav className="flex flex-col gap-1 p-3">
         {navItems.map((item) => (
           <Link
