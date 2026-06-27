@@ -6,7 +6,7 @@ import {
   expansionsAdminApi,
   expansionsAdminQueryKey,
 } from '#/lib/api/admin/expansions-admin-api';
-import { ApiRequestError } from '#/lib/api/request';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { Button } from '@/components/ui/button';
 import { ExpansionFormDialogComponent } from './ExpansionFormDialogComponent';
 import { ExpansionTableComponent } from './ExpansionTableComponent';
@@ -33,11 +33,7 @@ export function ExpansionManagementComponent() {
   };
 
   const handleError = (error: unknown, fallbackMessage: string) => {
-    if (error instanceof ApiRequestError) {
-      toast.error(error.message);
-      return;
-    }
-    toast.error(fallbackMessage);
+    showMutationErrorToast(error, fallbackMessage);
   };
 
   const createMutation = useMutation({

@@ -7,7 +7,7 @@ import {
   blocklistApi,
   type RaidRunBlocklistCheckResponse,
 } from '#/lib/api/blocklist-api';
-import { ApiRequestError } from '#/lib/api/request';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -55,13 +55,7 @@ export function RaidHistoryBlocklistCheckButtonComponent({
       }
       setResult(data);
     },
-    onError: (error) => {
-      if (error instanceof ApiRequestError) {
-        toast.error(error.message);
-        return;
-      }
-      toast.error('避雷检测失败');
-    },
+    onError: (error) => showMutationErrorToast(error, '避雷检测失败'),
   });
 
   return (

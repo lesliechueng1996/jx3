@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { authClient } from '#/lib/auth/auth-client';
 import { safeRedirectPath } from '#/lib/auth/auth-guard';
 import { invalidateCachedSession } from '#/lib/auth/session-query';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { AuthCredentialsFormComponent } from './AuthCredentialsFormComponent';
 import type { AuthCredentials } from './auth-credentials-schema';
 
@@ -40,9 +41,7 @@ export function LoginComponent({ redirectTo }: LoginComponentProps) {
       await invalidateCachedSession();
       router.navigate({ to: destination });
     },
-    onError: () => {
-      toast.error('登录失败');
-    },
+    onError: (error) => showMutationErrorToast(error, '登录失败'),
   });
 
   // const signUpMutation = useMutation<SignUpResult, Error, AuthCredentials>({

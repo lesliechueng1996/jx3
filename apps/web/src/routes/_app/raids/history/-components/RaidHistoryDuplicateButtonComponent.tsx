@@ -7,7 +7,7 @@ import {
   raidRunsApi,
   raidRunsMineQueryKey,
 } from '#/lib/api/raid-runs-api';
-import { ApiRequestError } from '#/lib/api/request';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { Button } from '@/components/ui/button';
 
 type RaidHistoryDuplicateButtonComponentProps = {
@@ -29,13 +29,7 @@ export function RaidHistoryDuplicateButtonComponent({
       });
       toast.success('已拷贝创建新团队');
     },
-    onError: (error) => {
-      if (error instanceof ApiRequestError) {
-        toast.error(error.message);
-        return;
-      }
-      toast.error('拷贝创建失败');
-    },
+    onError: (error) => showMutationErrorToast(error, '拷贝创建失败'),
   });
 
   if (!item.isCreator) {

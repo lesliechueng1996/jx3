@@ -14,6 +14,7 @@ import {
   gameReferenceQueryKey,
 } from '#/lib/api/game-reference-api';
 import { ApiRequestError } from '#/lib/api/request';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -70,15 +71,11 @@ export function BlocklistComponent() {
   };
 
   const handleError = (error: unknown, fallbackMessage: string) => {
-    if (error instanceof ApiRequestError) {
-      if (error.code === 'CONFLICT') {
-        toast.error('该记录已在避雷名单中');
-        return;
-      }
-      toast.error(error.message);
+    if (error instanceof ApiRequestError && error.code === 'CONFLICT') {
+      toast.error('该记录已在避雷名单中');
       return;
     }
-    toast.error(fallbackMessage);
+    showMutationErrorToast(error, fallbackMessage);
   };
 
   const createBrandMutation = useMutation({

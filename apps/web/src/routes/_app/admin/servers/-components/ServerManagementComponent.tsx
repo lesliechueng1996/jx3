@@ -6,7 +6,7 @@ import {
   gameServersAdminApi,
   gameServersAdminQueryKey,
 } from '#/lib/api/admin/game-servers-admin-api';
-import { ApiRequestError } from '#/lib/api/request';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { Button } from '@/components/ui/button';
 import { ServerFormDialogComponent } from './ServerFormDialogComponent';
 import { ServerTableComponent } from './ServerTableComponent';
@@ -30,11 +30,7 @@ export function ServerManagementComponent() {
   };
 
   const handleError = (error: unknown, fallbackMessage: string) => {
-    if (error instanceof ApiRequestError) {
-      toast.error(error.message);
-      return;
-    }
-    toast.error(fallbackMessage);
+    showMutationErrorToast(error, fallbackMessage);
   };
 
   const createMutation = useMutation({

@@ -8,7 +8,7 @@ import {
   raidRunsApi,
   raidRunsMineQueryKey,
 } from '#/lib/api/raid-runs-api';
-import { ApiRequestError } from '#/lib/api/request';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -55,13 +55,7 @@ export function RaidHistoryStatusMenuComponent({
       toast.success(`团队状态已更新为「${RAID_RUN_STATUS_LABELS[status]}」`);
       setPendingAction(null);
     },
-    onError: (error) => {
-      if (error instanceof ApiRequestError) {
-        toast.error(error.message);
-        return;
-      }
-      toast.error('更新团队状态失败');
-    },
+    onError: (error) => showMutationErrorToast(error, '更新团队状态失败'),
   });
 
   const handleSelectAction = (action: RaidRunStatusAction) => {

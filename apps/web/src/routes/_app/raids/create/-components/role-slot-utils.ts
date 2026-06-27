@@ -48,6 +48,22 @@ export const normalizePlayerLimit = (
 ): number =>
   Math.min(Math.max(1, Math.floor(playerLimit)), RAID_MAX_PLAYER_LIMIT);
 
+export const resolvePlayerLimitForDraft = (input: {
+  dungeonId: string | null;
+  signups: readonly unknown[];
+  dungeonPlayerLimit?: number | null;
+}): number => {
+  if (input.dungeonPlayerLimit != null) {
+    return normalizePlayerLimit(input.dungeonPlayerLimit);
+  }
+
+  if (input.dungeonId && input.signups.length > 0) {
+    return normalizePlayerLimit(input.signups.length);
+  }
+
+  return DEFAULT_PLAYER_LIMIT;
+};
+
 export const getRaidGridLayout = (
   playerLimit: number = DEFAULT_PLAYER_LIMIT,
 ): RaidGridLayout => {

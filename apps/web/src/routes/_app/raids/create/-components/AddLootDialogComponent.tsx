@@ -6,7 +6,7 @@ import type {
   GameItemResponse,
 } from '#/lib/api/game-items-api';
 import type { RaidLootItem, RaidSignupResponse } from '#/lib/api/raid-runs-api';
-import { ApiRequestError } from '#/lib/api/request';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -156,13 +156,7 @@ export function AddLootDialogComponent({
       setShowCreateItem(false);
       toast.success('物品已创建');
     },
-    onError: (error) => {
-      if (error instanceof ApiRequestError) {
-        toast.error(error.message);
-        return;
-      }
-      toast.error('创建物品失败');
-    },
+    onError: (error) => showMutationErrorToast(error, '创建物品失败'),
   });
 
   return (

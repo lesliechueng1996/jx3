@@ -7,7 +7,7 @@ import {
   gameReferenceQueryKey,
 } from '#/lib/api/game-reference-api';
 import { type RaidRunResponse, raidRunsApi } from '#/lib/api/raid-runs-api';
-import { ApiRequestError } from '#/lib/api/request';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { Button } from '@/components/ui/button';
 import { LootPanelComponent } from './LootPanelComponent';
 import { RaidGridComponent } from './RaidGridComponent';
@@ -24,7 +24,10 @@ import {
   swapSignupsAt,
   syncReservedCounts,
 } from './raid-signup-draft';
-import { DEFAULT_PLAYER_LIMIT, isReservedTotalValid } from './role-slot-utils';
+import {
+  isReservedTotalValid,
+  resolvePlayerLimitForDraft,
+} from './role-slot-utils';
 import { SignupPanelComponent } from './SignupPanelComponent';
 
 type CreateRaidComponentProps = {
@@ -92,10 +95,14 @@ export function CreateRaidComponent({
     enabled: Boolean(draft.dungeonId),
   });
 
-  const playerLimit = dungeonQuery.data?.playerLimit ?? DEFAULT_PLAYER_LIMIT;
   const dungeonPlayerLimit = draft.dungeonId
-    ? (dungeonQuery.data?.playerLimit ?? null)
+    ? (dungeonQuery.data?.playerLimit ?? draft.signups.length)
     : null;
+  const playerLimit = resolvePlayerLimitForDraft({
+    dungeonId: draft.dungeonId,
+    signups: draft.signups,
+    dungeonPlayerLimit,
+  });
 
   const draftSaveSchema = useMemo(
     () => createDraftSaveSchema(playerLimit),
@@ -171,14 +178,6 @@ export function CreateRaidComponent({
     return map;
   }, [kungfuQuery.data?.items]);
 
-  const handleError = (error: unknown, fallbackMessage: string) => {
-    if (error instanceof ApiRequestError) {
-      toast.error(error.message);
-      return;
-    }
-    toast.error(fallbackMessage);
-  };
-
   const saveMutation = useMutation({
     mutationFn: async () => {
       const parsed = isDraft
@@ -208,7 +207,8 @@ export function CreateRaidComponent({
         });
       }
     },
-    onError: (error) => handleError(error, isDraft ? '暂存失败' : '保存失败'),
+    onError: (error) =>
+      showMutationErrorToast(error, isDraft ? '暂存失败' : '保存失败'),
   });
 
   const publishMutation = useMutation({
@@ -234,7 +234,7 @@ export function CreateRaidComponent({
       setSignupResponses(response.signups);
       toast.success('开团已发布');
     },
-    onError: (error) => handleError(error, '发布失败'),
+    onError: (error) => showMutationErrorToast(error, '发布失败'),
   });
 
   const updateDraft = (next: RaidRunDraft) => {

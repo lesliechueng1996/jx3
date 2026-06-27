@@ -7,7 +7,7 @@ import {
   schoolsAdminApi,
   schoolsAdminQueryKey,
 } from '#/lib/api/admin/schools-admin-api';
-import { ApiRequestError } from '#/lib/api/request';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { toRouteSearch } from '#/routes/_app/admin/-components/admin-list-search';
 import { Button } from '@/components/ui/button';
 import { SchoolFiltersComponent } from './SchoolFiltersComponent';
@@ -46,11 +46,7 @@ export function SchoolManagementComponent() {
   };
 
   const handleError = (error: unknown, fallbackMessage: string) => {
-    if (error instanceof ApiRequestError) {
-      toast.error(error.message);
-      return;
-    }
-    toast.error(fallbackMessage);
+    showMutationErrorToast(error, fallbackMessage);
   };
 
   const createMutation = useMutation({

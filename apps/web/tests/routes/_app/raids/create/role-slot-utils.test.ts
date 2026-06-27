@@ -21,6 +21,7 @@ import {
   isActiveSlot,
   isReservedTotalValid,
   listActiveSlotCoordinates,
+  resolvePlayerLimitForDraft,
 } from '#/routes/_app/raids/create/-components/role-slot-utils';
 
 const roleAt = (
@@ -133,6 +134,28 @@ describe('role-slot-utils', () => {
     expect(formatSlotDisplayName('四堆', null)).toBe('四堆');
     expect(formatSlotDisplayName(null, '梦江南')).toBe('空位');
     expect(formatSlotDisplayName(null, null)).toBe('空位');
+  });
+
+  it('falls back to signup count before dungeon metadata loads', () => {
+    expect(
+      resolvePlayerLimitForDraft({
+        dungeonId: 'dungeon-10',
+        signups: Array.from({ length: 10 }),
+      }),
+    ).toBe(10);
+    expect(
+      resolvePlayerLimitForDraft({
+        dungeonId: null,
+        signups: Array.from({ length: 25 }),
+      }),
+    ).toBe(25);
+    expect(
+      resolvePlayerLimitForDraft({
+        dungeonId: 'dungeon-10',
+        signups: Array.from({ length: 10 }),
+        dungeonPlayerLimit: 10,
+      }),
+    ).toBe(10);
   });
 });
 

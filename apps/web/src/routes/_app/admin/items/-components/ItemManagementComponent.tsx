@@ -7,7 +7,7 @@ import {
   gameItemsAdminApi,
   gameItemsAdminQueryKey,
 } from '#/lib/api/admin/game-items-admin-api';
-import { ApiRequestError } from '#/lib/api/request';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { toRouteSearch } from '#/routes/_app/admin/-components/admin-list-search';
 import { Button } from '@/components/ui/button';
 import { ItemFiltersComponent } from './ItemFiltersComponent';
@@ -44,11 +44,7 @@ export function ItemManagementComponent() {
   };
 
   const handleError = (error: unknown, fallbackMessage: string) => {
-    if (error instanceof ApiRequestError) {
-      toast.error(error.message);
-      return;
-    }
-    toast.error(fallbackMessage);
+    showMutationErrorToast(error, fallbackMessage);
   };
 
   const createMutation = useMutation({

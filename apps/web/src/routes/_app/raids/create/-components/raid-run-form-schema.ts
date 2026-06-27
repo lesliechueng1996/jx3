@@ -45,7 +45,9 @@ const createRaidRunDraftShape = (playerLimit: number) => ({
   reservedDps: createReservedCountSchema(playerLimit),
   reservedBoss: createReservedCountSchema(playerLimit),
   remark: z.string().nullable(),
-  signups: z.array(signupDraftSchema).length(playerLimit),
+  signups: z
+    .array(signupDraftSchema)
+    .length(playerLimit, `团员布局应为 ${playerLimit} 格`),
 });
 
 const createReservedRefine =

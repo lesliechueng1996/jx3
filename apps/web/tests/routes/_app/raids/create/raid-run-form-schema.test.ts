@@ -6,6 +6,7 @@ import {
   publishSchema,
 } from '#/routes/_app/raids/create/-components/raid-run-form-schema';
 import { createInitialRaidRunDraft } from '#/routes/_app/raids/create/-components/raid-signup-draft';
+import { resolvePlayerLimitForDraft } from '#/routes/_app/raids/create/-components/role-slot-utils';
 
 describe('raid-run-form-schema', () => {
   it('allows loose draft validation', () => {
@@ -42,6 +43,29 @@ describe('raid-run-form-schema', () => {
       reservedBoss: 0,
     });
 
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts publish payload before dungeon metadata loads for 10-player raids', () => {
+    const draft = {
+      ...createInitialRaidRunDraft(10),
+      name: '周末团',
+      dungeonId: '00000000-0000-4000-8000-000000000001',
+      gatherTime: '2026-06-14T11:30:00.000Z',
+      startTime: '2026-06-14T12:00:00.000Z',
+      endTime: '2026-06-14T13:30:00.000Z',
+      reservedDps: 5,
+      reservedHealer: 3,
+      reservedTank: 2,
+      reservedBoss: 0,
+    };
+    const playerLimit = resolvePlayerLimitForDraft({
+      dungeonId: draft.dungeonId,
+      signups: draft.signups,
+    });
+    const result = createPublishSchema(playerLimit).safeParse(draft);
+
+    expect(playerLimit).toBe(10);
     expect(result.success).toBe(true);
   });
 });

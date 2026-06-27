@@ -7,7 +7,7 @@ import {
   seasonsAdminApi,
   seasonsAdminQueryKey,
 } from '#/lib/api/admin/seasons-admin-api';
-import { ApiRequestError } from '#/lib/api/request';
+import { showMutationErrorToast } from '#/lib/utils/mutation-error';
 import { Button } from '@/components/ui/button';
 import { SeasonFormDialogComponent } from './SeasonFormDialogComponent';
 import { SeasonTableComponent } from './SeasonTableComponent';
@@ -35,11 +35,7 @@ export function SeasonPanelComponent({ expansion }: SeasonPanelComponentProps) {
   };
 
   const handleError = (error: unknown, fallbackMessage: string) => {
-    if (error instanceof ApiRequestError) {
-      toast.error(error.message);
-      return;
-    }
-    toast.error(fallbackMessage);
+    showMutationErrorToast(error, fallbackMessage);
   };
 
   const createMutation = useMutation({

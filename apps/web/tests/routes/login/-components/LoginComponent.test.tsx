@@ -107,7 +107,7 @@ describe('LoginComponent', () => {
     });
   });
 
-  it('shows a fallback toast when sign in throws', async () => {
+  it('shows the thrown error message when sign in throws', async () => {
     signInEmail.mockRejectedValue(new Error('network'));
     const user = userEvent.setup();
     renderLogin();
@@ -115,7 +115,7 @@ describe('LoginComponent', () => {
     await submitSignIn(user);
 
     await waitFor(() => {
-      expect(toastError).toHaveBeenCalledWith('登录失败');
+      expect(toastError).toHaveBeenCalledWith('network');
     });
   });
 
